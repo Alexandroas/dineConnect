@@ -1,0 +1,142 @@
+    .sidebar {
+        width: 75px;
+        min-height: 100vh;
+        background: linear-gradient(180deg, #2c3e50 -5%, #1e7bd7 100%);
+        transition: width 0.3s ease;
+        position: fixed;
+        left: 0;
+        top: 0;
+        z-index: 1000;
+    }
+
+    .sidebar:hover {
+        width: 200px;
+    }
+
+    .nav-item {
+        width: 100%;
+        margin: 8px 0;
+    }
+
+    .nav-link {
+        display: flex;
+        align-items: center;
+        padding: 12px 15px;
+        color: #c3920c !important;
+        transition: all 0.3s ease;
+        border-radius: 0;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .nav-link:hover, .nav-link.active {
+        background: rgba(255, 255, 255, 0.1);
+        transform: translateX(5px);
+    }
+
+    .nav-link::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 0;
+        height: 100%;
+        width: 3px;
+        background: #3498db;
+        transform: scaleY(0);
+        transition: transform 0.2s ease;
+    }
+
+    .nav-link:hover::before, .nav-link.active::before {
+        transform: scaleY(1);
+    }
+
+    .nav-link i {
+        min-width: 45px;
+        font-size: 1.5rem;
+        transition: all 0.3s ease;
+    }
+
+    .nav-link span {
+        margin-left: 10px;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+        white-space: nowrap;
+    }
+
+    .sidebar:hover .nav-link span {
+        opacity: 1;
+    }
+
+    .profile-section {
+        position: absolute;
+        bottom: 0;
+        width: 100%;
+        padding: 15px;
+        border-top: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .profile-toggle {
+        width: 100%;
+        color: #ecf0f1;
+        background: transparent;
+        border: none;
+        display: flex;
+        align-items: center;
+        padding: 10px;
+        transition: all 0.3s ease;
+    }
+
+    .profile-toggle:hover {
+        background: rgba(255, 255, 255, 0.1);
+    }
+
+    .profile-toggle img {
+        width: 35px;
+        height: 35px;
+        border-radius: 50%;
+        margin-right: 10px;
+    }
+
+    .profile-toggle span {
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+
+    .sidebar:hover .profile-toggle span {
+        opacity: 1;
+    }
+
+    .dropdown-menu {
+        border: none;
+        border-radius: 8px;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        padding: 8px;
+        min-width: 180px;
+    }
+
+    .dropdown-item {
+        padding: 8px 15px;
+        border-radius: 6px;
+        transition: all 0.2s ease;
+    }
+
+    .dropdown-item:hover {
+        background: #e3a807;
+        transform: translateX(5px);
+    }
+
+    .content-wrapper {
+        margin-left: 75px;
+        transition: margin 0.3s ease;
+        min-height: 100vh;
+        padding: 20px;
+    }
+
+    @media (max-width: 768px) {
+        .sidebar {
+            width: 60px;
+        }
+        .content-wrapper {
+            margin-left: 60px;
+        }
+    }

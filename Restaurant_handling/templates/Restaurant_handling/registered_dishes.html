@@ -1,0 +1,37 @@
+{% extends 'main/header.html' %}
+{% block content %}
+  <div class="container-fluid">
+    <div class="row">
+      <!-- Sidebar -->
+      <div class="col-md-3 col-lg-2 d-md-block bg-light sidebar">
+        {% include 'Restaurant_handling/restaurant_dashboard.html' %}
+      </div>
+
+      <!-- Main Content -->
+      <div class="col-md-9 col-lg-10 ms-sm-auto px-4">
+        <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+          <h1 class="h2">Dishes</h1>
+          <div class="btn-toolbar mb-2 mb-md-0">
+            <a href="{% url 'add_dish' %}" class="btn btn-primary">Add Dish</a>
+          </div>
+        </div>
+
+        <!-- Dishes Grid -->
+        <div class="row row-cols-1 row-cols-md-3 g-4">
+          {% for dish in dishes %}
+            <div class="col">
+              <div class="card h-100">
+                <div class="card-body">
+                  <h5 class="card-title">{{ dish.dish_name }}</h5>
+                  <h6 class="card-subtitle mb-2 text-muted">${{ dish.dish_cost }}</h6>
+                  <p class="card-text">{{ dish.dish_description }}</p>
+                  <a href="{% url 'edit_dish' dish.dish_id %}" class="btn btn-sm btn-outline-primary">View/Edit dish</a>
+                </div>
+              </div>
+            </div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock %}

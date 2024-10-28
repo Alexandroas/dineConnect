@@ -1,0 +1,91 @@
+{% load static %}
+<link rel="stylesheet" href="{% static 'main/sidebar.css' %}" />
+{% block content %}
+  <div class="d-flex">
+    <!-- Sidebar -->
+    <nav class="sidebar">
+      <ul class="nav flex-column text-center align-items-center pt-4">
+        <li class="nav-item">
+          <a href="{% url 'restaurant_home' %}" class="nav-link {% if request.resolver_match.url_name == 'restaurant_home' %}active{% endif %}">
+            <i class="bi bi-house"></i>
+            <span>Dashboard</span>
+          </a>
+        </li>
+        <li class="nav-item">
+          <a href="#" class="nav-link">
+            <i class="bi bi-graph-up"></i>
+            <span>Analytics</span>
+          </a>
+        </li>
+        <li class="nav-item">
+          <a href="#" class="nav-link">
+            <i class="bi bi-calendar-check"></i>
+            <span>Reservations</span>
+          </a>
+        </li>
+        <li class="nav-item">
+          <a href="{% url 'restaurant_menu' %}" class="nav-link {% if request.resolver_match.url_name == 'restaurant_menu' %}active{% endif %}">
+            <i class="bi bi-menu-button-wide"></i>
+            <span>Menu</span>
+          </a>
+        </li>
+        <li class="nav-item">
+          <a href="#" class="nav-link">
+            <i class="bi bi-people"></i>
+            <span>Customers</span>
+          </a>
+        </li>
+      </ul>
+
+      <!-- Profile Section -->
+      <div class="profile-section">
+        <div class="dropdown">
+          <button class="profile-toggle w-100" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+            <span>{{ request.user.username }}</span>
+          </button>
+          <ul class="dropdown-menu dropdown-menu-end">
+            <li>
+              <a class="dropdown-item" href="#"><i class="bi bi-person me-2"></i>Profile</a>
+            </li>
+            <li>
+              <a class="dropdown-item" href="#"><i class="bi bi-gear me-2"></i>Settings</a>
+            </li>
+            <li>
+              <hr class="dropdown-divider" />
+            </li>
+            <li>
+              <a class="dropdown-item text-danger" href="{% url 'logout' %}"><i class="bi bi-box-arrow-right me-2"></i>Logout</a>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="content-wrapper">
+      {% block dashboard_content %}
+      {% endblock %}
+    </div>
+  </div>
+  <script>
+    // Initialize tooltips
+    document.addEventListener('DOMContentLoaded', function () {
+      var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+      var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl)
+      })
+    })
+    
+    // Add active class to current page link
+    document.addEventListener('DOMContentLoaded', function () {
+      const currentPath = window.location.pathname
+      const navLinks = document.querySelectorAll('.nav-link')
+    
+      navLinks.forEach((link) => {
+        if (link.getAttribute('href') === currentPath) {
+          link.classList.add('active')
+        }
+      })
+    })
+  </script>
+{% endblock %}

@@ -1,0 +1,39 @@
+{% extends 'main/header.html' %}
+{% block content %}
+<div class="row">
+  <!-- Sidebar -->
+  <div class="col-md-3 col-lg-2 d-md-block bg-light sidebar">
+    {% include 'Restaurant_handling/restaurant_dashboard.html' %}
+  </div>
+</div>
+<div>
+  <h2>{{ business.business_name }}</h2>
+  <p>Status: {% if is_open %}Open{% else %}Closed{% endif %}</p>
+  
+  <h3>Today's Statistics</h3>
+  <p>Total Reservations: {{ stats.total }}</p>
+  <p>Upcoming Reservations: {{ stats.upcoming }}</p>
+  <p>Today's Reservations: {{ stats.today }}</p>
+  
+  <h3>Available Time Slots Today</h3>
+  <ul>
+  {% for slot in today_slots %}
+      <li>{{ slot|time:"H:i" }}</li>
+  {% empty %}
+      <li>No available slots today</li>
+  {% endfor %}
+  </ul>
+  
+  <h3>Today's Reservations</h3>
+  <ul>
+  {% for reservation in today_reservations %}
+      <li>
+          {{ reservation.reservation_time|time:"H:i" }} - 
+          Party of {{ reservation.reservation_party_size }}
+      </li>
+  {% empty %}
+      <li>No reservations today</li>
+  {% endfor %}
+  </ul>
+</div>
+{% endblock %}

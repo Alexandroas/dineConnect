@@ -1,0 +1,12 @@
+{% extends 'main/header.html' %}
+{% block content %}
+  {% load crispy_forms_tags %}
+  <form method="post">
+    {% csrf_token %}
+    {{ form|crispy }}
+    <button type="submit" class="btn btn-primary">Upload dish</button>
+  </form>
+  <a href="{% url 'restaurant_menu' %}" class="btn btn-primary">Back</a>
+
+  <br />
+{% endblock %}

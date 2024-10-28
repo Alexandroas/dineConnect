@@ -1,0 +1,54 @@
+{%extends main/header.html%}
+{%block content%}
+<div class="col-lg-4">
+    <div class="card shadow-sm">
+      <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+        <h4 class="mb-0">My Reservations</h4>
+        <span class="badge bg-light text-primary">{{ reservations|length }} Total</span>
+      </div>
+      <div class="card-body">
+        <!-- Upcoming Reservations Section -->
+        <div>
+          <h2>Upcoming Reservations</h2>
+          {% if upcoming_reservations %}
+            {% for reservation in upcoming_reservations %}
+              <div>
+                <p>Restaurant: {{ reservation.business_id.business_name }}</p>
+                <p>Date: {{ reservation.reservation_date }}</p>
+                <p>Time: {{ reservation.reservation_time }}</p>
+                <p>Party Size: {{ reservation.reservation_party_size }}</p>
+                <p>Status: {{ reservation.reservation_status }}</p>
+                {% if reservation.reservation_special_requests %}
+                  <p>Special Requests: {{ reservation.reservation_special_requests }}</p>
+                {% endif %}
+              </div>
+            {% endfor %}
+          {% else %}
+            <p>No upcoming reservations</p>
+          {% endif %}
+        </div>
+
+        <!-- Past Reservations Section -->
+        <div>
+          <h2>Past Reservations</h2>
+          {% if past_reservations %}
+            {% for reservation in past_reservations %}
+              <div>
+                <p>Restaurant: {{ reservation.business_id.business_name }}</p>
+                <p>Date: {{ reservation.reservation_date }}</p>
+                <p>Time: {{ reservation.reservation_time }}</p>
+                <p>Party Size: {{ reservation.reservation_party_size }}</p>
+                <p>Status: {{ reservation.reservation_status }}</p>
+                {% if reservation.reservation_special_requests %}
+                  <p>Special Requests: {{ reservation.reservation_special_requests }}</p>
+                {% endif %}
+              </div>
+            {% endfor %}
+          {% else %}
+            <p>No past reservations</p>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+{%endblock %}

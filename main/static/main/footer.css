@@ -1,0 +1,119 @@
+.footer-content {
+    background: linear-gradient(to right, #1e7bd7 ,#2c3e50);
+    color: #fff;
+    padding: 3rem 0 0;
+    position: relative;
+    margin-top: 4rem;
+  }
+  
+  .footer-section {
+    margin-bottom: 2rem;
+  }
+  
+  .footer-heading {
+    font-size: 1.2rem;
+    font-weight: 600;
+    margin-bottom: 1.5rem;
+    color: #ecf0f1;
+  }
+  
+  .contact-info {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+  
+  .contact-info li {
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    transition: transform 0.2s;
+  }
+  
+  .contact-info li:hover {
+    transform: translateX(5px);
+  }
+  
+  .contact-info i {
+    width: 25px;
+    margin-right: 10px;
+    color: #3498db;
+  }
+  
+  .social-links {
+    display: flex;
+    gap: 1rem;
+    margin-top: 1.5rem;
+  }
+  
+  .social-links a {
+    color: #fff;
+    background: rgba(255, 255, 255, 0.1);
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: all 0.3s ease;
+    text-decoration: none;
+  }
+  
+  .social-links a:hover {
+    background: #3498db;
+    transform: translateY(-3px);
+    box-shadow: 0 5px 15px rgba(52, 152, 219, 0.3);
+  }
+  
+  .footer-line {
+    width: 50px;
+    height: 3px;
+    background: #3498db;
+    margin: 1rem 0;
+  }
+  
+  .copyright {
+    background: rgba(0, 0, 0, 0.2);
+    padding: 1.5rem 0;
+    margin-top: 2rem;
+    font-size: 0.9rem;
+  }
+  
+  .footer-logo {
+    font-size: 1.8rem;
+    font-weight: bold;
+    color: #fff;
+    text-decoration: none;
+    display: inline-block;
+    margin-bottom: 1rem;
+  }
+  
+  .footer-logo:hover {
+    color: #3498db;
+  }
+  
+  .contact-card {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 10px;
+    padding: 2rem;
+    backdrop-filter: blur(10px);
+    transition: transform 0.3s ease;
+  }
+  
+  .contact-card:hover {
+    transform: translateY(-5px);
+  }
+  
+  @media (max-width: 768px) {
+    .footer-content {
+        padding-top: 2rem;
+    }
+  
+    .contact-card {
+        margin-bottom: 1rem;
+    }
+  
+    .social-links {
+        justify-content: center;
+    }
+  }

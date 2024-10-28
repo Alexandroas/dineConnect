@@ -1,0 +1,110 @@
+{% extends 'main/header.html' %}
+{% load crispy_forms_tags %}
+{% block content %}
+  <div class="container py-4">
+    <div class="row">
+      <!-- Profile Information Card -->
+      <div class="col-lg-8 mb-4">
+        <div class="card shadow-sm">
+          <div class="card-header bg-primary text-white">
+            <h4 class="mb-0">Profile Information</h4>
+          </div>
+          <div class="card-body">
+            <form method="POST" enctype="multipart/form-data">
+              {% csrf_token %}
+              <!-- Profile Details -->
+              <div class="mb-4">
+                <h3 class="h4">
+                  {{ form.instance.username }}
+                  <span class="badge bg-secondary">{{ form.instance.status }}</span>
+                </h3>
+                <p class="text-muted mb-1">
+                  <i class="fas fa-user me-2"></i>
+                  {{ form.instance.first_name }} {{ form.instance.last_name }}
+                </p>
+                <p class="text-muted mb-1">
+                  <i class="fas fa-envelope me-2"></i>
+                  {{ form.instance.email }}
+                </p>
+                {% if form.instance.description %}
+                  <p class="text-muted mb-0">
+                    <i class="fas fa-info-circle me-2"></i>
+                    {{ form.instance.description }}
+                  </p>
+                {% endif %}
+              </div>
+
+              {% if user.username == form.instance.username %}
+                <div class="border-top pt-4">
+                  <h5>Edit Profile Information</h5>
+                  <div class="row g-3">
+                    <div class="col-md-6">{{ form.first_name|as_crispy_field }}</div>
+                    <div class="col-md-6">{{ form.last_name|as_crispy_field }}</div>
+                  </div>
+                  <div class="mb-3">{{ form.email|as_crispy_field }}</div>
+                  <div class="d-flex justify-content-between align-items-center">
+                    <button class="btn btn-primary" type="submit"><i class="fas fa-save me-2"></i>Update Profile</button>
+                    <a href="{% url 'password_change' %}" class="btn btn-outline-secondary"><i class="fas fa-key me-2"></i>Change Password</a>
+                  </div>
+                </div>
+              {% endif %}
+            </form>
+          </div>
+        </div>
+      </div>
+
+      <!-- Reservations Card -->
+      <div class="col-lg-4">
+        <div class="card shadow-sm">
+          <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+            <h4 class="mb-0">My Reservations</h4>
+            <span class="badge bg-light text-primary">{{ reservations|length }} Total</span>
+          </div>
+          <div class="card-body">
+            <!-- Upcoming Reservations Section -->
+            <div>
+              <h2>Upcoming Reservations</h2>
+              {% if upcoming_reservations %}
+                {% for reservation in upcoming_reservations %}
+                  <div>
+                    <p>Restaurant: {{ reservation.business_id.business_name }}</p>
+                    <p>Date: {{ reservation.reservation_date }}</p>
+                    <p>Time: {{ reservation.reservation_time }}</p>
+                    <p>Party Size: {{ reservation.reservation_party_size }}</p>
+                    <p>Status: {{ reservation.reservation_status }}</p>
+                    {% if reservation.reservation_special_requests %}
+                      <p>Special Requests: {{ reservation.reservation_special_requests }}</p>
+                    {% endif %}
+                  </div>
+                {% endfor %}
+              {% else %}
+                <p>No upcoming reservations</p>
+              {% endif %}
+            </div>
+
+            <!-- Past Reservations Section -->
+            <div>
+              <h2>Past Reservations</h2>
+              {% if past_reservations %}
+                {% for reservation in past_reservations %}
+                  <div>
+                    <p>Restaurant: {{ reservation.business_id.business_name }}</p>
+                    <p>Date: {{ reservation.reservation_date }}</p>
+                    <p>Time: {{ reservation.reservation_time }}</p>
+                    <p>Party Size: {{ reservation.reservation_party_size }}</p>
+                    <p>Status: {{ reservation.reservation_status }}</p>
+                    {% if reservation.reservation_special_requests %}
+                      <p>Special Requests: {{ reservation.reservation_special_requests }}</p>
+                    {% endif %}
+                  </div>
+                {% endfor %}
+              {% else %}
+                <p>No past reservations</p>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock %}

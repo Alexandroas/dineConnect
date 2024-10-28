@@ -1,0 +1,106 @@
+{% extends 'main/header.html' %}
+{% load static %}
+{% block content %}
+  <div class="container business-grid">
+    <!-- Search and Filter Section -->
+    <div class="search-section">
+      <div class="row">
+        <div class="col-md-6">
+          <input type="text" class="form-control search-input" placeholder="Search restaurants..." id="searchInput" />
+        </div>
+        <div class="col-md-6">
+          <div class="d-flex gap-2">
+            <select class="form-select search-input" id="cuisineTypeSearch" onchange="filterByCuisineType()">
+              <option value="all">All Cuisines</option>
+              {% for cuisine in cuisines %}
+                <!-- Fixed: removed business reference in value -->
+                <option value="{{ cuisine.cuisine_name|lower }}">{{ cuisine.cuisine_name }}</option>
+              {% endfor %}
+            </select>
+            <select class="form-select search-input">
+              <option value="">Sort By</option>
+              <option value="rating">Rating</option>
+              <option value="name">Name</option>
+              <option value="price">Price</option>
+            </select>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Title Section -->
+    <h1 class="section-title">Discover Local Restaurants</h1>
+
+    <!-- Business Grid -->
+    <div class="row row-cols-1 row-cols-md-3 g-4">
+      {% for business in businesses %}
+        <div class="col">
+          <div class="card business-card cuisine_type_filter"
+            data-cuisines="{% for cuisine in business.cuisine.all %}
+              {{ cuisine.cuisine_name|lower }}{% if not forloop.last %},{% endif %}
+            {% endfor %}">
+            <a href="{% url 'restaurant_detail' business.business_id %}" class="text-decoration-none">
+              <div class="card-img-wrapper">
+                {% if business.business_image %}
+                  <img src="{{ business.business_image.url }}" alt="{{ business.business_name }}" class="card-img" />
+                {% else %}
+                  <img src="/api/placeholder/400/320" alt="No Image Available" class="card-img" />
+                {% endif %}
+
+                <button class="favorite-btn" onclick="event.preventDefault(); toggleFavorite(this);"><i class="bi bi-heart-fill"></i></button>
+              </div>
+
+              <div class="card-body">
+                <h5 class="business-name">{{ business.business_name }}</h5>
+
+                <div class="business-info">
+                  <p>
+                    <i class="fas fa-user"></i> {{ business.business_owner }}
+                  </p>
+                  <p>
+                    <i class="fas fa-map-marker-alt"></i> {{ business.business_address }}
+                  </p>
+                  <p>
+                    <i class="fas fa-phone"></i> {{ business.contact_number }}
+                  </p>
+                  <p>
+                    <i class="fas fa-utensils"></i>
+                    {% for cuisine in business.cuisine.all %}
+                      {{ cuisine.cuisine_name }}{% if not forloop.last %}, {% endif %}
+                    {% endfor %}
+                  </p>
+                </div>
+
+                <div class="d-flex align-items-center mb-3">
+                  <div class="rating">
+                    <i class="fas fa-star"></i>
+                    <i class="fas fa-star"></i>
+                    <i class="fas fa-star"></i>
+                    <i class="fas fa-star"></i>
+                    <i class="fas fa-star-half-alt"></i>
+                  </div>
+                  <span class="price-level">
+                    <i class="fas fa-dollar-sign"></i>
+                    <i class="fas fa-dollar-sign"></i>
+                  </span>
+                </div>
+
+                <div class="tags-container">
+                  <span class="tag tag-cuisine">
+                    {% for cuisine in business.cuisine.all %}
+                      {{ cuisine.cuisine_name }}{% if not forloop.last %}, {% endif %}
+                    {% endfor %}
+                  </span>
+                  <span class="tag tag-owner">{{ business.business_owner }}</span>
+                  <span class="tag tag-details">View Details</span>
+                </div>
+              </div>
+            </a>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <script src="{% static 'gfgauth/Jquery/cuisine_type_filtering.js' %}"></script>
+{% endblock %}
