@@ -42,21 +42,30 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',   
-    'gfgauth',
     'django.contrib.sites',
     'allauth',
     'fontawesomefree',
-    'main',
     'crispy_bootstrap5',
     'tinymce',
     'formtools',
     'bootstrap5',
     'crispy_forms',
+    'main',
+    'gfgauth',
     'Restaurant_handling',
     'allauth.account',
     'allauth.socialaccount',
     'allauth.socialaccount.providers.google',
 ]
+
+#MEMAIL CONFIGURATION
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = 'dineConnectWeb@gmail.com'
+EMAIL_HOST_PASSWORD = 'otoe bljc gpbt kvft'
+
 
 CRISPY_TEMPLATE_PACK = 'bootstrap5'  # or 'bootstrap5' depending on your preference
 CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap5"
@@ -161,14 +170,15 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.1/howto/static-files/
 
+BASE_DIR = Path(__file__).resolve().parent.parent
 
 # Static files settings
-STATIC_URL = 'static/'
-STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
-
+# Static files settings
+STATIC_URL = '/static/'  # Add leading slash
+STATIC_ROOT = BASE_DIR / 'staticfiles'
 STATICFILES_DIRS = [
-    os.path.join(BASE_DIR, 'main/static'),
-    os.path.join(BASE_DIR, 'gfgauth/static'),
+    BASE_DIR / 'main' / 'static',
+    BASE_DIR / 'gfgauth' / 'static',
 ]
 ALLOWED_HOSTS = ['*']
 # Default primary key field type

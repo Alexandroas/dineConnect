@@ -2,6 +2,9 @@
 {% block content %}
   {% load crispy_forms_tags %}
   <form method="post">
+    <div class="col-md-3 col-lg-2 d-md-block bg-light sidebar">
+      {% include 'Restaurant_handling/restaurant_dashboard.html' %}
+    </div>
     {% csrf_token %}
     {{ form|crispy }}
     <button type="submit" class="btn btn-primary">Upload dish</button>

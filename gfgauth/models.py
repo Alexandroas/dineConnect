@@ -1,7 +1,9 @@
 from django.db import models
 from django.contrib.auth.models import BaseUserManager, AbstractBaseUser, PermissionsMixin
 from django.conf import settings
-from Restaurant_handling.models import Cuisine
+from django.utils import timezone
+from datetime import datetime, timedelta
+from Restaurant_handling.models import Cuisine, DieteryPreference
 
 
 # Regular User Model
@@ -23,14 +25,27 @@ class CustomUserManager(BaseUserManager):
 
 class CustomUser(AbstractBaseUser, PermissionsMixin):
     email = models.EmailField(unique=True)
-    first_name = models.CharField(max_length=100)
-    username = models.CharField(max_length=100, unique=True)
-    last_name = models.CharField(max_length=100)
+    first_name = models.CharField(max_length=24)
+    username = models.CharField(max_length=24, unique=True)
+    last_name = models.CharField(max_length=24)
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
     is_superuser = models.BooleanField(default=False)
+    profile_image = models.ImageField(
+        upload_to='profile_images/', 
+        blank=True, 
+        null=True
+    )
+    favourite_restaurants = models.ManyToManyField(
+        'Business', 
+        blank=True, 
+        related_name='favourite_users')
     #TODO: Add restaurant favourite field
-
+    dietery_preference = models.ManyToManyField(
+        DieteryPreference, 
+        blank=True, 
+        related_name='users'
+    )
     objects = CustomUserManager()
 
     USERNAME_FIELD = 'email'
@@ -38,14 +53,6 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
 
     def __str__(self):
         return self.email
-
-
-from django.db import models
-from django.contrib.auth.models import BaseUserManager, AbstractBaseUser, PermissionsMixin
-from django.conf import settings
-from django.utils import timezone
-from datetime import datetime, time, timedelta
-from Restaurant_handling.models import Cuisine
 
 class Business(models.Model):
     business_id = models.AutoField(primary_key=True)

@@ -1,14 +1,22 @@
 from django.contrib import messages
 from django.shortcuts import render, redirect, get_object_or_404
+from gfgauth.forms import BusinessUpdateForm, UserUpdateForm  # Import your existing form
 from gfgauth.models import Business
-from django.utils import timezone
-from .decorators import business_required
-from .forms import DishForm, ReservationForm
-from .models import Dish, Reservation
-
+from .decorators import business_required, login_required
+from .forms import DishForm, ReservationForm, DishUpdateForm
+from .models import Dish
+from main.utils import send_reservation_email
 @business_required
 def restaurant_dashboard(request):
-    return render(request, 'Restaurant_handling/restaurant_dashboard.html')
+    try:
+        business = Business.objects.get(business_owner=request.user)
+        context = {
+            'business': business,
+        }
+        return render(request, 'Restaurant_handling/restaurant_dashboard.html', context)
+    except Business.DoesNotExist:
+        messages.error(request, "No business profile found.")
+        return redirect('home')
 
 @business_required
 def add_dish(request):
@@ -38,7 +46,7 @@ def add_dish(request):
 def edit_dish(request, dish_id=None):
     dish = get_object_or_404(Dish, dish_id=dish_id)
     if request.method == 'POST':
-        form = DishForm(request.POST, request.FILES, instance=dish)
+        form = DishUpdateForm(request.POST, request.FILES, instance=dish)  # Changed to DishUpdateForm
         if form.is_valid():
             try:
                 dish = form.save(commit=False)
@@ -46,9 +54,11 @@ def edit_dish(request, dish_id=None):
                 business = Business.objects.get(business_owner=request.user)
                 # Set the business_id field
                 dish.business_id = business
+                # Convert is_available string to boolean if using ChoiceField
+                dish.is_available = form.cleaned_data['is_available'] == 'True'
                 dish.save()
-                print(f"Dish saved successfully with business_id: {business.business_id}")
-                return redirect(restaurant_menu)
+                messages.success(request, 'Dish updated successfully!')
+                return redirect('restaurant_menu')
             except Business.DoesNotExist:
                 print("No business found for user:", request.user)
                 messages.error(request, "Error: No business associated with this account")
@@ -56,8 +66,12 @@ def edit_dish(request, dish_id=None):
                 print("Error saving dish:", str(e))
                 messages.error(request, f"Error saving dish: {str(e)}")
     else:
-        form = DishForm(instance=dish)
-    return render(request, 'Restaurant_handling/edit_dish.html', {'form': form , 'dish': dish})
+        form = DishUpdateForm(instance=dish)  # Changed to DishUpdateForm
+        
+    return render(request, 'Restaurant_handling/edit_dish.html', {
+        'form': form,
+        'dish': dish
+    })
 
 @business_required
 def delete_dish(request, dish_id=None):
@@ -65,10 +79,37 @@ def delete_dish(request, dish_id=None):
     dish.delete()
     return redirect(restaurant_menu) #Redirect to the restaurant menu page
 
-
 @business_required
 def restaurant_profile(request):
-    return render(request, 'Restaurant_handling/restaurant_profile.html')
+    try:
+        business = Business.objects.get(business_owner=request.user)
+        
+        if request.method == 'POST':
+            user_form = UserUpdateForm(request.POST, instance=request.user)
+            business_form = BusinessUpdateForm(request.POST, request.FILES, instance=business)
+            
+            if user_form.is_valid() and business_form.is_valid():
+                user_form.save()
+                business_form.save()
+                messages.success(request, f'Your profile has been updated successfully!')
+                return redirect("restaurant_profile")
+            else:
+                for error in list(user_form.errors.values()) + list(business_form.errors.values()):
+                    messages.error(request, error)
+        else:
+            user_form = UserUpdateForm(instance=request.user)
+            business_form = BusinessUpdateForm(instance=business)
+            
+        context = {
+            'business': business,
+            'user_form': user_form,
+            'business_form': business_form
+        }
+        return render(request, 'Restaurant_handling/restaurant_profile.html', context)
+        
+    except Business.DoesNotExist:
+        messages.error(request, "No business profile found.")
+        return redirect('home')
 
 @business_required
 def restaurant_profile_settings(request):
@@ -94,6 +135,7 @@ def restaurant_detail(request, business_id):
 def restaurant_home(request):
     return render(request, 'Restaurant_handling/restaurant_home.html')
 
+@login_required
 def reservation(request, business_id):
     if request.method == 'POST':
         form = ReservationForm(request.POST)
@@ -103,6 +145,8 @@ def reservation(request, business_id):
                 business = Business.objects.get(business_id=business_id)
                 reservation.business_id = business
                 reservation.user_id = request.user
+                send_reservation_email(request.user, reservation)
+                messages.success(request, 'Your reservation has been saved!')
                 reservation.save()
                 print(f"Reservation saved successfully with business_id: {business.business_id}")
                 return redirect('restaurant_detail', business_id=business_id)
@@ -116,38 +160,3 @@ def reservation(request, business_id):
         form = ReservationForm()
     return render(request, 'Restaurant_handling/reservation.html', {'form': form , 'business_id': business_id})
 
-
-"""def upcoming_reservations(request, business_id):
-    try:
-        business = Business.objects.get(id=business_id)
-        current_datetime = timezone.now()
-        
-        # Get all reservations for this business
-        upcoming = Reservation.objects.filter(
-            business_id=business,
-            models.Q(reservation_date__gt=current_datetime.date()) |
-            models.Q(
-                reservation_date=current_datetime.date(),
-                reservation_time__gt=current_datetime.time()
-            )
-        ).order_by('reservation_date', 'reservation_time')
-        
-        past = Reservation.objects.filter(
-            business_id=business,
-            models.Q(reservation_date__lt=current_datetime.date()) |
-            models.Q(
-                reservation_date=current_datetime.date(),
-                reservation_time__lte=current_datetime.time()
-            )
-        ).order_by('-reservation_date', '-reservation_time')
-        
-        context = {
-            'upcoming_reservations': upcoming,
-            'past_reservations': past,
-            'business': business
-        }
-        return render(request, 'upcoming_reservations.html', context)
-    
-    except Business.DoesNotExist:
-        messages.error(request, "Business not found")
-        return redirect('home') """

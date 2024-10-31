@@ -163,6 +163,64 @@ a:visited{
   height: 100%;
 }
 
+.messages {
+  position: fixed;
+  background-color: #148dc5b6;
+  border-radius: 10%;
+  top: 20px;
+  right: 20px;
+  z-index: 1000;
+  width: 300px;
+}
+.preferences-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 1rem;
+  padding: 1rem;
+  background-color: #f8f9fa;
+  border-radius: 0.25rem;
+}
+.form-check {
+  margin: 0.5rem 0;
+}
+.form-check-label {
+  margin-left: 0.5rem;
+}
+.menu-section {
+  border-bottom: 1px solid #eee;
+  padding-bottom: 1rem;
+}
+
+.menu-section:last-child {
+  border-bottom: none;
+}
+
+.card-title {
+  color: #2c3e50;
+  margin-bottom: 0.5rem;
+}
+
+.card-subtitle {
+  color: #e67e22;
+  font-weight: bold;
+}
+
+.card-text {
+  color: #7f8c8d;
+  font-size: 0.9rem;
+}
+.alert {
+  margin-bottom: 10px;
+  position: fixed;
+  border-radius: 10%;
+  top: 20px;
+  right: 20px;
+  z-index: 1000;
+  width: 300px;
+  border-radius: 10%;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.195);
+}
+
 .card {
   transition: all 0.3s ease-in-out;
 }

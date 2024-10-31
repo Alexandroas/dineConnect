@@ -84,23 +84,46 @@
                 </div>
             </div>
 
-            <!-- Menu Section -->
             <div class="card shadow-sm mb-4">
                 <div class="card-body">
                     <h5 class="border-bottom pb-2">
                         <i class="bi bi-journal-text me-2"></i>Menu
-                        {%for dish in dishes%}
-                        <div class="card-body">
-                            <h5 class="card-title">{{ dish.dish_name }}</h5>
-                            <h6 class="card-subtitle mb-2 text-muted">${{ dish.dish_cost }}</h6>
-                            <p class="card-text">{{ dish.dish_description }}</p>
-                        {% endfor %}
                     </h5>
-                    <!-- Add menu items here -->
+                    
+                    {% regroup dishes by dish_type as dish_list %}
+                    
+                    {% for type in dish_list %}
+                    <div class="menu-section mb-4">
+                        <h4 class="text-primary mb-3">{{ type.grouper }}</h4>
+                        <div class="row">
+                            {% for dish in type.list %}
+                            <div class="col-md-6 mb-3">
+                                <div class="card h-100">
+                                    <div class="card-body">
+                                        <h5 class="card-title">{{ dish.dish_name }}</h5>
+                                        <h6 class="card-subtitle mb-2 text-muted">${{ dish.dish_cost }}</h6>
+                                        <p class="card-text">{{ dish.dish_description }}</p>
+                                        {% if dish.allergens %}
+                                        <div class="mt-2">
+                                            <small class="text-warning">
+                                                <i class="bi bi-exclamation-triangle me-1"></i>
+                                                Contains: {{ dish.allergens }}
+                                            </small>
+                                        </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% empty %}
+                    <div class="alert alert-info">
+                        No menu items available.
+                    </div>
+                    {% endfor %}
                 </div>
             </div>
-        </div>
-
         <!-- Additional Information or Features -->
         <div class="col-md-4">
             <!-- You can add more cards here for reviews, ratings, etc. -->

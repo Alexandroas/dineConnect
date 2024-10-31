@@ -3,6 +3,12 @@ from django.utils import timezone
 from datetime import datetime
 
 
+class DieteryPreference(models.Model):
+    dietery_id = models.AutoField(primary_key=True)
+    dietery_name = models.CharField(max_length=100)
+    def __str__(self):
+        return self.dietery_name
+
 class Cuisine(models.Model):
     cuisine_id = models.AutoField(primary_key=True)
     cuisine_name = models.CharField(max_length=100)
@@ -24,6 +30,7 @@ class Dish(models.Model):
     business_id = models.ForeignKey('gfgauth.Business', on_delete=models.CASCADE)
     dish_description = models.TextField(max_length=100)
     dish_image = models.ImageField(upload_to='dishes/', blank=True, null=True)
+    is_available = models.BooleanField(default=True)
     
 
     def __str__(self):
@@ -35,7 +42,7 @@ class Reservation(models.Model):
     reservation_date = models.DateField(blank=True, null=True)
     reservation_time = models.TimeField()
     reservation_party_size = models.IntegerField()
-    reservation_special_requests = models.TextField(max_length=100)
+    reservation_special_requests = models.TextField(max_length=100 , blank=True, null=True)
     reservation_status = models.CharField(max_length=100)
     business_id = models.ForeignKey('gfgauth.Business', on_delete=models.CASCADE)
     user_id = models.ForeignKey('gfgauth.CustomUser', on_delete=models.CASCADE)

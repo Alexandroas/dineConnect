@@ -9,5 +9,7 @@ urlpatterns = [
     path('login/', views.custom_login, name='login'), 
     path('profile/<username>/', views.profile, name='profile'),  
     path('password_change/', views.password_change, name='password_change'),
-    path('register_business/', views.register_business, name='register_business'),  
+    path('register/business/', 
+         views.BusinessRegistrationWizard.as_view(views.FORMS), 
+         name='register_business'), 
 ]

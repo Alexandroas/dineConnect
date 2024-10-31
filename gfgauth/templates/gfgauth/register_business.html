@@ -1,19 +1,83 @@
-<!-- django_project/users/templates/register.html -->
+<!-- templates/gfgauth/register_business.html -->
 {% extends 'main/header.html' %}
 {% load crispy_forms_tags %}
 {% block content %}
-  <div class="content-section">
-    <form method="POST">
-      {% csrf_token %}
-      <fieldset class="form-group">
-        <legend class="border-bottom mb-4">Register you buisness today!</legend>
-        {{ form|crispy }}
-      </fieldset>By registering, you accept the Terms of Service and Privacy Notice<div class="form-group">
-        <button class="btn btn-outline-info" type="submit">Sign Up</button>
-      </div>
+<div class="content-section">
+    <form method="POST" enctype="multipart/form-data">
+        {% csrf_token %}
+        
+        {% if wizard %}  <!-- If using wizard view -->
+            {{ wizard.management_form }}
+            
+            <!-- Progress indicator -->
+            <div class="progress mb-4">
+                {% with total_steps=4 %}
+                    {% with current=wizard.steps.step1|add:"0" %}
+                        <div class="progress-bar" role="progressbar" 
+                             style="width: {% widthratio current total_steps 100 %}%"
+                             aria-valuenow="{% widthratio current total_steps 100 %}" 
+                             aria-valuemin="0" aria-valuemax="100">
+                            Step {{ wizard.steps.step1 }} of {{ wizard.steps.count }}
+                        </div>
+                    {% endwith %}
+                {% endwith %}
+            </div>
+
+            <fieldset class="form-group">
+                <legend class="border-bottom mb-4">
+                    {% if wizard.steps.current == "basic" %}
+                        Basic Information
+                    {% elif wizard.steps.current == "details" %}
+                        Business Details
+                    {% elif wizard.steps.current == "hours" %}
+                        Business Hours
+                    {% else %}
+                        Additional Information
+                    {% endif %}
+                </legend>
+                {{ wizard.form|crispy }}
+            </fieldset>
+
+            <div class="form-group d-flex justify-content-between">
+                {% if wizard.steps.prev %}
+                <button type="submit" name="wizard_goto_step" value="{{ wizard.steps.prev }}" 
+                class="btn btn-secondary" formnovalidate> Back </button>
+                {% endif %}
+                <button type="submit" class="btn btn-primary">
+                    {% if wizard.steps.current == wizard.steps.last %}
+                        Complete Registration
+                    {% else %}
+                        Next
+                    {% endif %}
+                </button>
+            </div>
+
+        {% else %}  <!-- If using regular form -->
+            <fieldset class="form-group">
+                <legend class="border-bottom mb-4">Register your business today!</legend>
+                {{ form|crispy }}
+            </fieldset>
+            <div class="form-group">
+                <button class="btn btn-outline-info" type="submit">Sign Up</button>
+            </div>
+        {% endif %}
     </form>
+
     <div class="border-top pt-3">
-      <small class="text-muted">Already Have An Account? <a class="ml-2" href="/login">Sign In</a></small>
+        <small class="text-muted">
+            Already Have An Account? <a class="ml-2" href="/login">Sign In</a>
+        </small>
     </div>
-  </div>
+</div>
+
+<style>
+    .progress {
+        height: 25px;
+        margin-bottom: 20px;
+    }
+    .progress-bar {
+        background-color: #17a2b8;
+        transition: width 0.3s ease-in-out;
+    }
+</style>
 {% endblock %}

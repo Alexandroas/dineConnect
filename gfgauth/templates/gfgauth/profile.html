@@ -1,110 +1,118 @@
+<!-- templates/gfgauth/profile.html -->
 {% extends 'main/header.html' %}
 {% load crispy_forms_tags %}
+
 {% block content %}
-  <div class="container py-4">
+<div class="container mt-4">
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }}">
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endif %}
+
     <div class="row">
-      <!-- Profile Information Card -->
-      <div class="col-lg-8 mb-4">
-        <div class="card shadow-sm">
-          <div class="card-header bg-primary text-white">
-            <h4 class="mb-0">Profile Information</h4>
-          </div>
-          <div class="card-body">
-            <form method="POST" enctype="multipart/form-data">
-              {% csrf_token %}
-              <!-- Profile Details -->
-              <div class="mb-4">
-                <h3 class="h4">
-                  {{ form.instance.username }}
-                  <span class="badge bg-secondary">{{ form.instance.status }}</span>
-                </h3>
-                <p class="text-muted mb-1">
-                  <i class="fas fa-user me-2"></i>
-                  {{ form.instance.first_name }} {{ form.instance.last_name }}
-                </p>
-                <p class="text-muted mb-1">
-                  <i class="fas fa-envelope me-2"></i>
-                  {{ form.instance.email }}
-                </p>
-                {% if form.instance.description %}
-                  <p class="text-muted mb-0">
-                    <i class="fas fa-info-circle me-2"></i>
-                    {{ form.instance.description }}
-                  </p>
-                {% endif %}
-              </div>
-
-              {% if user.username == form.instance.username %}
-                <div class="border-top pt-4">
-                  <h5>Edit Profile Information</h5>
-                  <div class="row g-3">
-                    <div class="col-md-6">{{ form.first_name|as_crispy_field }}</div>
-                    <div class="col-md-6">{{ form.last_name|as_crispy_field }}</div>
-                  </div>
-                  <div class="mb-3">{{ form.email|as_crispy_field }}</div>
-                  <div class="d-flex justify-content-between align-items-center">
-                    <button class="btn btn-primary" type="submit"><i class="fas fa-save me-2"></i>Update Profile</button>
-                    <a href="{% url 'password_change' %}" class="btn btn-outline-secondary"><i class="fas fa-key me-2"></i>Change Password</a>
-                  </div>
+        <!-- Profile Update Form -->
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h3>Profile Information</h3>
                 </div>
-              {% endif %}
-            </form>
-          </div>
-        </div>
-      </div>
+                <div class="card-body">
+                    <form method="POST" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        
+                        <div class="row g-3">
+                            <div class="col-md-6">{{ form.first_name|as_crispy_field }}</div>
+                            <div class="col-md-6">{{ form.last_name|as_crispy_field }}</div>
+                        </div>
+                        <div class="mb-3">{{ form.email|as_crispy_field }}</div>
+                        
+                        <!-- Dietary Preferences Section -->
+                        <div class="mb-3">
+                          <label class="form-label">Dietary Preferences</label>
+                          <div class="preferences-grid">
+                              {% for checkbox in form.dietery_preference %}
+                                  <div class="form-check">
+                                      {{ checkbox.tag }}
+                                      <label class="form-check-label" for="{{ checkbox.id_for_label }}">
+                                          {{ checkbox.choice_label }}
+                                      </label>
+                                  </div>
+                              {% endfor %}
+                          </div>
+                      </div>
 
-      <!-- Reservations Card -->
-      <div class="col-lg-4">
-        <div class="card shadow-sm">
-          <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
-            <h4 class="mb-0">My Reservations</h4>
-            <span class="badge bg-light text-primary">{{ reservations|length }} Total</span>
-          </div>
-          <div class="card-body">
-            <!-- Upcoming Reservations Section -->
-            <div>
-              <h2>Upcoming Reservations</h2>
-              {% if upcoming_reservations %}
-                {% for reservation in upcoming_reservations %}
-                  <div>
-                    <p>Restaurant: {{ reservation.business_id.business_name }}</p>
-                    <p>Date: {{ reservation.reservation_date }}</p>
-                    <p>Time: {{ reservation.reservation_time }}</p>
-                    <p>Party Size: {{ reservation.reservation_party_size }}</p>
-                    <p>Status: {{ reservation.reservation_status }}</p>
-                    {% if reservation.reservation_special_requests %}
-                      <p>Special Requests: {{ reservation.reservation_special_requests }}</p>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <button type="submit" class="btn btn-primary">Save Changes</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Reservations -->
+        <div class="col-md-6">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h3>Upcoming Reservations</h3>
+                </div>
+                <div class="card-body">
+                    {% if upcoming_reservations %}
+                        <ul class="list-group">
+                        {% for reservation in upcoming_reservations %}
+                            <li class="list-group-item">
+                                <h5>{{ reservation.business_id.business_name }}</h5>
+                                <p>Date: {{ reservation.reservation_date }}<br>
+                                Time: {{ reservation.reservation_time }}</p>
+                            </li>
+                        {% endfor %}
+                        </ul>
+                    {% else %}
+                        <p>No upcoming reservations.</p>
                     {% endif %}
-                  </div>
-                {% endfor %}
-              {% else %}
-                <p>No upcoming reservations</p>
-              {% endif %}
+                </div>
             </div>
 
-            <!-- Past Reservations Section -->
-            <div>
-              <h2>Past Reservations</h2>
-              {% if past_reservations %}
-                {% for reservation in past_reservations %}
-                  <div>
-                    <p>Restaurant: {{ reservation.business_id.business_name }}</p>
-                    <p>Date: {{ reservation.reservation_date }}</p>
-                    <p>Time: {{ reservation.reservation_time }}</p>
-                    <p>Party Size: {{ reservation.reservation_party_size }}</p>
-                    <p>Status: {{ reservation.reservation_status }}</p>
-                    {% if reservation.reservation_special_requests %}
-                      <p>Special Requests: {{ reservation.reservation_special_requests }}</p>
+            <div class="card">
+                <div class="card-header">
+                    <h3>Past Reservations</h3>
+                </div>
+                <div class="card-body">
+                    {% if past_reservations %}
+                        <ul class="list-group">
+                        {% for reservation in past_reservations %}
+                            <li class="list-group-item">
+                                <h5>{{ reservation.business_id.business_name }}</h5>
+                                <p>Date: {{ reservation.reservation_date }}<br>
+                                Time: {{ reservation.reservation_time }}</p>
+                            </li>
+                        {% endfor %}
+                        </ul>
+                    {% else %}
+                        <p>No past reservations.</p>
                     {% endif %}
-                  </div>
-                {% endfor %}
-              {% else %}
-                <p>No past reservations</p>
-              {% endif %}
+                </div>
             </div>
-          </div>
         </div>
-      </div>
     </div>
-  </div>
+</div>
+
+<style>
+    .preferences-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        gap: 1rem;
+        padding: 1rem;
+        background-color: #f8f9fa;
+        border-radius: 0.25rem;
+    }
+    .form-check {
+        margin: 0.5rem 0;
+    }
+    .form-check-label {
+        margin-left: 0.5rem;
+    }
+</style>
 {% endblock %}

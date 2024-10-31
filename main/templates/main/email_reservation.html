@@ -1,0 +1,66 @@
+<!-- templates/emails/reservation_confirmation.html -->
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            font-family: Arial, sans-serif;
+        }
+        .reservation-details {
+            background-color: #f8f9fa;
+            padding: 20px;
+            border-radius: 5px;
+            margin: 20px 0;
+        }
+        ul {
+            list-style: none;
+            padding: 0;
+        }
+        .detail-item {
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Reservation Confirmation</h1>
+        
+        <p>Dear {{ first_name }},</p>
+        
+        <p>Your reservation at {{ business.business_name }} has been confirmed!</p>
+        
+        <div class="reservation-details">
+            <h3>Reservation Details:</h3>
+            <ul>
+                <li class="detail-item">
+                    <strong>Restaurant:</strong> {{ business.business_name }}
+                </li>
+                <li class="detail-item">
+                    <strong>Date:</strong> {{ reservation.reservation_date }}
+                </li>
+                <li class="detail-item">
+                    <strong>Time:</strong> {{ reservation.reservation_time }}
+                </li>
+                <li class="detail-item">
+                    <strong>Party Size:</strong> {{ reservation.reservation_party_size }}
+                </li>
+                {% if reservation.special_requests %}
+                <li class="detail-item">
+                    <strong>Special Requests:</strong> {{ reservation.special_requests }}
+                </li>
+                {% endif %}
+            </ul>
+        </div>
+
+        <p>We look forward to serving you!</p>
+        
+        <p>
+            If you need to modify or cancel your reservation, 
+            please contact {{ business.business_name }} at {{ business.contact_number }}.
+        </p>
+    </div>
+</body>
+</html>

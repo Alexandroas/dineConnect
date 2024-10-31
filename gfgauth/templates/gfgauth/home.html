@@ -35,10 +35,7 @@
     <div class="row row-cols-1 row-cols-md-3 g-4">
       {% for business in businesses %}
         <div class="col">
-          <div class="card business-card cuisine_type_filter"
-            data-cuisines="{% for cuisine in business.cuisine.all %}
-              {{ cuisine.cuisine_name|lower }}{% if not forloop.last %},{% endif %}
-            {% endfor %}">
+          <div class="card business-card cuisine_type_filter" data-cuisines="{{ business.get_cuisine_names|lower }}">
             <a href="{% url 'restaurant_detail' business.business_id %}" class="text-decoration-none">
               <div class="card-img-wrapper">
                 {% if business.business_image %}
@@ -64,10 +61,7 @@
                     <i class="fas fa-phone"></i> {{ business.contact_number }}
                   </p>
                   <p>
-                    <i class="fas fa-utensils"></i>
-                    {% for cuisine in business.cuisine.all %}
-                      {{ cuisine.cuisine_name }}{% if not forloop.last %}, {% endif %}
-                    {% endfor %}
+                    <i class="fas fa-utensils"></i> {{ business.get_cuisine_names }}
                   </p>
                 </div>
 
@@ -86,11 +80,7 @@
                 </div>
 
                 <div class="tags-container">
-                  <span class="tag tag-cuisine">
-                    {% for cuisine in business.cuisine.all %}
-                      {{ cuisine.cuisine_name }}{% if not forloop.last %}, {% endif %}
-                    {% endfor %}
-                  </span>
+                  <span class="tag tag-cuisine">{{ business.get_cuisine_names }}</span>
                   <span class="tag tag-owner">{{ business.business_owner }}</span>
                   <span class="tag tag-details">View Details</span>
                 </div>
@@ -100,7 +90,82 @@
         </div>
       {% endfor %}
     </div>
+    <div class="container-fluid card-body">
+      <div class="row">
+        <h1 class="section-title">What is dineConnect?</h1>
+        <div class="card-body">
+          <p>DineConnect is an innovative restaurant discovery platform designed to transform how people explore and connect with local dining establishments. 
+            Unlike traditional review sites, DineConnect focuses on creating meaningful connections between diners and restaurants through personalized recommendations and detailed insights into each establishment's unique offerings, ambiance, and culinary specialties. 
+            The platform empowers users to discover restaurants based on specific dietary preferences, cuisine types, and special requirements, while also allowing them to save their favorite spots for future reference. 
+            Whether you're a food enthusiast looking for your next culinary adventure, a casual diner seeking the perfect spot + a family gathering, or a busy professional in need of reliable lunch options, DineConnect streamlines the restaurant discovery process. 
+            The platform's user-friendly interface combines detailed restaurant information, user preferences, and community insights to help users make informed dining decisions. 
+            By bridging the gap between diners and local restaurants, DineConnect aims to enhance the dining experience while supporting local businesses and fostering a vibrant culinary community.</p>
+        </div>
+      </div>
+    </div>
   </div>
+  <div class="container-fluid">
+    <h1 class="section-title">Testimonials</h1>
+    {% if testimonials %}
+      <div id="carouselExampleIndicators" class="carousel slide">
+        <div class="carousel-indicators">
+          {% for testimonial in testimonials %}
+            <button type="button"
+              data-bs-target="#carouselExampleIndicators"
+              data-bs-slide-to="{{ forloop.counter0 }}"
+              class="{% if forloop.first %}active{% endif %}"
+              aria-current="{% if forloop.first %}
+                true
+              {% else %}
+                false
+              {% endif %}"
+              aria-label="Slide {{ forloop.counter }}">
 
-  <script src="{% static 'gfgauth/Jquery/cuisine_type_filtering.js' %}"></script>
+            </button>
+          {% endfor %}
+        </div>
+        <div class="carousel-inner">
+          {% for testimonial in testimonials %}
+            <div class="carousel-item {% if forloop.first %}active{% endif %}">
+              <div class="testimonial-content text-center">
+                <p class="testimonial-text">"{{ testimonial.content }}"</p>
+                <div class="testimonial-author">
+                  <p class="author-name">- {{ testimonial.user.get_full_name|default:testimonial.user.username }}</p>
+                  {% if testimonial.rating %}
+                  <div class="rating">
+                      {% with ''|center:testimonial.rating as range %}
+                      {% for _ in range %}
+                          <i class="bi bi-star-fill text-warning"></i>
+                      {% endfor %}
+                      {% endwith %}
+                  </div>
+                  {% endif %}
+                  <small class="text-muted">{{ testimonial.created_at|date:"F d, Y" }}</small>
+              </div>
+              </div>
+            </div>
+          {% endfor %}
+        </div>
+        {% if testimonials.count > 1 %}
+          <button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide="prev">
+            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+            <span class="visually-hidden">Previous</span>
+          </button>
+          <button class="carousel-control-next" type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide="next">
+            <span class="carousel-control-next-icon" aria-hidden="true"></span>
+            <span >Next</span>
+          </button>
+        {% endif %}
+      </div>
+    {% else %}
+      <div class="text-center py-5">
+        <p>No testimonials yet. Be the first to share your experience!</p>
+        {% if user.is_authenticated %}
+          <a href="{% url 'testimonials' %}" class="btn btn-primary">Add Testimonial</a>
+        {% endif %}
+      </div>
+    {% endif %}
+  </div>
+  <script src="{% static 'gfgauth/js/cuisine_type_filtering.js' %}"></script>
+  <script src="{% static 'gfgauth/js/search_function.js' %}"></script>
 {% endblock %}

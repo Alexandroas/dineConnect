@@ -1,0 +1,64 @@
+{% extends 'main/header.html' %}
+{% load crispy_forms_tags %}
+{% block content %}
+<div class="content-section col-lg-12 col-md-12 col-sm-12 tutorial-style" style="min-height:65vh;">
+  <div class="col-md-3 col-lg-2 d-md-block bg-light sidebar">
+    {% include 'Restaurant_handling/restaurant_dashboard.html' %}
+  </div>
+    <legend class="border-bottom mb-4">Business Profile Information</legend>
+    <form method="POST" enctype="multipart/form-data">
+        {% csrf_token %}
+        <!-- Business Owner Information -->
+        <div class="media">
+            <div class="media-body">
+                <h2 class="account-heading">
+                    {{ business.business_owner.username }}
+                </h2>
+                <p class="text-secondary">{{ business.business_owner.email }}</p>
+            </div>
+        </div>
+
+        <!-- Business Information Display -->
+        <div class="media mt-3">
+            <div class="media-body">
+                <h3>Business Details</h3>
+                <p class="text-secondary">Business Name: {{ business.business_name }}</p>
+                <p class="text-secondary">Description: {{ business.business_description }}</p>
+                <p class="text-secondary">Address: {{ business.business_address }}</p>
+                <p class="text-secondary">Tax Code: {{ business.business_tax_code }}</p>
+                <p class="text-secondary">Contact: {{ business.contact_number }}</p>
+                <p class="text-secondary">Hours: {{ business.opening_time }} - {{ business.closing_time }}</p>
+                <p class="text-secondary">Cuisine: {% for cuisine in business.cuisine.all %}{{ cuisine.name }}{% if not forloop.last %}, {% endif %}{% endfor %}</p>
+                {% if business.business_image %}
+                    <img src="{{ business.business_image.url }}" alt="Business Image" class="img-thumbnail" style="max-width: 200px;">
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Edit User Information -->
+        <fieldset class="form-group mt-4">
+            <legend class="border-bottom mb-4">Edit Owner Information</legend>
+            <div class="form-row">
+                <div class="form-group col-md-6 mb-0">
+                    {{ user_form.first_name|as_crispy_field }}
+                </div>
+                <div class="form-group col-md-6 mb-0">
+                    {{ user_form.last_name|as_crispy_field }}
+                </div>
+            </div>
+            {{ user_form.email|as_crispy_field }}
+            <!--USERNAME -->
+        </fieldset>
+
+        <!-- Edit Business Information -->
+        <fieldset class="form-group mt-4">
+            <legend class="border-bottom mb-4">Edit Business Information</legend>
+            {{ business_form|crispy }}
+        </fieldset>
+
+        <div class="form-group">
+            <button class="btn btn-outline-info" type="submit">Update Profile</button>
+        </div>
+    </form>
+</div>
+{% endblock %}
