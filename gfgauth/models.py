@@ -40,7 +40,6 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
         'Business', 
         blank=True, 
         related_name='favourite_users')
-    #TODO: Add restaurant favourite field
     dietery_preference = models.ManyToManyField(
         DieteryPreference, 
         blank=True, 
