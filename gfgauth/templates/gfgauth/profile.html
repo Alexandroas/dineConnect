@@ -20,6 +20,7 @@
                     <h3>Profile Information</h3>
                 </div>
                 <div class="card-body">
+                    <img src="{{ user.profile_image.url }}" class="img-fluid rounded-circle mb-3 center:" style="width: 100px; height: 100px; margin-left: auto; margin-right: auto; display: block;">
                     <form method="POST" enctype="multipart/form-data">
                         {% csrf_token %}
                         
@@ -28,6 +29,7 @@
                             <div class="col-md-6">{{ form.last_name|as_crispy_field }}</div>
                         </div>
                         <div class="mb-3">{{ form.email|as_crispy_field }}</div>
+                        <div class="mb-3">{{form.profile_image|as_crispy_field}}</div>
                         
                         <!-- Dietary Preferences Section -->
                         <div class="mb-3">
