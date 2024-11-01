@@ -1,3 +1,4 @@
+from django.http import JsonResponse
 from django.shortcuts import render, redirect
 from allauth.account.forms import SignupForm
 from django.views import View
@@ -237,7 +238,7 @@ def profile(request, username):
 
     # Get current datetime for comparison
     current_datetime = timezone.now()
-   
+
     # Get all user reservations
     reservations = user.reservation_set.all()
     # Get user dietery preferences
@@ -274,14 +275,49 @@ def profile(request, username):
                     messages.error(request, f"{field}: {error}")
     else:
         form = UserUpdateForm(instance=user)
-
+    user = get_user_model().objects.filter(username=username).first()
+    if user:
+        form = UserUpdateForm(instance=user)
+        # Get user's favorite restaurants
+        favorite_restaurants = user.favourite_restaurants.all()
     context = {
         "form": form,
         "upcoming_reservations": upcoming_reservations,
         "dietery_preference": dietery_preference,
         "past_reservations": past_reservations,
-        "user_profile": user  # Add this to distinguish between logged-in user and profile user
+        "user_profile": user,  # Add this to distinguish between logged-in user and profile user
+        "favorite_restaurants": favorite_restaurants
     }
     
     return render(request=request, template_name="gfgauth/profile.html", context=context)
 
+
+@login_required
+def toggle_favorite(request, business_id):
+    try:
+        business = Business.objects.get(business_id=business_id)
+        user = request.user
+        
+        if business in user.favourite_restaurants.all():
+            user.favourite_restaurants.remove(business)
+            is_favorite = False
+        else:
+            user.favourite_restaurants.add(business)
+            is_favorite = True
+            
+        return JsonResponse({
+            'status': 'success',
+            'is_favorite': is_favorite
+        })
+    except Business.DoesNotExist:
+        return JsonResponse({
+            'status': 'error',
+            'message': 'Business not found'
+        }, status=404)
+# views.py
+@login_required
+def favorite_restaurants(request):
+    favorites = request.user.favourite_restaurants.all()
+    return render(request, 'favorite_restaurants.html', {
+        'favorites': favorites
+    })
