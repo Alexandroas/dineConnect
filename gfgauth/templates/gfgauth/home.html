@@ -130,7 +130,17 @@
               <div class="testimonial-content text-center">
                 <p class="testimonial-text">"{{ testimonial.content }}"</p>
                 <div class="testimonial-author">
+                  <img src="{% if testimonial.user.profile_image %}{{ testimonial.user.profile_image.url }}{% else %}{% static 'gfgauth/img/default_profile.jpg' %}{% endif %}" style ="width: 50px; height: 50px;"alt="" aria-hidden="true" class="rounded-circle" />
                   <p class="author-name">- {{ testimonial.user.get_full_name|default:testimonial.user.username }}</p>
+                  <p class="star-rating">
+                    {% if testimonial.rating %}
+                      {% with ''|center:testimonial.rating as range %}
+                        {% for _ in range %}
+                          <i class="bi bi-star-fill text-warning"></i>
+                        {% endfor %}
+                      {% endwith %}
+                    {% endif %}
+                  </p>
                   {% if testimonial.rating %}
                   <div class="rating">
                       {% with ''|center:testimonial.rating as range %}
@@ -149,7 +159,7 @@
         {% if testimonials.count > 1 %}
           <button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide="prev">
             <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-            <span class="visually-hidden">Previous</span>
+            <span class="">Previous</span>
           </button>
           <button class="carousel-control-next" type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide="next">
             <span class="carousel-control-next-icon" aria-hidden="true"></span>
