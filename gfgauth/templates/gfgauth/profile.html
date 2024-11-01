@@ -3,118 +3,165 @@
 {% load crispy_forms_tags %}
 
 {% block content %}
-<div class="container mt-4">
+  <div class="container mt-4">
     {% if messages %}
-        {% for message in messages %}
-            <div class="alert alert-{{ message.tags }}">
-                {{ message }}
-            </div>
-        {% endfor %}
+      {% for message in messages %}
+        <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+      {% endfor %}
     {% endif %}
 
     <div class="row">
-        <!-- Profile Update Form -->
-        <div class="col-md-6">
-            <div class="card">
-                <div class="card-header">
-                    <h3>Profile Information</h3>
-                </div>
-                <div class="card-body">
-                    <img src="{{ user.profile_image.url }}" class="img-fluid rounded-circle mb-3 center:" style="width: 100px; height: 100px; margin-left: auto; margin-right: auto; display: block;">
-                    <form method="POST" enctype="multipart/form-data">
-                        {% csrf_token %}
-                        
-                        <div class="row g-3">
-                            <div class="col-md-6">{{ form.first_name|as_crispy_field }}</div>
-                            <div class="col-md-6">{{ form.last_name|as_crispy_field }}</div>
+      <!-- Profile Update Form -->
+      <div class="col-md-6">
+        <div class="card">
+          <div class="card-header">
+            <h3>Profile Information</h3>
+          </div>
+          <div class="card-body">
+            <img src="{{ user.profile_image.url }}" class="img-fluid rounded-circle mb-3 center:" style="width: 100px; height: 100px; margin-left: auto; margin-right: auto; display: block;" />
+            <form method="POST" enctype="multipart/form-data">
+              {% csrf_token %}
+
+              <div class="row g-3">
+                <div class="col-md-6">{{ form.first_name|as_crispy_field }}</div>
+                <div class="col-md-6">{{ form.last_name|as_crispy_field }}</div>
+              </div>
+              <div class="mb-3">{{ form.email|as_crispy_field }}</div>
+              <div class="mb-3">{{ form.profile_image|as_crispy_field }}</div>
+
+              <!-- Dietary Preferences Section -->
+              <div class="mb-3">
+                <label class="form-label fw-bold">Dietary Preferences</label>
+                <div class="dietary-preferences-dropdown">
+                  <button class="btn btn-outline-secondary w-100 text-start d-flex justify-content-between align-items-center" type="button" data-bs-toggle="collapse" data-bs-target="#dietaryPreferences" aria-expanded="false">
+                    <span>Select Dietary Preferences</span>
+                    <i class="bi bi-chevron-down"></i>
+                  </button>
+                  <div class="collapse" id="dietaryPreferences">
+                    <div class="preferences-container mt-2">
+                      {% for checkbox in form.dietery_preference %}
+                        <div class="form-check">
+                          {{ checkbox.tag }}
+                          <label class="form-check-label" for="{{ checkbox.id_for_label }}">{{ checkbox.choice_label }}</label>
                         </div>
-                        <div class="mb-3">{{ form.email|as_crispy_field }}</div>
-                        <div class="mb-3">{{form.profile_image|as_crispy_field}}</div>
-                        
-                        <!-- Dietary Preferences Section -->
-                        <div class="mb-3">
-                          <label class="form-label">Dietary Preferences</label>
-                          <div class="preferences-grid">
-                              {% for checkbox in form.dietery_preference %}
-                                  <div class="form-check">
-                                      {{ checkbox.tag }}
-                                      <label class="form-check-label" for="{{ checkbox.id_for_label }}">
-                                          {{ checkbox.choice_label }}
-                                      </label>
-                                  </div>
-                              {% endfor %}
+                      {% empty %}
+                        <p class="text-muted m-2">No dietary preferences available</p>
+                      {% endfor %}
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="d-flex justify-content-between align-items-center">
+                <button type="submit" class="btn btn-primary">Save Changes</button>
+              </div>
+            </form>
+            <!-- Move this outside of the form -->
+            <div class="card mt-4">
+              <div class="card-header">
+                <h3>My Favorite Restaurants</h3>
+              </div>
+              <div class="card-body">
+                {% if favorite_restaurants %}
+                  <div class="row row-cols-1 row-cols-md-2 g-4">
+                    {% for business in favorite_restaurants %}
+                      <div class="col">
+                        <div class="card h-100">
+                          <div class="card-img-wrapper position-relative">
+                            {% if business.business_image %}
+                              <img src="{{ business.business_image.url }}" class="card-img-top" alt="{{ business.business_name }}" style="height: 150px; object-fit: cover;" />
+                            {% else %}
+                              <img src="/api/placeholder/400/320" class="card-img-top" alt="No Image Available" style="height: 150px; object-fit: cover;" />
+                            {% endif %}
+
+                            <button class="favorite-btn active" onclick="toggleFavorite(this, {{ business.business_id }})" type="button"><i class="bi bi-heart-fill"></i></button>
                           </div>
-                      </div>
 
-                        <div class="d-flex justify-content-between align-items-center">
-                            <button type="submit" class="btn btn-primary">Save Changes</button>
+                          <div class="card-body">
+                            <h5 class="card-title">{{ business.business_name }}</h5>
+                            <p class="card-text text-truncate">{{ business.business_description }}</p>
+                            <a href="{% url 'restaurant_detail' business.business_id %}" class="btn btn-primary btn-sm">View Details</a>
+                          </div>
                         </div>
-                    </form>
-                </div>
+                      </div>
+                    {% endfor %}
+                  </div>
+                {% else %}
+                  <div class="alert alert-info">
+                    You haven't added any restaurants to your favorites yet.
+                    <a href="{% url 'home' %}" class="alert-link">Explore restaurants?</a>
+                  </div>
+                {% endif %}
+              </div>
             </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Reservations -->
+      <div class="col-md-6">
+        <div class="card mb-4">
+          <div class="card-header">
+            <h3>Upcoming Reservations</h3>
+          </div>
+          <div class="card-body">
+            {% if upcoming_reservations %}
+              <ul class="list-group">
+                {% for reservation in upcoming_reservations %}
+                  <li class="list-group-item">
+                    <h5>{{ reservation.business_id.business_name }}</h5>
+                    <p>
+                      Date: {{ reservation.reservation_date }}<br />
+                      Time: {{ reservation.reservation_time }}
+                    </p>
+                  </li>
+                {% endfor %}
+              </ul>
+            {% else %}
+              <p>No upcoming reservations.</p>
+            {% endif %}
+          </div>
         </div>
 
-        <!-- Reservations -->
-        <div class="col-md-6">
-            <div class="card mb-4">
-                <div class="card-header">
-                    <h3>Upcoming Reservations</h3>
-                </div>
-                <div class="card-body">
-                    {% if upcoming_reservations %}
-                        <ul class="list-group">
-                        {% for reservation in upcoming_reservations %}
-                            <li class="list-group-item">
-                                <h5>{{ reservation.business_id.business_name }}</h5>
-                                <p>Date: {{ reservation.reservation_date }}<br>
-                                Time: {{ reservation.reservation_time }}</p>
-                            </li>
-                        {% endfor %}
-                        </ul>
-                    {% else %}
-                        <p>No upcoming reservations.</p>
-                    {% endif %}
-                </div>
-            </div>
-
-            <div class="card">
-                <div class="card-header">
-                    <h3>Past Reservations</h3>
-                </div>
-                <div class="card-body">
-                    {% if past_reservations %}
-                        <ul class="list-group">
-                        {% for reservation in past_reservations %}
-                            <li class="list-group-item">
-                                <h5>{{ reservation.business_id.business_name }}</h5>
-                                <p>Date: {{ reservation.reservation_date }}<br>
-                                Time: {{ reservation.reservation_time }}</p>
-                            </li>
-                        {% endfor %}
-                        </ul>
-                    {% else %}
-                        <p>No past reservations.</p>
-                    {% endif %}
-                </div>
-            </div>
+        <div class="card">
+          <div class="card-header">
+            <h3>Past Reservations</h3>
+          </div>
+          <div class="card-body">
+            {% if past_reservations %}
+              <ul class="list-group">
+                {% for reservation in past_reservations %}
+                  <li class="list-group-item">
+                    <h5>{{ reservation.business_id.business_name }}</h5>
+                    <p>
+                      Date: {{ reservation.reservation_date }}<br />
+                      Time: {{ reservation.reservation_time }}
+                    </p>
+                  </li>
+                {% endfor %}
+              </ul>
+            {% else %}
+              <p>No past reservations.</p>
+            {% endif %}
+          </div>
         </div>
+      </div>
     </div>
-</div>
+  </div>
 
-<style>
+  <style>
     .preferences-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-        gap: 1rem;
-        padding: 1rem;
-        background-color: #f8f9fa;
-        border-radius: 0.25rem;
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 1rem;
+      padding: 1rem;
+      background-color: #f8f9fa;
+      border-radius: 0.25rem;
     }
     .form-check {
-        margin: 0.5rem 0;
+      margin: 0.5rem 0;
     }
     .form-check-label {
-        margin-left: 0.5rem;
+      margin-left: 0.5rem;
     }
-</style>
+  </style>
 {% endblock %}
