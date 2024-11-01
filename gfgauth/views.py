@@ -14,6 +14,7 @@ from formtools.wizard.views import SessionWizardView
 from django.core.files.storage import FileSystemStorage
 from .models import Business, CustomUser
 import os
+from .forms import CustomUserCreationForm
 from main.utils import send_welcome_email
 from django.conf import settings
 from .forms import (
@@ -22,9 +23,7 @@ from .forms import (
     BusinessHoursForm,
     BusinessImageForm,
     UserUpdateForm,
-    UserLoginForm
-    
-)
+    UserLoginForm)
 
 def home(request):
     Business = apps.get_model('gfgauth', 'Business')
@@ -173,13 +172,12 @@ def login(request):
 
 class SignupView(View):
     def get(self, request):
-        return render(request, 'gfgauth/signup.html', {'form': SignupForm()})
+        return render(request, 'gfgauth/signup.html', {'form': CustomUserCreationForm()})
     def post(self, request):
         form = SignupForm(request.POST, request.FILES)
         if form.is_valid():
             user = form.save(request)
             send_welcome_email(user)
-            form.save(request)
             return redirect('home')
         else:
             print(form.errors)
