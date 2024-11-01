@@ -1,10 +1,15 @@
+from django.utils import timezone
+from venv import logger
 from django.contrib import messages
+from django.http import HttpResponseForbidden
+from django.core.paginator import Paginator
 from django.shortcuts import render, redirect, get_object_or_404
 from gfgauth.forms import BusinessUpdateForm, UserUpdateForm  # Import your existing form
 from gfgauth.models import Business
+from django.db.models import Q
 from .decorators import business_required, login_required
 from .forms import DishForm, ReservationForm, DishUpdateForm
-from .models import Dish
+from .models import Dish, Reservation
 from main.utils import send_reservation_email
 @business_required
 def restaurant_dashboard(request):
@@ -133,7 +138,8 @@ def restaurant_detail(request, business_id):
 
 @business_required
 def restaurant_home(request):
-    return render(request, 'Restaurant_handling/restaurant_home.html')
+    business = get_object_or_404(Business, business_owner=request.user)
+    return render(request, 'Restaurant_handling/restaurant_home.html', {'business': business})
 
 @login_required
 def reservation(request, business_id):
@@ -160,3 +166,71 @@ def reservation(request, business_id):
         form = ReservationForm()
     return render(request, 'Restaurant_handling/reservation.html', {'form': form , 'business_id': business_id})
 
+
+@business_required
+
+def upcoming_reservations(request, business_id):
+    """
+    View to display upcoming reservations for a business.
+    """
+    try:
+        business = get_object_or_404(Business, business_id=business_id)
+        
+        # Get filter parameters
+        date_filter = request.GET.get('date')
+        status_filter = request.GET.get('status')
+        
+        # Get upcoming reservations
+        current_datetime = timezone.now()
+        reservations = Reservation.objects.filter(
+            business_id=business,
+            reservation_date__gte=current_datetime.date()
+        ).filter(
+            Q(reservation_date__gt=current_datetime.date()) |
+            Q(
+                reservation_date=current_datetime.date(),
+                reservation_time__gt=current_datetime.time()
+            )
+        ).order_by('reservation_date', 'reservation_time')
+
+        # Apply additional filters if provided
+        if date_filter:
+            try:
+                filter_date = timezone.datetime.strptime(date_filter, '%Y-%m-%d').date()
+                reservations = reservations.filter(reservation_date=filter_date)
+            except ValueError:
+                pass
+
+        if status_filter:
+            reservations = reservations.filter(reservation_status=status_filter)
+
+        # Calculate counts
+        total_upcoming = reservations.count()
+        today_count = reservations.filter(
+            reservation_date=current_datetime.date()
+        ).count()
+
+        # Pagination
+        paginator = Paginator(reservations, 20)
+        page_number = request.GET.get('page', 1)
+        page_obj = paginator.get_page(page_number)
+
+        context = {
+            'business': business,
+            'page_obj': page_obj,
+            'total_upcoming': total_upcoming,
+            'today_count': today_count,
+            'current_date': current_datetime.date(),
+            'date_filter': date_filter,
+            'status_filter': status_filter,
+        }
+
+        return render(
+            request,
+            'Restaurant_handling/upcoming_reservations.html',
+            context
+        )
+        
+    except Exception as e:
+        messages.error(request, f"An error occurred while loading reservations: {str(e)}")
+        return redirect('restaurant_home')
