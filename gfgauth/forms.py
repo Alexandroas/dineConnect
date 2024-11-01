@@ -11,6 +11,11 @@ class UserUpdateForm(forms.ModelForm):
     email = forms.EmailField(required=True)
     first_name = forms.CharField(max_length=24, required=True)
     last_name = forms.CharField(max_length=24, required=True)
+    profile_image = forms.ImageField(
+        required=False,
+        widget=forms.FileInput(attrs={'class': 'form-control', 'accept': 'image/*'}),
+        label="Profile Picture"
+    )
     dietery_preference = forms.ModelMultipleChoiceField(  # Match the model field name
         queryset=DieteryPreference.objects.all(),
         widget=forms.CheckboxSelectMultiple,
@@ -20,7 +25,7 @@ class UserUpdateForm(forms.ModelForm):
 
     class Meta:
         model = CustomUser
-        fields = ['first_name', 'last_name', 'email', 'dietery_preference']
+        fields = ['first_name', 'last_name', 'email', 'dietery_preference', 'profile_image']
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
