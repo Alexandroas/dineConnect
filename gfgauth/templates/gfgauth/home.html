@@ -3,6 +3,7 @@
 {% block content %}
   <div class="container business-grid">
     <!-- Search and Filter Section -->
+     <br>
     <div class="search-section">
       <div class="row">
         <div class="col-md-6">
@@ -13,7 +14,6 @@
             <select class="form-select search-input" id="cuisineTypeSearch" onchange="filterByCuisineType()">
               <option value="all">All Cuisines</option>
               {% for cuisine in cuisines %}
-                <!-- Fixed: removed business reference in value -->
                 <option value="{{ cuisine.cuisine_name|lower }}">{{ cuisine.cuisine_name }}</option>
               {% endfor %}
             </select>
@@ -56,22 +56,22 @@
                 <h5 class="business-name">{{ business.business_name }}</h5>
 
                 <div class="business-info">
-                  <p>
+                  <p class="business-info">
                     <i class="fas fa-user"></i> {{ business.business_owner }}
                   </p>
-                  <p>
+                  <p class="business-info">
                     <i class="fas fa-map-marker-alt"></i> {{ business.business_address }}
                   </p>
-                  <p>
+                  <p class="business-info">
                     <i class="fas fa-phone"></i> {{ business.contact_number }}
                   </p>
-                  <p>
+                  <p class="business-info">
                     <i class="fas fa-utensils"></i> {{ business.get_cuisine_names }}
                   </p>
                 </div>
 
                 <div class="d-flex align-items-center mb-3">
-                  <div class="rating">
+                  <div class="rating-business">
                     <i class="fas fa-star"></i>
                     <i class="fas fa-star"></i>
                     <i class="fas fa-star"></i>
@@ -144,17 +144,8 @@
                     aria-hidden="true"
                     class="rounded-circle" />
                   <p class="author-name">- {{ testimonial.user.get_full_name|default:testimonial.user.username }}</p>
-                  <p class="star-rating">
-                    {% if testimonial.rating %}
-                      {% with range=''|center:testimonial.rating %}
-                        {% for _ in range %}
-                          <i class="bi bi-star-fill text-warning"></i>
-                        {% endfor %}
-                      {% endwith %}
-                    {% endif %}
-                  </p>
                   {% if testimonial.rating %}
-                    <div class="rating">
+                    <div class="rating" style="margin-bottom: 2%;">
                       {% with range=''|center:testimonial.rating %}
                         {% for _ in range %}
                           <i class="bi bi-star-fill text-warning"></i>
