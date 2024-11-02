@@ -25,6 +25,7 @@ def restaurant_dashboard(request):
 
 @business_required
 def add_dish(request):
+    business = Business.objects.get(business_owner=request.user)
     if request.method == 'POST':
         form = DishForm(request.POST, request.FILES)
         if form.is_valid():
@@ -45,11 +46,12 @@ def add_dish(request):
                 messages.error(request, f"Error saving dish: {str(e)}")
     else:
         form = DishForm()
-    return render(request, 'Restaurant_handling/add_dish.html', {'form': form})
+    return render(request, 'Restaurant_handling/add_dish.html', {'form': form, 'business': business})
 
 @business_required
 def edit_dish(request, dish_id=None):
     dish = get_object_or_404(Dish, dish_id=dish_id)
+    business = Business.objects.get(business_owner=request.user)
     if request.method == 'POST':
         form = DishUpdateForm(request.POST, request.FILES, instance=dish)  # Changed to DishUpdateForm
         if form.is_valid():
@@ -75,7 +77,8 @@ def edit_dish(request, dish_id=None):
         
     return render(request, 'Restaurant_handling/edit_dish.html', {
         'form': form,
-        'dish': dish
+        'dish': dish,
+        'business': business
     })
 
 @business_required
@@ -125,8 +128,13 @@ def permission_denied_view(request, exception):
 
 @business_required
 def restaurant_menu(request):
-    dishes = Dish.objects.filter(business_id=request.user.business)
-    return render(request, 'Restaurant_handling/registered_dishes.html', {'dishes': dishes})
+    # Get the business associated with the logged-in user
+    business = Business.objects.filter(business_owner=request.user).first()
+    dishes = Dish.objects.filter(business_id=business)
+    return render(request, 'Restaurant_handling/registered_dishes.html', {
+        'dishes': dishes,
+        'business': business  # Add business to the context
+    })
 def restaurant_detail(request, business_id):
     business = get_object_or_404(Business, business_id=business_id)
     dishes = Dish.objects.filter(business_id=business)
