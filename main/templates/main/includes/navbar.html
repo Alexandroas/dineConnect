@@ -1,4 +1,4 @@
-{%load static%}
+{% load static %}
 <link rel="stylesheet" type="text/css" href="{% static 'main/navbar.css' %}">
 <header class="site-header">
     <nav class="navbar navbar-expand-md navbar-color">
@@ -7,53 +7,45 @@
                 <i class="fas fa-utensils me-2"></i>
                 DineConnect
             </a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent" aria-controls="navbarContent" aria-expanded="false" aria-label="Toggle navigation">
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent" 
+                    aria-controls="navbarContent" aria-expanded="false" aria-label="Toggle navigation">
                 <i class="fas fa-bars"></i>
             </button>
             
             <div class="collapse navbar-collapse" id="navbarContent">
+                <!-- Left side nav items -->
                 <ul class="navbar-nav me-auto">
                     <li class="nav-item active">
                         <a class="nav-link" href="/">
                             <i class="fas fa-home me-1"></i> Home
                         </a>
                     </li>
+                    {% if is_business %}
                     <li class="nav-item">
-                        {% if is_business%}
-                                <a class="nav-link" href="{% url 'restaurant_home' %}">
-                                <i class="fas fa-chart-line me-1"></i> Dashboard
-                            </a>
-                        {%endif%}
+                        <a class="nav-link" href="{% url 'restaurant_home' %}">
+                            <i class="fas fa-chart-line me-1"></i> Dashboard
+                        </a>
                     </li>
+                    {% endif %}
                 </ul>
                 
+                <!-- Right side nav items -->
                 <ul class="navbar-nav ms-auto">
-                    {% if user.is_authenticated and is_business%}
+                    {% if user.is_authenticated %}
                         <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" 
+                               id="userDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                                 <span>{{ user.username }}</span>
                             </a>
                             <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
-                                <li><hr class="dropdown-divider"></li>
-                                <li>
-                                    <a class="dropdown-item text-danger" href="{% url 'logout' %}">
-                                        <i class="fas fa-sign-out-alt me-2"></i> Logout
-                                    </a>
-                                </li>
-                            </ul>
-                        </li>
-                        {% elif user.is_authenticated%}
-                        <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                <span>{{ user.username }}</span>
-                            </a>
-                            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+                                {% if not is_business %}
                                 <li>
                                     <a class="dropdown-item" href="{% url 'profile' user.username %}">
                                         <i class="fas fa-user-circle me-2"></i> Profile
                                     </a>
                                 </li>
                                 <li><hr class="dropdown-divider"></li>
+                                {% endif %}
                                 <li>
                                     <a class="dropdown-item text-danger" href="{% url 'logout' %}">
                                         <i class="fas fa-sign-out-alt me-2"></i> Logout
