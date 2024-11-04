@@ -15,52 +15,63 @@
             border-radius: 5px;
             margin: 20px 0;
         }
-        ul {
-            list-style: none;
-            padding: 0;
-        }
         .detail-item {
             margin-bottom: 10px;
+        }
+        .dish-list {
+            margin-left: 20px;
+            padding-left: 0;
+            list-style-type: none;
+        }
+        .dish-item {
+            margin: 5px 0;
+            padding: 5px 0;
+            border-bottom: 1px solid #eee;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>Reservation Confirmation</h1>
-        
-        <p>Dear {{ first_name }},</p>
-        
-        <p>Your reservation at {{ business.business_name }} has been confirmed!</p>
-        
+        <h2>Reservation Confirmation</h2>
         <div class="reservation-details">
-            <h3>Reservation Details:</h3>
-            <ul>
-                <li class="detail-item">
-                    <strong>Restaurant:</strong> {{ business.business_name }}
-                </li>
-                <li class="detail-item">
-                    <strong>Date:</strong> {{ reservation.reservation_date }}
-                </li>
-                <li class="detail-item">
-                    <strong>Time:</strong> {{ reservation.reservation_time }}
-                </li>
-                <li class="detail-item">
-                    <strong>Party Size:</strong> {{ reservation.reservation_party_size }}
-                </li>
-                {% if reservation.special_requests %}
-                <li class="detail-item">
-                    <strong>Special Requests:</strong> {{ reservation.special_requests }}
-                </li>
-                {% endif %}
-            </ul>
+            <h3>Details:</h3>
+            <div class="detail-item">
+                <strong>Restaurant:</strong> {{ business.business_name }}
+            </div>
+            <div class="detail-item">
+                <strong>Date:</strong> {{ reservation.reservation_date }}
+            </div>
+            <div class="detail-item">
+                <strong>Time:</strong> {{ reservation.reservation_time }}
+            </div>
+            <div class="detail-item">
+                <strong>Party Size:</strong> {{ reservation.reservation_party_size }}
+            </div>
+            
+            {% if reservation.dish_id.all %}
+            <div class="detail-item">
+                <strong>Pre-ordered Items:</strong>
+                <ul class="dish-list">
+                    {% for dish in reservation.dish_id.all %}
+                    <li class="dish-item">
+                        {{ dish.dish_name }} - ${{ dish.dish_cost }}
+                    </li>
+                    {% endfor %}
+                </ul>
+            </div>
+            {% endif %}
+            
+            {% if reservation.reservation_special_requests %}
+            <div class="detail-item">
+                <strong>Special Requests:</strong><br>
+                {{ reservation.reservation_special_requests }}
+            </div>
+            {% endif %}
         </div>
-
-        <p>We look forward to serving you!</p>
         
-        <p>
-            If you need to modify or cancel your reservation, 
-            please contact {{ business.business_name }} at {{ business.contact_number }}.
-        </p>
+        <p>Thank you for choosing {{ business.business_name }}. We look forward to serving you!</p>
+        
+        <p><small>If you need to modify or cancel your reservation, please contact us at {{ business.contact_number }}.</small></p>
     </div>
 </body>
 </html>
