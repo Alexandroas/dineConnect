@@ -46,6 +46,7 @@ class Reservation(models.Model):
     reservation_status = models.CharField(max_length=100)
     business_id = models.ForeignKey('gfgauth.Business', on_delete=models.CASCADE)
     user_id = models.ForeignKey('gfgauth.CustomUser', on_delete=models.CASCADE)
+    dish_id = models.ManyToManyField('Dish', blank=True)
     
     @property
     def get_datetime(self):
