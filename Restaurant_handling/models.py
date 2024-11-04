@@ -39,7 +39,7 @@ class Dish(models.Model):
 
 class Reservation(models.Model):
     reservation_id = models.AutoField(primary_key=True)
-    reservation_date = models.DateField(blank=True, null=True)
+    reservation_date = models.DateField()
     reservation_time = models.TimeField()
     reservation_party_size = models.IntegerField()
     reservation_special_requests = models.TextField(max_length=100 , blank=True, null=True)
