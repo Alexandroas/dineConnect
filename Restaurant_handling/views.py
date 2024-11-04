@@ -151,28 +151,44 @@ def restaurant_home(request):
 
 @login_required
 def reservation(request, business_id):
+    business = get_object_or_404(Business, business_id=business_id)
+    dishes = Dish.objects.filter(business_id=business)
+    
     if request.method == 'POST':
         form = ReservationForm(request.POST)
         if form.is_valid():
             try:
+                # Create reservation but don't save to DB yet
                 reservation = form.save(commit=False)
-                business = Business.objects.get(business_id=business_id)
                 reservation.business_id = business
                 reservation.user_id = request.user
+                
+                # Save the reservation first
+                reservation.save()
+                
+                # Handle selected dishes
+                selected_dishes = request.POST.getlist('selected_dishes')
+                if selected_dishes:
+                    dishes_to_add = Dish.objects.filter(dish_id__in=selected_dishes)
+                    reservation.dish_id.add(*dishes_to_add)
+                
+                # Send email after all data is saved
                 send_reservation_email(request.user, reservation)
                 messages.success(request, 'Your reservation has been saved!')
-                reservation.save()
-                print(f"Reservation saved successfully with business_id: {business.business_id}")
+                
                 return redirect('restaurant_detail', business_id=business_id)
-            except Business.DoesNotExist:
-                print("No business found for user:", request.user)
-                messages.error(request, "Error: No business associated with this account")
+                
             except Exception as e:
                 print("Error saving reservation:", str(e))
                 messages.error(request, f"Error saving reservation: {str(e)}")
     else:
         form = ReservationForm()
-    return render(request, 'Restaurant_handling/reservation.html', {'form': form , 'business_id': business_id})
+    
+    return render(request, 'Restaurant_handling/reservation.html', {
+        'form': form,
+        'business': business,
+        'dishes': dishes
+    })
 
 
 @business_required
