@@ -1,28 +1,91 @@
-.reservation-container {
-    max-width: 1200px;
+/* Main Container Styling */
+form {
+    max-width: 70%;
     margin: 40px auto;
-    padding: 20px;
-    background-color: #fff;
-    border-radius: 10px;
+    padding: 30px;
+    background-color: #2d2d2d;
+    border-radius: 15px;
     box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
 }
 
-.section-title {
-    color: #2c3e50;
-    font-weight: 600;
-    margin-bottom: 30px;
-    padding-bottom: 10px;
-    border-bottom: 2px solid #3498db;
+/* Crispy Form Fields Styling */
+.form-group {
+    margin-bottom: 1.5rem;
 }
 
-.dish-card {
+/* Labels */
+label {
+    font-weight: 500;
+    color: #d0b100;
+    margin-bottom: 0.5rem;
+    font-size: 1rem;
+}
+
+/* Input Fields */
+.textinput,
+.numberinput,
+.select,
+.textarea,
+.dateinput,
+.timeinput {
+    width: 100%;
+    padding: 12px;
+    border: 2px solid #e9ecef;
+    border-radius: 8px;
+    font-size: 1rem;
     transition: all 0.3s ease;
-    border: none;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-    margin-bottom: 20px;
+    background-color: #f8f9fa;
 }
 
-.dish-card:hover {
+.textinput:focus,
+.numberinput:focus,
+.select:focus,
+.textarea:focus,
+.dateinput:focus,
+.timeinput:focus {
+    border-color: #d0b100;
+    box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+    outline: none;
+}
+
+/* Help Text */
+.help-text {
+    color: #d0b100;
+    font-size: 0.875rem;
+    margin-top: 0.25rem;
+}
+
+/* Error Messages */
+.invalid-feedback {
+    color: #dc3545;
+    font-size: 0.875rem;
+    margin-top: 0.5rem;
+}
+
+/* Section Headings */
+h2, h3 {
+    color: #d0b100;
+    font-weight: 600;
+    margin: 2rem 0 1.5rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid #d0b100;
+}
+
+/* Dish Selection Section */
+#dish_selection {
+    margin-top: 2rem;
+}
+
+/* Card Styling */
+.card {
+    border: none;
+    border-radius: 12px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+    overflow: hidden;
+}
+
+.card:hover {
     transform: translateY(-5px);
     box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
 }
@@ -31,109 +94,116 @@
     padding: 1.5rem;
 }
 
-.dish-title {
-    color: #34495e;
-    font-size: 1.2rem;
-    font-weight: 600;
-    margin-bottom: 10px;
-}
-
-.dish-description {
-    color: #7f8c8d;
-    font-size: 0.9rem;
-    margin-bottom: 15px;
-}
-
-.dish-price {
-    color: #2ecc71;
-    font-size: 1.1rem;
-    font-weight: bold;
-}
-
+/* Checkbox Styling */
 .form-check {
-    padding: 0;
-    margin-left: 2%;
+    padding-left: 2rem;
+    margin: 0;
 }
 
 .form-check-input {
-    margin-right: 10px;
-    transform: scale(1.2);
+    margin-left: -1.5rem;
+    width: 1.2rem;
+    height: 1.2rem;
+    border: 2px solid #3498db;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.form-check-input:checked {
+    background-color: #3498db;
+    border-color: #3498db;
 }
 
 .form-check-label {
     width: 100%;
     cursor: pointer;
-    padding: 10px;
-    border-radius: 5px;
-    transition: background-color 0.2s ease;
 }
 
-.form-check-label:hover {
-    background-color: #f8f9fa;
+/* Dish Information */
+.card-title {
+    color: #d0b100;
+    font-size: 1.2rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
 }
 
-.btn-reserve {
+.card-text {
+    color: #6c757d;
+    font-size: 0.9rem;
+    line-height: 1.5;
+}
+
+/* Price */
+.card-text strong {
+    color: #2ecc71;
+    font-size: 1.1rem;
+}
+
+/* Submit Button */
+.btn-primary {
     background-color: #3498db;
-    color: white;
+    border: none;
     padding: 12px 30px;
     border-radius: 25px;
-    border: none;
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 1px;
     transition: all 0.3s ease;
-    margin-top: 20px;
+    margin-top: 2rem;
+    width: 100%;
 }
 
-.btn-reserve:hover {
+.btn-primary:hover {
     background-color: #2980b9;
     transform: translateY(-2px);
     box-shadow: 0 5px 15px rgba(52, 152, 219, 0.3);
 }
 
-.dishes-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-    gap: 20px;
-    padding: 20px 0;
+/* Alert Styling */
+.alert {
+    border-radius: 8px;
+    padding: 1rem;
+    margin: 1rem 0;
+    border: none;
 }
 
-.alert-no-dishes {
-    background-color: #f8f9fa;
-    border-left: 4px solid #3498db;
-    padding: 15px;
-    border-radius: 5px;
+.alert-info {
+    background-color: #e3f2fd;
+    color: #0d47a1;
+    border-left: 4px solid #2196f3;
 }
 
-/* Custom checkbox styling */
-.custom-checkbox {
+/* Responsive Grid */
+@media (max-width: 768px) {
+    form {
+        margin: 20px;
+        padding: 20px;
+    }
+    
+    .col-md-6 {
+        padding: 0 10px;
+    }
+    
+    .card {
+        margin-bottom: 15px;
+    }
+}
+
+/* Date and Time Inputs Specific Styling */
+.dateinput,
+.timeinput {
     position: relative;
-    padding-left: 35px;
-    cursor: pointer;
-    user-select: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%23495057' viewBox='0 0 16 16'%3E%3Cpath d='M3.5 0a.5.5 0 0 1 .5.5V1h8V.5a.5.5 0 0 1 1 0V1h1a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V3a2 2 0 0 1 2-2h1V.5a.5.5 0 0 1 .5-.5zM1 4v10a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V4H1z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    padding-right: 40px;
 }
 
-.custom-checkbox input {
-    position: absolute;
-    opacity: 0;
-    cursor: pointer;
-}
-
-.checkmark {
-    position: absolute;
-    top: 0;
-    left: 0;
-    height: 25px;
-    width: 25px;
-    background-color: #eee;
-    border-radius: 4px;
-    transition: all 0.2s ease;
-}
-
-.custom-checkbox:hover input ~ .checkmark {
-    background-color: #ccc;
-}
-
-.custom-checkbox input:checked ~ .checkmark {
-    background-color: #3498db;
+/* Select Dropdown Styling */
+select.select {
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%23495057' viewBox='0 0 16 16'%3E%3Cpath d='M7.247 11.14L2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    padding-right: 40px;
 }
