@@ -2,71 +2,52 @@
 {% load crispy_forms_tags %}
 
 {% block content %}
-<div class="container mt-5">
-    <div class="row justify-content-center">
-        <div class="col-md-8">
-            <div class="card shadow">
-                <!-- Form Header -->
-                <div class="card-header bg-primary text-white">
-                    <h3 class="mb-0">Make a Reservation</h3>
-                </div>
+<!-- Restaurant_handling/templates/Restaurant_handling/reservation.html -->
+<form method="POST">
+    {% csrf_token %}
+    {{ form|crispy }}
+    <div class="container mt-5">
+    <h2>Would you like to pre-order food?</h2>
 
-                <div class="card-body">
-                    <!-- Form itself -->
-                    <form method="POST">
-                        {% csrf_token %}
-                        
-                        <!-- Simple version with all fields -->
-                        {{ form|crispy }}
-
-                        <!-- Submit Button -->
-                        <div class="mt-4">
-                            <button type="submit" class="btn btn-primary">
-                                Make Reservation
-                            </button>
-                            <a href="javascript:history.back()" class="btn btn-outline-secondary">
-                                Back
-                            </a>
-                        </div>
-                    </form>
-
-                    <!-- Messages -->
-                    {% if messages %}
-                        {% for message in messages %}
-                            <div class="alert alert-{{ message.tags }}">
-                                {{ message }}
+    <!-- Dish selection section -->
+    <div id="dish_selection" class="form-group" style="display: flex;">
+        <h3 class="mb-3">Available Dishes</h3>
+        
+        {% if dishes %}
+            <div class="row">
+                {% for dish in dishes %}
+                    <div class="col-md-6 mb-3">
+                        <div class="card">
+                            <div class="card-body">
+                                <div class="form-check">
+                                    <input type="checkbox" 
+                                           class="form-check-input" 
+                                           name="selected_dishes" 
+                                           value="{{ dish.dish_id }}" 
+                                           id="dish_{{ dish.dish_id }}">
+                                    <label class="form-check-label" for="dish_{{ dish.dish_id }}">
+                                        <h5 class="card-title mb-1">{{ dish.dish_name }}</h5>
+                                        <p class="card-text text-muted mb-1">
+                                            {{ dish.dish_description }}
+                                        </p>
+                                        <p class="card-text">
+                                            <strong>${{ dish.dish_cost }}</strong>
+                                        </p>
+                                    </label>
+                                </div>
                             </div>
-                        {% endfor %}
-                    {% endif %}
-                </div>
+                        </div>
+                    </div>
+                {% endfor %}
             </div>
-        </div>
+        {% else %}
+            <div class="alert alert-info">
+                No dishes available for pre-order at this time.
+            </div>
+        {% endif %}
     </div>
-</div>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Make Reservation</button>
+</form>
 {% endblock %}
-
-<!-- Optional: Add JavaScript for better form interaction -->
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    // Update progress bar based on form completion
-    const form = document.getElementById('reservationForm');
-    const inputs = form.querySelectorAll('input, select, textarea');
-    const progressBar = document.querySelector('.progress-bar');
-    
-    function updateProgress() {
-        const totalFields = inputs.length;
-        let filledFields = 0;
-        
-        inputs.forEach(input => {
-            if (input.value) filledFields++;
-        });
-        
-        const progress = (filledFields / totalFields) * 100;
-        progressBar.style.width = progress + '%';
-    }
-
-    inputs.forEach(input => {
-        input.addEventListener('change', updateProgress);
-    });
-});
-</script>
