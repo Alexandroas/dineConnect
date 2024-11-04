@@ -198,17 +198,6 @@
 }
 
 /* Hover Effects Enhancement */
-.nav-link:hover::after {
-    content: '';
-    position: absolute;
-    right: 0;
-    top: 50%;
-    transform: translateY(-50%);
-    width: 3px;
-    height: 50%;
-    background: #ffd700;
-    opacity: 0.5;
-}
 
 .profile-section::before {
     content: '';
