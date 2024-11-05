@@ -150,7 +150,7 @@ def restaurant_home(request):
     return render(request, 'Restaurant_handling/restaurant_home.html', {'business': business})
 
 @login_required
-def reservation(request, business_id):
+def make_reservation(request, business_id):
     business = get_object_or_404(Business, business_id=business_id)
     dishes = Dish.objects.filter(business_id=business)
     
