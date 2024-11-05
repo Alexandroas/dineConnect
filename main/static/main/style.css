@@ -19,13 +19,6 @@ a:link, a:visited {
   margin: 2px auto;
 }
 
-#form-group, #button {
-  border-radius: 10px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
-  background-color: #1a1a1a;
-  border: 1px solid rgba(255, 215, 0, 0.1);
-}
-
 /* Card styles */
 .card {
   background-color: #1a1a1a;
@@ -109,10 +102,6 @@ a:link, a:visited {
 }
 .fa-dollar-sign{
   color: green;
-}
-.tag-details {
-  background-color: rgba(255, 215, 0, 0.2);
-  color: #fff7cc;
 }
 
 /* Favorite button */
@@ -258,4 +247,36 @@ p {
 }
 a.btn-primary {
   color: black;
+}
+/* Pagination Styles */
+.pagination {
+  margin: 20px 0;
+}
+
+a.step-link {
+  color: #333;
+  border: 1px solid #dee2e6;
+  padding: 8px 16px;
+}
+.pagination .page-item.active .page-link {
+  background-color: #007bff;
+  border-color: #007bff;
+  color: white;
+}
+
+.pagination .page-item.disabled .page-link {
+  color: #6c757d;
+  pointer-events: none;
+  background-color: #fff;
+  border-color: #dee2e6;
+}
+
+.pagination .page-link:hover {
+  background-color: #e9ecef;
+  border-color: #dee2e6;
+  color: #0056b3;
+}
+
+.pagination .page-link:focus {
+  box-shadow: 0 0 0 0.2rem rgba(0,123,255,.25);
 }
