@@ -126,9 +126,11 @@ a:link, a:visited {
 }
 
 .favorite-btn.active i {
-  color: #1a1a1a;
+  color: #ff0000;
 }
-
+p.card-text {
+  color: #d0b100 !important;
+}
 /* Search section */
 .search-section {
   background: #1a1a1a;
@@ -242,11 +244,16 @@ h3 {
   padding: 0.375rem 1rem;
   font-size: 0.8125rem;
 }
+h6.text-muted {
+  color : #2ecc71 !important;
+}
 p {
   color: #d0b100;
 }
 a.btn-primary {
   color: black;
+  height: 40px;
+  width: 80px;
 }
 /* Pagination Styles */
 .pagination {
