@@ -1,6 +1,8 @@
 from . import views
 from django.urls import include, path
 
+app_name = 'Restaurant_handling'
+
 urlpatterns = [
     path('add_dish/', views.add_dish, name='add_dish'),
     path('edit_dish/<int:dish_id>/', views.edit_dish, name='edit_dish'),
@@ -13,6 +15,16 @@ urlpatterns = [
     path('restaurant_home/', views.restaurant_home, name='restaurant_home'),
     path('restaurant_reservation/<int:business_id>/', views.make_reservation, name='restaurant_reservation'),
     path('upcoming_reservations<int:business_id>/', views.upcoming_reservations, name='upcoming_reservations'),
-    #path('business/<int:business_id>/reservations/', views.upcoming_reservations, name='upcoming_reservations'),    
-   # path('business/<int:business_id>/', views.business_detail, name='business_detail'),
+    path('payment/<int:reservation_id>/', views.payment_view, name='payment'),
+    path('payment-success/', views.payment_success, name='payment_success'),
+    # urls.py
+     path('process-payment/<int:reservation_id>/',
+         views.process_payment,
+         name='process_payment'),
+    path('payment/<int:reservation_id>/',
+         views.payment_view,
+         name='payment'),
+    path('payment-success/<int:reservation_id>/',
+         views.payment_success,
+         name='payment_success'),
 ]
