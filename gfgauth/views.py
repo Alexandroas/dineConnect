@@ -7,6 +7,7 @@ from django.apps import apps
 from django.utils import timezone
 from django.db import models
 from django.contrib.auth.models import Group
+from django.core.paginator import Paginator
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.contrib.auth.forms import SetPasswordForm
@@ -25,25 +26,35 @@ from .forms import (
     BusinessImageForm,
     UserUpdateForm,
     UserLoginForm)
-
 def home(request):
     Business = apps.get_model('gfgauth', 'Business')
     Cuisine = apps.get_model('Restaurant_handling', 'Cuisine')
-    Testimonial = apps.get_model('main', 'Testimonial')  # Add this line
+    Testimonial = apps.get_model('main', 'Testimonial')
    
+    # Get all businesses with prefetched cuisine data
     businesses = Business.objects.prefetch_related('cuisine').all()
+    
+    # Create paginator with businesses queryset (not the model class)
+    paginator = Paginator(businesses, 6)  # Changed from Business to businesses
+    
+    # Get other data
     is_business = request.user.groups.filter(name='Business').exists()
     cuisines = Cuisine.objects.all()
-    testimonials = Testimonial.objects.filter(is_visible=True).select_related('user')  # Add this line
+    testimonials = Testimonial.objects.filter(is_visible=True).select_related('user')
    
+    # Get current page
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    
+    # Combine all context into a single dictionary
     context = {
-        'businesses': businesses,
+        'businesses': page_obj,  # Use page_obj instead of businesses
         'cuisines': cuisines,
-        'testimonials': testimonials,  # Add this line
+        'testimonials': testimonials,
         'is_business': is_business
     }
    
-    return render(request, 'gfgauth/home.html', context)
+    return render(request, 'gfgauth/home.html', context)  # Remove the second context dictionary
 
 def logout_view(request):
     logout(request)
@@ -314,7 +325,6 @@ def toggle_favorite(request, business_id):
             'status': 'error',
             'message': 'Business not found'
         }, status=404)
-# views.py
 @login_required
 def favorite_restaurants(request):
     favorites = request.user.favourite_restaurants.all()
