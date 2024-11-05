@@ -1,6 +1,8 @@
 {% extends 'main/header.html' %}
 {% load crispy_forms_tags %}
 {% block content %}
+{%load static%}
+<link rel="stylesheet" type="text/css" href="{% static 'gfgauth/css/account_registration.css' %}">
 <div class="content-section col-lg-12 col-md-12 col-sm-12 tutorial-style" style="min-height:65vh;">
   <div class="col-md-3 col-lg-2 d-md-block bg-light sidebar">
     {% include 'Restaurant_handling/restaurant_dashboard.html' %}
