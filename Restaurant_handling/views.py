@@ -4,6 +4,7 @@ from django.contrib import messages
 from django.http import HttpResponseForbidden
 from django.core.paginator import Paginator
 from django.shortcuts import render, redirect, get_object_or_404
+from dineConnect_project import settings
 from gfgauth.forms import BusinessUpdateForm, UserUpdateForm  # Import your existing form
 from gfgauth.models import Business
 from django.db.models import Q
@@ -148,12 +149,12 @@ def restaurant_detail(request, business_id):
 def restaurant_home(request):
     business = get_object_or_404(Business, business_owner=request.user)
     return render(request, 'Restaurant_handling/restaurant_home.html', {'business': business})
-
+import stripe
 @login_required
 def make_reservation(request, business_id):
     business = get_object_or_404(Business, business_id=business_id)
     dishes = Dish.objects.filter(business_id=business)
-    
+   
     if request.method == 'POST':
         form = ReservationForm(request.POST)
         if form.is_valid():
@@ -162,37 +163,172 @@ def make_reservation(request, business_id):
                 reservation = form.save(commit=False)
                 reservation.business_id = business
                 reservation.user_id = request.user
-                
+                reservation.reservation_status = 'Pending'  # Add status
+               
                 # Save the reservation first
                 reservation.save()
-                
+               
                 # Handle selected dishes
                 selected_dishes = request.POST.getlist('selected_dishes')
                 if selected_dishes:
                     dishes_to_add = Dish.objects.filter(dish_id__in=selected_dishes)
                     reservation.dish_id.add(*dishes_to_add)
-                
-                # Send email after all data is saved
+                    
+                    # Calculate total amount
+                    total_amount = sum(dish.dish_cost for dish in dishes_to_add)
+                    
+                    if total_amount > 0:
+                        # Redirect to payment if there are dishes selected
+                        return redirect('Restaurant_handling:payment', reservation_id=reservation.reservation_id)
+                    
+                # If no dishes selected, just send confirmation email
                 send_reservation_email(request.user, reservation)
                 messages.success(request, 'Your reservation has been saved!')
-                
-                return redirect('restaurant_detail', business_id=business_id)
-                
+                return redirect('Restaurant_handling:restaurant_detail', business_id=business_id)
+               
             except Exception as e:
                 print("Error saving reservation:", str(e))
                 messages.error(request, f"Error saving reservation: {str(e)}")
+                # If error occurs, try to delete the reservation if it was created
+                if 'reservation' in locals() and reservation.reservation_id:
+                    reservation.delete()
     else:
         form = ReservationForm()
-    
+   
     return render(request, 'Restaurant_handling/reservation.html', {
         'form': form,
         'business': business,
         'dishes': dishes
     })
 
+def payment_view(request, reservation_id):
+    # Get the reservation and verify it belongs to the current user
+    reservation = get_object_or_404(Reservation, 
+                                  reservation_id=reservation_id, 
+                                  user_id=request.user)
+    
+    # Calculate total amount from selected dishes
+    total_amount = sum(dish.dish_cost for dish in reservation.dish_id.all())
+    
+    if request.method == 'POST':
+        try:
+            # Create Stripe payment intent
+            stripe.api_key = settings.STRIPE_SECRET_KEY
+            intent = stripe.PaymentIntent.create(
+                amount=int(total_amount * 100),  # Convert to cents
+                currency='usd',
+                metadata={
+                    'reservation_id': reservation.reservation_id,
+                    'user_email': request.user.email
+                }
+            )
+            
+            return render(request, 'Restaurant_handling/payment.html', {
+                'reservation': reservation,
+                'total_amount': total_amount,
+                'client_secret': intent.client_secret,
+                'stripe_publishable_key': settings.STRIPE_PUBLISHABLE_KEY
+            })
+            
+        except Exception as e:
+            messages.error(request, f"Payment error: {str(e)}")
+            return redirect('restaurant_detail', business_id=reservation.business_id.business_id)
+    
+    return render(request, 'Restaurant_handling/payment.html', {
+        'reservation': reservation,
+        'total_amount': total_amount,
+        'stripe_publishable_key': settings.STRIPE_PUBLISHABLE_KEY
+    })
+
+def payment_success(request, reservation_id):
+    reservation = get_object_or_404(Reservation, 
+                                  reservation_id=reservation_id, 
+                                  user_id=request.user)
+    
+    # Update reservation status
+    reservation.reservation_status = 'Confirmed'
+    reservation.save()
+    
+    # Send confirmation email
+    send_reservation_email(request.user, reservation)
+    
+    messages.success(request, 'Payment successful! Your reservation is confirmed.')
+    return redirect('Restaurant_handling:restaurant_detail', business_id=reservation.business_id.business_id)
+
+def payment_cancel(request, reservation_id):
+    reservation = get_object_or_404(Reservation, 
+                                  reservation_id=reservation_id, 
+                                  user_id=request.user)
+    
+    messages.warning(request, 'Payment was cancelled. Your reservation is still pending.')
+    return redirect('Restaurant_handling:restaurant_detail', business_id=reservation.business_id.business_id)
+
+# views.py
+import json
+from django.http import JsonResponse
+from django.views.decorators.http import require_POST
+from django.urls import reverse
+
+@require_POST
+def process_payment(request, reservation_id):
+    try:
+        data = json.loads(request.body)
+        payment_method_id = data.get('payment_method_id')
+        
+        reservation = get_object_or_404(Reservation, 
+                                      reservation_id=reservation_id,
+                                      user_id=request.user)
+        
+        total_amount = sum(dish.dish_cost for dish in reservation.dish_id.all())
+        
+        # Create payment intent
+        stripe.api_key = settings.STRIPE_SECRET_KEY
+        intent = stripe.PaymentIntent.create(
+            amount=int(total_amount * 100),  # Convert to cents
+            currency='usd',
+            payment_method=payment_method_id,
+            confirm=True,  # Confirm the payment immediately
+            return_url=request.build_absolute_uri(
+                reverse('Restaurant_handling:payment_success', args=[reservation_id])
+            ),
+            metadata={
+                'reservation_id': reservation.reservation_id,
+                'user_email': request.user.email
+            }
+        )
+        
+        if intent.status == 'succeeded':
+            # Update reservation status
+            reservation.reservation_status = 'Confirmed'
+            reservation.save()
+            
+            # Send confirmation email
+            send_reservation_email(request.user, reservation)
+            
+            return JsonResponse({
+                'success': True,
+                'redirect_url': reverse('Restaurant_handling:payment_success', args=[reservation_id])
+            })
+        else:
+            return JsonResponse({
+                'success': False,
+                'error': 'Payment failed.'
+            })
+            
+    except stripe.error.CardError as e:
+        return JsonResponse({
+            'success': False,
+            'error': e.error.message
+        })
+    except Exception as e:
+        return JsonResponse({
+            'success': False,
+            'error': str(e)
+        })
+
+
 
 @business_required
-
 def upcoming_reservations(request, business_id):
     """
     View to display upcoming reservations for a business.
