@@ -79,7 +79,7 @@
                           <div class="card-body">
                             <h5 class="card-title">{{ business.business_name }}</h5>
                             <p class="card-text text-truncate">{{ business.business_description }}</p>
-                            <a href="{% url 'restaurant_detail' business.business_id %}" class="btn btn-primary btn-sm">View Details</a>
+                            <a href="{% url 'Restaurant_handling:restaurant_detail' business.business_id %}" class="btn btn-primary btn-sm">View Details</a>
                           </div>
                         </div>
                       </div>
