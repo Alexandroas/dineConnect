@@ -6,7 +6,7 @@
     <nav class="sidebar">
       <ul class="nav flex-column text-center align-items-center pt-4">
         <li class="nav-item">
-          <a href="{% url 'restaurant_home' %}" class="nav-link {% if request.resolver_match.url_name == 'restaurant_home' %}active{% endif %}">
+          <a href="{% url 'Restaurant_handling:restaurant_home' %}" class="nav-link {% if request.resolver_match.url_name == 'restaurant_home' %}active{% endif %}">
             <i class="bi bi-house"></i>
             <span>Dashboard</span>
           </a>
@@ -18,13 +18,13 @@
           </a>
         </li>
         <li class="nav-item">
-          <a href="{%url 'upcoming_reservations' business.business_id%}" class="nav-link">
+          <a href="{%url 'Restaurant_handling:upcoming_reservations' business.business_id%}" class="nav-link">
             <i class="bi bi-calendar-check"></i>
             <span>Reservations</span>
           </a>
         </li>
         <li class="nav-item">
-          <a href="{% url 'restaurant_menu' %}" class="nav-link {% if request.resolver_match.url_name == 'restaurant_menu' %}active{% endif %}">
+          <a href="{% url 'Restaurant_handling:restaurant_menu' %}" class="nav-link {% if request.resolver_match.url_name == 'restaurant_menu' %}active{% endif %}">
             <i class="bi bi-menu-button-wide"></i>
             <span>Menu</span>
           </a>
@@ -45,7 +45,7 @@
           </button>
           <ul class="dropdown-menu dropdown-menu-end">
             <li>
-                  <a class="dropdown-item" href="{% url 'restaurant_profile' %}">
+                  <a class="dropdown-item" href="{% url 'Restaurant_handling:restaurant_profile' %}">
                       <i class="bi bi-person me-2"></i>Profile
                   </a>
           </li>

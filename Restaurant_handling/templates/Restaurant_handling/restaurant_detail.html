@@ -40,7 +40,7 @@
                     
                     {% if user.is_authenticated %}
                         <div class="mt-4">
-                            <a href="{% url 'restaurant_reservation' business_id=business.business_id %}" 
+                            <a href="{% url 'Restaurant_handling:restaurant_reservation' business_id=business.business_id %}" 
                                class="btn btn-primary w-100">
                                 <i class="bi bi-calendar-check me-2"></i>
                                 Make Reservation
