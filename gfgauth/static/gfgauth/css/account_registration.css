@@ -48,9 +48,9 @@
     border-radius: 10px;
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
 }
-
-
-
+li{
+    color: #ffffff;
+}
 /* Legend/Headings */
 legend.border-bottom {
     padding-bottom: 1rem;
@@ -152,8 +152,8 @@ label {
     margin-top: 2rem;
 }
 
-.text-muted {
-    color: #6c757d;
+small.text-muted {
+    color: #ffffff !important;
 }
 
 .text-muted a {
