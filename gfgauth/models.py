@@ -52,6 +52,8 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
 
     def __str__(self):
         return self.email
+    def get_full_name(self):
+        return f'{self.first_name} {self.last_name}'
 
 class Business(models.Model):
     business_id = models.AutoField(primary_key=True)
@@ -93,6 +95,29 @@ class Business(models.Model):
     def get_cuisine_names(self):
         """Return cuisine names as comma-separated string"""
         return ", ".join([cuisine.cuisine_name for cuisine in self.cuisine.all()])
+    def get_reservation_users_with_stats(self):
+        """
+        Return users with their reservation statistics for this business
+        Returns a list of dictionaries containing user info and their reservation counts
+        """
+        from django.db.models import Count
+        return CustomUser.objects.filter(
+            reservation__business_id=self
+        ).annotate(
+            total_reservations=Count('reservation'),
+            pending_reservations=Count(
+                'reservation',
+                filter=models.Q(reservation__reservation_status='Pending')
+            ),
+            confirmed_reservations=Count(
+                'reservation',
+                filter=models.Q(reservation__reservation_status='Confirmed')
+            ),
+            cancelled_reservations=Count(
+                'reservation',
+                filter=models.Q(reservation__reservation_status='Cancelled')
+            )
+        ).distinct()
 
     def is_open(self, check_time=None):
         """
