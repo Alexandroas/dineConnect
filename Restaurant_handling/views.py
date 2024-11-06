@@ -5,11 +5,11 @@ from django.core.paginator import Paginator
 from django.shortcuts import render, redirect, get_object_or_404
 from dineConnect_project import settings
 from gfgauth.forms import BusinessUpdateForm, UserUpdateForm  # Import your existing form
-from gfgauth.models import Business
+from gfgauth.models import Business, CustomUser
 from django.db.models import Q
 from .decorators import business_required, login_required
 from .forms import DishForm, ReservationForm, DishUpdateForm
-from .models import Dish, Reservation
+from .models import Dish, Payment, Reservation
 from main.utils import send_reservation_email, send_cancellation_email
 import json
 import stripe
@@ -341,19 +341,9 @@ def upcoming_reservations(request, business_id):
         date_filter = request.GET.get('date')
         status_filter = request.GET.get('status')
         
-        # Get upcoming reservations
-        current_datetime = timezone.now()
-        reservations = Reservation.objects.filter(
-            business_id=business,
-            reservation_date__gte=current_datetime.date()
-        ).filter(
-            Q(reservation_date__gt=current_datetime.date()) |
-            Q(
-                reservation_date=current_datetime.date(),
-                reservation_time__gt=current_datetime.time()
-            )
-        ).order_by('reservation_date', 'reservation_time')
-
+        # Use the class method instead of repeating the filter logic
+        reservations = Reservation.upcoming_reservations().filter(business_id=business)
+        
         # Apply additional filters if provided
         if date_filter:
             try:
@@ -361,31 +351,33 @@ def upcoming_reservations(request, business_id):
                 reservations = reservations.filter(reservation_date=filter_date)
             except ValueError:
                 pass
-
         if status_filter:
             reservations = reservations.filter(reservation_status=status_filter)
-
+            
+        # Order the results
+        reservations = reservations.order_by('reservation_date', 'reservation_time')
+        
         # Calculate counts
         total_upcoming = reservations.count()
         today_count = reservations.filter(
-            reservation_date=current_datetime.date()
+            reservation_date=timezone.now().date()
         ).count()
-
+        
         # Pagination
         paginator = Paginator(reservations, 20)
         page_number = request.GET.get('page', 1)
         page_obj = paginator.get_page(page_number)
-
+        
         context = {
             'business': business,
             'page_obj': page_obj,
             'total_upcoming': total_upcoming,
             'today_count': today_count,
-            'current_date': current_datetime.date(),
+            'current_date': timezone.now().date(),
             'date_filter': date_filter,
             'status_filter': status_filter,
         }
-
+        
         return render(
             request,
             'Restaurant_handling/upcoming_reservations.html',
@@ -432,8 +424,70 @@ def delete_reservation(request, business_id, reservation_id):
 @business_required
 def manage_customers(request):
     business = Business.objects.get(business_owner=request.user)
-    reservations = Reservation.objects.filter(business_id=business)
-    return render(request, 'Restaurant_handling/manage_customers.html', {
+    users_with_stats = business.get_reservation_users_with_stats()
+    
+    context = {
+        'business': business,
+        'customers': users_with_stats
+    }
+    
+    return render(request, 'Restaurant_handling/manage_customers.html', context)
+from django.db import models
+@business_required
+def customer_details(request, user_id):
+    user = get_object_or_404(CustomUser, id=user_id)
+    business = request.user.business
+    
+    # Get all reservations for this user at this business
+    reservations = Reservation.objects.filter(
+        user_id=user,
+        business_id=business
+    ).order_by('-reservation_date', '-reservation_time')
+    
+    # Calculate statistics
+    stats = {
+        'total_visits': reservations.count(),
+        'confirmed_reservations': reservations.filter(reservation_status='Confirmed').count(),
+        'pending_reservations': reservations.filter(reservation_status='Pending').count(),
+        'cancelled_reservations': reservations.filter(reservation_status='Cancelled').count(),
+        'favorite_dishes': Dish.objects.filter(
+            reservation__in=reservations
+        ).annotate(
+            order_count=models.Count('dish_id')
+        ).order_by('-order_count')[:5],
+        'total_spent': Payment.objects.filter(
+            reservation__in=reservations,
+            status='completed'
+        ).aggregate(total=models.Sum('amount'))['total'] or 0,
+        'average_party_size': reservations.aggregate(
+            avg=models.Avg('reservation_party_size')
+        )['avg'] or 0,
+        'most_common_time': reservations.exclude(
+            reservation_status='Cancelled'
+        ).values('reservation_time').annotate(
+            count=models.Count('reservation_id')
+        ).order_by('-count').first(),
+        'most_common_day': reservations.exclude(
+            reservation_status='Cancelled'
+        ).values('reservation_date__week_day').annotate(
+            count=models.Count('reservation_id')
+        ).order_by('-count').first(),
+        'last_visit': reservations.filter(
+            reservation_status='Confirmed'
+        ).first(),
+        'is_favorite': business in user.favourite_restaurants.all(),
+        'special_requests_count': reservations.exclude(
+            reservation_special_requests__isnull=True
+        ).exclude(
+            reservation_special_requests__exact=''
+        ).count(),
+    }
+    
+    context = {
+        'user': user,
         'reservations': reservations,
+        'stats': stats,
         'business': business
-    })
+    }
+   
+    return render(request, 'Restaurant_handling/customer_details.html', context)
