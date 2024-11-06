@@ -27,4 +27,7 @@ urlpatterns = [
     path('payment-success/<int:reservation_id>/',
          views.payment_success,
          name='payment_success'),
+    path ('reservation_details/<int:business_id>/<int:reservation_id>',views.reservation_details,name='reservation_details'),
+    path('delete_reservation/<int:business_id>/<int:reservation_id>/', views.delete_reservation, name='delete_reservation'),
+    path('manage_customers/', views.manage_customers, name='manage_customers'),
 ]
