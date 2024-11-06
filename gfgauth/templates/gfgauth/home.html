@@ -36,7 +36,7 @@
       {% for business in businesses %}
         <div class="col">
           <div class="card business-card cuisine_type_filter" data-cuisines="{{ business.get_cuisine_names|lower }}">
-            <a href="{% url 'restaurant_detail' business.business_id %}" class="text-decoration-none">
+            <a href="{% url 'Restaurant_handling:restaurant_detail' business.business_id %}" class="text-decoration-none">
               <div class="card-img-wrapper">
                 {% if business.business_image %}
                   <img src="{{ business.business_image.url }}" alt="{{ business.business_name }}" class="card-img" />
@@ -191,4 +191,5 @@
   <script src="{% static 'gfgauth/js/cuisine_type_filtering.js' %}"></script>
   <script src="{% static 'gfgauth/js/search_function.js' %}"></script>
   <script src="{% static 'gfgauth/js/add_favourite.js' %}"></script>
+  <script src="{%static 'gfgauth/js/sorting.js'%}"></script>
 {% endblock %}
