@@ -12,7 +12,7 @@ from .forms import DishForm, ReservationForm, DishUpdateForm
 from .models import Dish, Payment, Reservation
 from main.utils import send_reservation_email, send_cancellation_email
 import json
-import stripe
+import stripe # type: ignore
 from django.http import JsonResponse
 from django.views.decorators.http import require_POST
 from django.urls import reverse
