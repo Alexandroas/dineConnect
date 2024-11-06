@@ -2,7 +2,8 @@
 from django.core.mail import send_mail
 from django.template.loader import render_to_string
 from django.conf import settings
-def send_welcome_email(request, user, **kwargs):
+# utils.py
+def send_welcome_email(user, request=None, **kwargs):
     try:
         # Check if it's a social login
         if 'sociallogin' in kwargs:
@@ -18,8 +19,8 @@ def send_welcome_email(request, user, **kwargs):
             'first_name': user.first_name,
             'email': user.email,
         }
-        html_message = render_to_string('main\email_welcome.html', context)
-        
+        html_message = render_to_string('main/email_welcome.html', context)
+       
         send_mail(
             subject='Welcome to DineConnect!',
             message='',
@@ -28,6 +29,7 @@ def send_welcome_email(request, user, **kwargs):
             recipient_list=[user.email],
             fail_silently=False,
         )
+        return True
     except Exception as e:
         print(f"Error sending email: {str(e)}")
         return False
@@ -48,6 +50,34 @@ def send_reservation_email(user, reservation):
     try:
         send_mail(
             subject=f'Reservation Confirmation - {reservation.business_id.business_name}',
+            message='',
+            html_message=html_message,
+            from_email=settings.DEFAULT_FROM_EMAIL,
+            recipient_list=[user.email],
+            fail_silently=False,
+        )
+        return True
+    except Exception as e:
+        print(f"Error sending email: {str(e)}")
+        return False
+    
+    
+def send_cancellation_email(user, reservation):
+    context = {
+        'user': user,
+        'reservation': reservation,
+        'business': reservation.business_id,
+        'dishes' : reservation.dish_id.all(),
+        'debug': True
+    }
+    print(f"Sending email for reservation {reservation.reservation_id}")
+    print(f"Number of dishes: {reservation.dish_id.count()}")
+    print(f"Dishes: {list(reservation.dish_id.all())}")
+    html_message = render_to_string('main/cancellation_email.html', context)
+    
+    try:
+        send_mail(
+            subject=f'Reservation Cancellation - {reservation.business_id.business_name}',
             message='',
             html_message=html_message,
             from_email=settings.DEFAULT_FROM_EMAIL,
