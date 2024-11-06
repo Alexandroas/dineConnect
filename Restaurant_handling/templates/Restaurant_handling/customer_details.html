@@ -1,0 +1,191 @@
+{% extends 'main/header.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <div class="row">
+        <div class="col-md-9 col-lg-10 ms-sm-auto px-4">
+            <!-- Customer Header -->
+            <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                <h1 class="h2">Customer Profile</h1>
+                <div class="btn-toolbar mb-2 mb-md-0">
+                    <a href="{% url 'Restaurant_handling:manage_customers' %}" class="btn btn-secondary">Back to Customers</a>
+                </div>
+            </div>
+
+            <!-- Customer Basic Info Card -->
+            <div class="row mb-4">
+                <div class="col-md-4">
+                    <div class="card">
+                        <div class="card-body text-center">
+                            {% if user.profile_image %}
+                                <img src="{{ user.profile_image.url }}" class="rounded-circle mb-3" style="width: 150px; height: 150px; object-fit: cover;">
+                            {% else %}
+                                <img src="{% static 'images/default_profile.png' %}" class="rounded-circle mb-3" style="width: 150px; height: 150px; object-fit: cover;">
+                            {% endif %}
+                            <h3>{{ user.get_full_name }}</h3>
+                            <p class="text-muted">{{ user.email }}</p>
+                            {% if stats.is_favorite %}
+                                <span class="badge bg-warning">Favorite Customer</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Key Statistics Cards -->
+                <div class="col-md-8">
+                    <div class="row row-cols-1 row-cols-md-2 g-4">
+                        <!-- Total Visits -->
+                        <div class="col">
+                            <div class="card h-100">
+                                <div class="card-body">
+                                    <h5 class="card-title text-muted">Total Visits</h5>
+                                    <h2 class="card-text">{{ stats.total_visits }}</h2>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Total Spent -->
+                        <div class="col">
+                            <div class="card h-100">
+                                <div class="card-body">
+                                    <h5 class="card-title text-muted">Total Spent</h5>
+                                    <h2 class="card-text">${{ stats.total_spent|floatformat:2 }}</h2>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Average Party Size -->
+                        <div class="col">
+                            <div class="card h-100">
+                                <div class="card-body">
+                                    <h5 class="card-title text-muted">Avg. Party Size</h5>
+                                    <h2 class="card-text">{{ stats.average_party_size|floatformat:1 }}</h2>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Last Visit -->
+                        <div class="col">
+                            <div class="card h-100">
+                                <div class="card-body">
+                                    <h5 class="card-title text-muted">Last Visit</h5>
+                                    <h2 class="card-text">
+                                        {% if stats.last_visit %}
+                                            {{ stats.last_visit.reservation_date|date:"M d, Y" }}
+                                        {% else %}
+                                            N/A
+                                        {% endif %}
+                                    </h2>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Detailed Statistics -->
+            <div class="row mb-4">
+                <!-- Reservation Stats -->
+                <div class="col-md-6">
+                    <div class="card h-100">
+                        <div class="card-header">
+                            <h5>Reservation Statistics</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="list-group list-group-flush">
+                                <div class="list-group-item d-flex justify-content-between align-items-center">
+                                    Confirmed Reservations
+                                    <span class="badge bg-success rounded-pill">{{ stats.confirmed_reservations }}</span>
+                                </div>
+                                <div class="list-group-item d-flex justify-content-between align-items-center">
+                                    Pending Reservations
+                                    <span class="badge bg-warning rounded-pill">{{ stats.pending_reservations }}</span>
+                                </div>
+                                <div class="list-group-item d-flex justify-content-between align-items-center">
+                                    Cancelled Reservations
+                                    <span class="badge bg-danger rounded-pill">{{ stats.cancelled_reservations }}</span>
+                                </div>
+                                <div class="list-group-item d-flex justify-content-between align-items-center">
+                                    Special Requests Made
+                                    <span class="badge bg-info rounded-pill">{{ stats.special_requests_count }}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Favorite Dishes -->
+                <div class="col-md-6">
+                    <div class="card h-100">
+                        <div class="card-header">
+                            <h5>Favorite Dishes</h5>
+                        </div>
+                        <div class="card-body">
+                            {% if stats.favorite_dishes %}
+                                <div class="list-group list-group-flush">
+                                    {% for dish in stats.favorite_dishes %}
+                                        <div class="list-group-item d-flex justify-content-between align-items-center">
+                                            {{ dish.dish_name }}
+                                            <span class="badge bg-primary rounded-pill">{{ dish.order_count }} times</span>
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                            {% else %}
+                                <p class="text-muted">No dish orders recorded</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent Reservations Table -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5>Recent Reservations</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Time</th>
+                                    <th>Party Size</th>
+                                    <th>Status</th>
+                                    <th>Special Requests</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for reservation in reservations|slice:":5" %}
+                                    <tr>
+                                        <td>{{ reservation.reservation_date|date:"M d, Y" }}</td>
+                                        <td>{{ reservation.reservation_time|time:"H:i" }}</td>
+                                        <td>{{ reservation.reservation_party_size }}</td>
+                                        <td>
+                                            <span class="badge {% if reservation.reservation_status == 'Confirmed' %}bg-success{% elif reservation.reservation_status == 'Pending' %}bg-warning{% else %}bg-danger{% endif %}">
+                                                {{ reservation.reservation_status }}
+                                            </span>
+                                        </td>
+                                        <td>{{ reservation.reservation_special_requests|default:"-" }}</td>
+                                        <td>
+                                            <a href="{% url 'Restaurant_handling:reservation_details' business.business_id reservation.reservation_id %}" class="btn btn-sm btn-info">
+                                                View
+                                            </a>
+                                        </td>
+                                    </tr>
+                                {% empty %}
+                                    <tr>
+                                        <td colspan="6" class="text-center">No reservations found</td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
