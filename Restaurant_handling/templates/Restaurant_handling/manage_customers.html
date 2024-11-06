@@ -1,0 +1,39 @@
+{%extends 'main/header.html'%}
+{% block content%}
+{%load static%}
+<div class="col-md-3 col-lg-2 d-md-block bg-light sidebar">
+    {% include 'Restaurant_handling/restaurant_dashboard.html' %}
+</div>
+
+<div class="col-md-9 col-lg-10 ms-sm-auto px-4">
+    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+        <h1 class="h2">Customers</h1>
+    </div>
+
+    <div class="row row-cols-1 row-cols-md-3 g-4">
+        {% for customer in customers %}
+        <div class="col">
+            <div class="card">
+                <div class="card-body">
+                    {% if customer.profile_image %}
+                    <img src="{{ customer.profile_image.url }}" 
+                         class="img-fluid rounded-circle mb-3 center:" 
+                         style="width: 50px; height: 50px; margin-left: auto; margin-right: auto; display: block;" />
+                {% else %}
+                    <!-- Display a default placeholder image -->
+                    <img src="{% static 'images/default_profile.png' %}" 
+                         class="img-fluid rounded-circle mb-3 center:" 
+                         style="width: 50px; height: 50px; margin-left: auto; margin-right: auto; display: block;" />
+                {% endif %}                    <h5 class="card-title">{{ customer.first_name }} {{ customer.last_name }}</h5>
+                    <p class="card-text">{{ customer.email }}</p>
+                    <p class="card-text">{{ customer.phone }}</p>
+                    <p class="card-text">{{ customer.address }}</p>
+                    <a href="{%url 'Restaurant_handling:customer_details' customer.id%}" class="btn btn-primary">View details</a>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+{% endblock  %}
