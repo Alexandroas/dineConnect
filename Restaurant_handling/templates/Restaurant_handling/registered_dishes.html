@@ -12,7 +12,7 @@
         <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
           <h1 class="h2">Dishes</h1>
           <div class="btn-toolbar mb-2 mb-md-0">
-            <a href="{% url 'add_dish' %}" class="btn btn-primary">Add Dish</a>
+            <a href="{% url 'Restaurant_handling:add_dish' %}" class="btn btn-primary">Add Dish</a>
           </div>
         </div>
 
@@ -25,7 +25,7 @@
                   <h5 class="card-title">{{ dish.dish_name }}</h5>
                   <h6 class="card-subtitle mb-2 text-muted">${{ dish.dish_cost }}</h6>
                   <p class="card-text">{{ dish.dish_description }}</p>
-                  <a href="{% url 'edit_dish' dish.dish_id %}" class="btn btn-sm btn-outline-primary">View/Edit dish</a>
+                  <a href="{% url 'Restaurant_handling:edit_dish' dish.dish_id %}" class="btn btn-sm btn-outline-primary">View/Edit dish</a>
                 </div>
               </div>
             </div>
