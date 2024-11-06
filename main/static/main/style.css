@@ -287,3 +287,66 @@ a.step-link {
 .pagination .page-link:focus {
   box-shadow: 0 0 0 0.2rem rgba(0,123,255,.25);
 }
+
+
+/* Reservation items styling */
+.list-group-item {
+  transition: background-color 0.2s ease;
+}
+
+.list-group-item:hover {
+  background-color: #f8f9fa;
+}
+
+/* Collapse animation */
+.collapse {
+  transition: all 0.3s ease-out;
+}
+
+/* Toggle button styling */
+.btn-outline-primary {
+  padding: 0.375rem 0.75rem;
+  color: #d0b100;
+  border-color: #d0b100;
+  transition: all 0.2s ease;
+}
+
+.btn-outline-primary:hover {
+  background-color: #d0b100;
+  border-color: #d0b100;
+  transform: translateY(-1px);
+}
+
+/* Icon rotation animation */
+.bi-chevron-down {
+  transition: transform 0.3s ease;
+}
+
+.rotate {
+  transform: rotate(180deg);
+}
+
+/* Reservation details */
+.reservation-details i {
+  width: 20px;
+  color: #6c757d;
+  margin-right: 5px;
+}
+
+/* View Restaurant button */
+.btn-outline-secondary {
+  font-size: 0.875rem;
+  padding: 0.25rem 0.5rem;
+}
+
+.btn-outline-secondary:hover {
+  background-color: #6c757d;
+  color: white;
+}
+
+/* Alert styling */
+.alert-info {
+  background-color: #e3f2fd;
+  border-color: #bee5eb;
+  color: #0c5460;
+}
