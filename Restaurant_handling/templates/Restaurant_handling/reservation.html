@@ -1,8 +1,8 @@
 {% extends 'main/header.html' %}
 {% load crispy_forms_tags %}
-
+{%load static%}
 {% block content %}
-<!-- Restaurant_handling/templates/Restaurant_handling/reservation.html -->
+<link rel="stylesheet" type="text/css" href="{% static 'Restaurant_handling\make_reservation.css' %}">
 <form method="POST">
     {% csrf_token %}
     {{ form|crispy }}
