@@ -1,6 +1,7 @@
 {% extends 'main/header.html' %}
-
+{%load static%}
 {% block content %}
+<link rel="stylesheet" type="text/css" href="{% static 'Restaurant_handling\reservation_details.css' %}">
 <div class="container mt-4">
     <div class="col-md-3 col-lg-2 d-md-block bg-light sidebar">
         {% include 'Restaurant_handling/restaurant_dashboard.html' %}
@@ -28,6 +29,7 @@
                     </tr>
                 </thead>
                 <tbody>
+                    
                     {% for reservation in page_obj %}
                         <tr>
                             <td>{{ reservation.reservation_date|date:"M d, Y" }}</td>
@@ -36,13 +38,21 @@
                             <td>{{ reservation.reservation_party_size }}</td>
                             <td>{{ reservation.reservation_status }}</td>
                             <td>{{ reservation.reservation_special_requests|default:"-" }}</td>
+                            <td>
+                                <a href="{% url 'Restaurant_handling:reservation_details' business.business_id reservation.reservation_id %}" 
+                                   class="btn btn-sm btn-info">
+                                    View Details
+                                </a>
+                            </td>
                         </tr>
                     {% empty %}
                         <tr>
                             <td colspan="6" class="text-center">No upcoming reservations found.</td>
                         </tr>
                     {% endfor %}
+                
                 </tbody>
+
             </table>
         </div>
 
