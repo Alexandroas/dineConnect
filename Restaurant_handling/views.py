@@ -394,3 +394,44 @@ def upcoming_reservations(request, business_id):
     except Exception as e:
         messages.error(request, f"An error occurred while loading reservations: {str(e)}")
         return redirect('restaurant_home')
+    
+    
+@business_required
+def reservation_details(request, business_id, reservation_id):
+    """
+    View to display details of a reservation.
+    """
+    business = get_object_or_404(Business, business_id=business_id)
+    reservation = get_object_or_404(Reservation, 
+                                  reservation_id=reservation_id,
+                                  business_id=business)
+   
+    # Calculate total amount if there are dishes
+    total_amount = sum(dish.dish_cost for dish in reservation.dish_id.all())
+   
+    context = {
+        'business': business,
+        'reservation': reservation,
+        'total_amount': total_amount
+    }
+   
+    return render(request, 'Restaurant_handling/reservation_details.html', context)
+
+@business_required
+def delete_reservation(request, business_id, reservation_id):
+    reservation = get_object_or_404(Reservation, 
+                                  reservation_id=reservation_id,
+                                  business_id=business_id)
+    messages.success(request, 'Reservation deleted successfully!')
+    reservation.delete()
+    return redirect('Restaurant_handling:upcoming_reservations', business_id=business_id)
+
+
+@business_required
+def manage_customers(request):
+    business = Business.objects.get(business_owner=request.user)
+    reservations = Reservation.objects.filter(business_id=business)
+    return render(request, 'Restaurant_handling/manage_customers.html', {
+        'reservations': reservations,
+        'business': business
+    })
