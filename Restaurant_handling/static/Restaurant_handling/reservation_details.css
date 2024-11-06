@@ -1,0 +1,274 @@
+.reservation-row {
+    transition: background-color 0.2s ease;
+}
+
+.reservation-row:hover {
+    background-color: #f8f9fa;
+}
+
+.btn-info {
+    color: white;
+    background-color: #17a2b8;
+}
+
+.btn-info:hover {
+    background-color: #138496;
+    color: white;
+}
+
+
+
+.table-responsive {
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+}
+
+.table {
+    margin-bottom: 0;
+    background-color: black;
+}
+
+/* Header styles */
+.table thead th {
+    color: #d0b100;
+    background-color: rgb(61, 61, 61);
+    font-weight: 500;
+    border: none;
+    padding: 15px;
+    vertical-align: middle;
+    text-transform: uppercase;
+    font-size: 0.875rem;
+    letter-spacing: 0.5px;
+}
+.table tbody tr {
+    background-color: rgb(61, 61, 61);
+    transition: all 0.3s ease;
+}
+
+.table tbody tr:hover {
+    background-color: #f8f9fa;
+    transform: scale(1.01);
+}
+.table td:nth-child(5) {  /* Adjust the number based on your status column position */
+    font-weight: 600;
+}
+
+/* Action buttons */
+.btn-info {
+    background-color: #d0b100;
+    border-color: #d0b100;
+    color: black !important;
+    padding: 0.375rem 0.75rem;
+    font-size: 0.875rem;
+    border-radius: 4px;
+    transition: all 0.3s ease;
+}
+
+.btn-info:hover {
+    background-color: #d0b100;
+    border-color: #d0b100;
+    transform: translateY(-1px);
+    box-shadow: rgba(0, 0, 0, 0.3);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .table thead {
+        display: none; /* Hide headers on mobile */
+    }
+    
+    .table tbody tr {
+        display: block;
+        margin-bottom: 1rem;
+        border: 1px solid #dee2e6;
+        border-radius: 4px;
+    }
+    
+    .table tbody td {
+        display: block;
+        text-align: right;
+        padding: 0.75rem;
+        border: none;
+    }
+    
+    .table tbody td::before {
+        content: attr(data-label);
+        float: left;
+        font-weight: bold;
+        text-transform: uppercase;
+        font-size: 0.875rem;
+    }
+}
+
+/* Status colors */
+.status-pending {
+    color: #ffc107;
+    font-weight: 600;
+}
+
+.status-confirmed {
+    color: #28a745;
+    font-weight: 600;
+}
+
+.status-cancelled {
+    color: #dc3545;
+    font-weight: 600;
+}
+
+/* Pagination styling */
+.pagination {
+    margin-top: 1rem;
+}
+
+.page-link {
+    color: #17a2b8;
+    border: 1px solid #dee2e6;
+    padding: 0.5rem 0.75rem;
+    transition: all 0.3s ease;
+}
+
+.page-link:hover {
+    background-color: #17a2b8;
+    color: white;
+    border-color: #17a2b8;
+}
+
+.page-item.active .page-link {
+    background-color: #17a2b8;
+    border-color: #17a2b8;
+}
+
+/* Empty state styling */
+.no-data {
+    text-align: center;
+    padding: 2rem;
+    color: #6c757d;
+    font-style: italic;
+}
+
+
+
+/* Button used to open the contact form - fixed at the bottom of the page */
+.open-button {
+    background-color: #d0b100;
+    border-color: #d0b100;
+    color: black !important;
+    padding: 0.375rem 0.75rem;
+    font-size: 0.875rem;
+    border-radius: 4px;
+    transition: all 0.3s ease;
+}
+.open-button:hover {
+    background-color: #d0b100;
+    border-color: #d0b100;
+    transform: translateY(-1px);
+    box-shadow: rgba(0, 0, 0, 0.3);
+}
+
+/* Overlay background */
+.modal-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(4px);
+    z-index: 999;
+}
+
+/* The popup form - centered positioning */
+.form-popup {
+    display: none;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 1000;
+    width: 100%;
+    max-width: 500px;
+    animation: modalFadeIn 0.3s ease;
+}
+
+/* Add styles to the form container */
+.form-container {
+    max-width: none;
+    width: 100%;
+    padding: 2rem;
+    background-color: rgb(61, 61, 61);
+    border-radius: 8px;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
+    color: white;
+}
+
+/* Full-width input fields */
+.form-container input[type=text],
+.form-container input[type=password] {
+    width: 100%;
+    padding: 12px;
+    margin: 8px 0;
+    border: 1px solid #444;
+    border-radius: 4px;
+    background: #333;
+    color: white;
+    transition: all 0.3s ease;
+}
+
+/* Input focus states */
+.form-container input[type=text]:focus,
+.form-container input[type=password]:focus {
+    background-color: #444;
+    border-color: #d0b100;
+    outline: none;
+}
+
+/* Submit and cancel buttons */
+.form-container .btn {
+    background-color: #d0b100;
+    color: black;
+    padding: 12px 20px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    width: 100%;
+    margin-bottom: 10px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.form-container .cancel {
+    background-color: #444;
+    color: white;
+}
+
+/* Button hover effects */
+.form-container .btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+/* Modal animation */
+@keyframes modalFadeIn {
+    from {
+        opacity: 0;
+        transform: translate(-50%, -48%);
+    }
+    to {
+        opacity: 1;
+        transform: translate(-50%, -50%);
+    }
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .form-popup {
+        width: 90%;
+    }
+    
+    .form-container {
+        padding: 1.5rem;
+    }
+}
