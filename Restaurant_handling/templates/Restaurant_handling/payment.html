@@ -1,0 +1,184 @@
+<!-- templates/Restaurant_handling/payment.html -->
+{% extends 'main/header.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-md-6 offset-md-3">
+            <div class="card">
+                <div class="card-body">
+                    <h3>Complete Your Reservation</h3>
+                    
+                    <!-- Reservation Details -->
+                    <div class="mb-4">
+                        <h5>Reservation Summary</h5>
+                        <p><strong>Date:</strong> {{ reservation.reservation_date }}</p>
+                        <p><strong>Time:</strong> {{ reservation.reservation_time }}</p>
+                        <p><strong>Party Size:</strong> {{ reservation.reservation_party_size }}</p>
+                        
+                        {% if reservation.dish_id.all %}
+                            <h5>Selected Dishes:</h5>
+                            <ul class="list-unstyled">
+                                {% for dish in reservation.dish_id.all %}
+                                    <li>{{ dish.dish_name }} - ${{ dish.dish_cost }}</li>
+                                {% endfor %}
+                            </ul>
+                            <h5>Total: ${{ total_amount }}</h5>
+                        {% endif %}
+                    </div>
+
+                    <!-- Payment Form -->
+                    <form id="payment-form">
+                        {% csrf_token %}
+                        <div id="card-element" class="mb-3">
+                            <!-- Stripe Card Element will be inserted here -->
+                        </div>
+                        <div id="card-errors" role="alert" class="text-danger mb-3"></div>
+                        <button class="btn btn-primary w-100" id="submit-button" type="submit">
+                            <span id="button-text">Pay ${{ total_amount }}</span>
+                            <span id="spinner" class="spinner d-none">
+                                <div class="spinner-border spinner-border-sm" role="status">
+                                    <span class="visually-hidden">Loading...</span>
+                                </div>
+                            </span>
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Stripe JS -->
+<script src="https://js.stripe.com/v3/"></script>
+<script>
+    // Get CSRF token
+    function getCSRFToken() {
+        const cookies = document.cookie.split(';');
+        for (let cookie of cookies) {
+            const [name, value] = cookie.trim().split('=');
+            if (name === 'csrftoken') {
+                return value;
+            }
+        }
+        return null;
+    }
+
+    // Initialize Stripe
+    const stripe = Stripe('{{ stripe_publishable_key }}');
+    const elements = stripe.elements();
+    
+    // Create card Element
+    const card = elements.create('card', {
+        style: {
+            base: {
+                fontSize: '16px',
+                color: '#32325d',
+            },
+        }
+    });
+    
+    // Mount the card Element
+    card.mount('#card-element');
+    
+    // Handle form submission
+    const form = document.getElementById('payment-form');
+    const submitButton = document.getElementById('submit-button');
+    const buttonText = document.getElementById('button-text');
+    const spinner = document.getElementById('spinner');
+    
+    // Handle real-time validation errors
+    card.addEventListener('change', function(event) {
+        const displayError = document.getElementById('card-errors');
+        if (event.error) {
+            displayError.textContent = event.error.message;
+        } else {
+            displayError.textContent = '';
+        }
+    });
+    
+    form.addEventListener('submit', async function(event) {
+        event.preventDefault();
+        
+        submitButton.disabled = true;
+        buttonText.classList.add('d-none');
+        spinner.classList.remove('d-none');
+
+        try {
+            const csrfToken = getCSRFToken();
+            if (!csrfToken) {
+                throw new Error('CSRF token not found');
+            }
+
+            // Create payment method
+            const { paymentMethod, error: paymentMethodError } = await stripe.createPaymentMethod({
+                type: 'card',
+                card: card,
+            });
+
+            if (paymentMethodError) {
+                throw new Error(paymentMethodError.message);
+            }
+
+            // Send to your server
+            const response = await fetch('{% url "Restaurant_handling:process_payment" reservation.reservation_id %}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': csrfToken,
+                },
+                body: JSON.stringify({
+                    payment_method_id: paymentMethod.id,
+                    amount: {{ total_amount }},
+                }),
+            });
+
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+
+            const result = await response.json();
+            
+            if (result.success) {
+                window.location.href = result.redirect_url;
+            } else {
+                throw new Error(result.error);
+            }
+
+        } catch (error) {
+            const errorElement = document.getElementById('card-errors');
+            errorElement.textContent = error.message || 'An error occurred';
+            
+            submitButton.disabled = false;
+            buttonText.classList.remove('d-none');
+            spinner.classList.add('d-none');
+        }
+    });
+</script>
+
+<style>
+.spinner {
+    margin-left: 10px;
+}
+#card-element {
+    padding: 12px;
+    border: 1px solid #ced4da;
+    border-radius: 4px;
+    background-color: white;
+}
+#card-errors {
+    margin-top: 8px;
+    font-size: 14px;
+}
+.btn-primary {
+    position: relative;
+}
+.spinner {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+}
+</style>
+{% endblock %}
