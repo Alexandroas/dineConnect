@@ -1,7 +1,6 @@
 from django.utils import timezone
 from venv import logger
 from django.contrib import messages
-from django.http import HttpResponseForbidden
 from django.core.paginator import Paginator
 from django.shortcuts import render, redirect, get_object_or_404
 from dineConnect_project import settings
@@ -11,7 +10,12 @@ from django.db.models import Q
 from .decorators import business_required, login_required
 from .forms import DishForm, ReservationForm, DishUpdateForm
 from .models import Dish, Reservation
-from main.utils import send_reservation_email
+from main.utils import send_reservation_email, send_cancellation_email
+import json
+import stripe
+from django.http import JsonResponse
+from django.views.decorators.http import require_POST
+from django.urls import reverse
 @business_required
 def restaurant_dashboard(request):
     try:
@@ -149,7 +153,7 @@ def restaurant_detail(request, business_id):
 def restaurant_home(request):
     business = get_object_or_404(Business, business_owner=request.user)
     return render(request, 'Restaurant_handling/restaurant_home.html', {'business': business})
-import stripe
+
 @login_required
 def make_reservation(request, business_id):
     business = get_object_or_404(Business, business_id=business_id)
@@ -264,10 +268,7 @@ def payment_cancel(request, reservation_id):
     return redirect('Restaurant_handling:restaurant_detail', business_id=reservation.business_id.business_id)
 
 # views.py
-import json
-from django.http import JsonResponse
-from django.views.decorators.http import require_POST
-from django.urls import reverse
+
 
 @require_POST
 def process_payment(request, reservation_id):
@@ -422,7 +423,8 @@ def delete_reservation(request, business_id, reservation_id):
     reservation = get_object_or_404(Reservation, 
                                   reservation_id=reservation_id,
                                   business_id=business_id)
-    messages.success(request, 'Reservation deleted successfully!')
+    send_cancellation_email(reservation.user_id, reservation)
+    messages.success(request, 'Reservation canceled successfully!')
     reservation.delete()
     return redirect('Restaurant_handling:upcoming_reservations', business_id=business_id)
 
