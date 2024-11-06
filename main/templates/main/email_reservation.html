@@ -21,6 +21,10 @@
             <div class="detail-item">
                 <strong>Party Size:</strong> {{ reservation.reservation_party_size }}
             </div>
+            <div class="detail-item">
+                <strong>Status:</strong> {{ reservation.reservation_status }}
+            </div>
+        
             
             {% if reservation.dish_id.all %}
             <div class="detail-item">
