@@ -20,8 +20,8 @@ urlpatterns = [
     path('process-payment/<int:reservation_id>/',views.process_payment,name='process_payment'),
     path('payment/<int:reservation_id>/',views.payment_view,name='payment'),
     path('payment-success/<int:reservation_id>/',views.payment_success,name='payment_success'),
-    path ('reservation_details/<int:business_id>/<int:reservation_id>',views.reservation_details,name='reservation_details'),
-    path('delete_reservation/<int:business_id>/<int:reservation_id>/', views.delete_reservation, name='delete_reservation'),
+    path('reservation_details/<int:business_id>/<int:reservation_id>',views.reservation_details,name='reservation_details'),
+    path('cancel_reservation/<int:business_id>/<int:reservation_id>/', views.cancel_reservation, name='cancel_reservation'),
     path('manage_customers/', views.manage_customers, name='manage_customers'),
     path('customer_details/<int:user_id>/', views.customer_details, name='customer_details'),
 ]
