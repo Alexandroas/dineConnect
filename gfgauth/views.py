@@ -1,5 +1,6 @@
+from datetime import datetime, timedelta
 from django.http import JsonResponse
-from django.shortcuts import render, redirect
+from django.shortcuts import get_object_or_404, render, redirect
 from allauth.account.forms import SignupForm
 from django.views import View
 from django.contrib.auth import authenticate, login as auth_login, logout
@@ -12,12 +13,13 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.contrib.auth.forms import SetPasswordForm
 from django.contrib.auth import get_user_model
-from formtools.wizard.views import SessionWizardView
+from Restaurant_handling.models import Reservation
+from formtools.wizard.views import SessionWizardView # type: ignore
 from django.core.files.storage import FileSystemStorage
 from .models import Business, CustomUser
 import os
 from .forms import CustomUserCreationForm
-from main.utils import send_welcome_email
+from main.utils import send_welcome_email, send_cancellation_email_business, send_cancellation_email
 from django.conf import settings
 from .forms import (
     BusinessBasicInfoForm,
@@ -297,11 +299,58 @@ def profile(request, username):
         "dietery_preference": dietery_preference,
         "past_reservations": past_reservations,
         "user_profile": user,  # Add this to distinguish between logged-in user and profile user
-        "favorite_restaurants": favorite_restaurants
+        "favorite_restaurants": favorite_restaurants,
     }
     
     return render(request=request, template_name="gfgauth/profile.html", context=context)
 
+
+
+@login_required
+def view_reservation(request, reservation_id):
+    # Get the reservation and verify it belongs to the user
+    reservation = get_object_or_404(Reservation, 
+                                  reservation_id=reservation_id, 
+                                  user_id=request.user)
+    
+    # Calculate total amount if there are dishes
+    total_amount = sum(dish.dish_cost for dish in reservation.dish_id.all())
+    
+    return render(request, 'gfgauth/view_reservation.html', {
+        'reservation': reservation,
+        'total_amount': total_amount
+    })
+@login_required
+def cancel_reservation(request, reservation_id):
+    if request.method == 'POST':
+        reservation = get_object_or_404(Reservation, 
+                                      reservation_id=reservation_id,  
+                                      user_id=request.user)
+        
+        if reservation.reservation_status == 'Cancelled':
+            messages.error(request, "This reservation is already cancelled.")
+            return redirect('view_reservation', reservation_id=reservation_id)
+        
+        # Add any business logic for cancellation (e.g., time limits)
+        current_time = timezone.now()
+        reservation_datetime = timezone.make_aware(
+            datetime.combine(reservation.reservation_date, reservation.reservation_time)
+        )
+        
+        # Example: Only allow cancellation up to 1 hour before reservation
+        if current_time > reservation_datetime - timedelta(hours=1):
+            messages.error(request, 
+                         "Reservations can only be cancelled at least 1 hour in advance.")
+            return redirect('view_reservation', reservation_id=reservation_id)
+        
+        reservation.reservation_status = 'Cancelled'
+        reservation.save()
+        send_cancellation_email(request.user, reservation)  # For user
+        send_cancellation_email_business(reservation.business_id, reservation)  # For business
+        messages.success(request, "Your reservation has been cancelled successfully.")
+        return redirect('profile', username=request.user.username)
+    
+    return redirect('view_reservation', reservation_id=reservation_id)
 
 @login_required
 def toggle_favorite(request, business_id):
