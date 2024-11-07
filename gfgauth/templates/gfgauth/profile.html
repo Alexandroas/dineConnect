@@ -64,7 +64,6 @@
                 <button type="submit" class="btn btn-primary">Save Changes</button>
               </div>
             </form>
-            <!-- Move this outside of the form -->
             <div class="card mt-4">
               <div class="card-header">
                 <h3>My Favorite Restaurants</h3>
@@ -115,15 +114,26 @@
           <div class="card-body">
             {% if upcoming_reservations %}
               <ul class="list-group">
-                {% for reservation in upcoming_reservations %}
-                  <li class="list-group-item">
-                    <h5>{{ reservation.business_id.business_name }}</h5>
-                    <p>
-                      Date: {{ reservation.reservation_date }}<br />
-                      Time: {{ reservation.reservation_time }}
-                    </p>
-                  </li>
-                {% endfor %}
+                <!-- Fix the double dot and properly format the URL -->
+{% for reservation in upcoming_reservations %}
+<li class="list-group-item">
+    <h5>{{ reservation.business_id.business_name }}</h5>
+    <p>
+        Date: {{ reservation.reservation_date }}<br />
+        Time: {{ reservation.reservation_time }}
+    </p>
+    <div class="d-flex justify-content-between align-items-center mt-2">
+        <a href="{% url 'view_reservation' reservation.reservation_id %}" 
+           class="btn btn-sm btn-primary">
+            View Reservation
+        </a>
+        <a href="{% url 'Restaurant_handling:restaurant_detail' reservation.business_id.business_id %}" 
+           class="btn btn-sm btn-outline-secondary">
+            View Restaurant
+        </a>
+    </div>
+</li>
+{% endfor %}
               </ul>
             {% else %}
               <p>No upcoming reservations.</p>
