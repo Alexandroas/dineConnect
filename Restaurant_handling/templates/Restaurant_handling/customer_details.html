@@ -2,6 +2,7 @@
 {% load static %}
 
 {% block content %}
+<link rel = "stylesheet" type = "text/css" href = "{% static 'Restaurant_handling/customer_details.css' %}">
 <div class="container-fluid mt-4">
     <div class="row">
         <div class="col-md-9 col-lg-10 ms-sm-auto px-4">
@@ -127,7 +128,7 @@
                                     {% for dish in stats.favorite_dishes %}
                                         <div class="list-group-item d-flex justify-content-between align-items-center">
                                             {{ dish.dish_name }}
-                                            <span class="badge bg-primary rounded-pill">{{ dish.order_count }} times</span>
+                                            <span class="badge bg-secondary rounded-pill">{{ dish.order_count }} times</span>
                                         </div>
                                     {% endfor %}
                                 </div>
