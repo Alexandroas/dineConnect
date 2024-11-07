@@ -105,7 +105,7 @@ def restaurant_profile(request):
                 user_form.save()
                 business_form.save()
                 messages.success(request, f'Your profile has been updated successfully!')
-                return redirect("restaurant_profile")
+                return redirect('Restaurant_handling:restaurant_profile')
             else:
                 for error in list(user_form.errors.values()) + list(business_form.errors.values()):
                     messages.error(request, error)
@@ -152,7 +152,12 @@ def restaurant_detail(request, business_id):
 @business_required
 def restaurant_home(request):
     business = get_object_or_404(Business, business_owner=request.user)
-    return render(request, 'Restaurant_handling/restaurant_home.html', {'business': business})
+    stats = business.get_reservation_stats()
+    context = {
+        'business': business,
+        'stats': stats
+    }
+    return render(request, 'Restaurant_handling/restaurant_home.html', context)
 
 @login_required
 def make_reservation(request, business_id):
@@ -410,16 +415,34 @@ def reservation_details(request, business_id, reservation_id):
    
     return render(request, 'Restaurant_handling/reservation_details.html', context)
 
+
 @business_required
-def delete_reservation(request, business_id, reservation_id):
+def cancel_reservation(request, business_id, reservation_id):
     reservation = get_object_or_404(Reservation, 
                                   reservation_id=reservation_id,
                                   business_id=business_id)
-    send_cancellation_email(reservation.user_id, reservation)
+    reservation.reservation_status = 'Cancelled'
+    reservation.save()
     messages.success(request, 'Reservation canceled successfully!')
-    reservation.delete()
-    return redirect('Restaurant_handling:upcoming_reservations', business_id=business_id)
-
+    send_cancellation_email(reservation.user_id, reservation)
+    context = {
+        'business': reservation.business_id,
+        'reservation': reservation
+    }
+    return render(request, 'Restaurant_handling/upcoming_reservations.html', context)
+@business_required
+def reservation_confirmation(request, business_id, reservation_id):
+    reservation = get_object_or_404(Reservation, 
+                                  reservation_id=reservation_id,
+                                  business_id=business_id)
+    reservation.reservation_status = 'Confirmed'
+    reservation.save()
+    messages.success(request, 'Reservation confirmed successfully!')
+    context = {
+        'business': reservation.business_id,
+        'reservation': reservation
+    }
+    return render(request, 'Restaurant_handling/upcoming_reservations.html', context)
 
 @business_required
 def manage_customers(request):
