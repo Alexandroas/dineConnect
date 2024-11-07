@@ -1,38 +1,88 @@
 {% extends 'main/header.html' %}
 {% block content %}
+<div class="container-fluid mt-4">
 <div class="row">
   <!-- Sidebar -->
   <div class="col-md-3 col-lg-2 d-md-block bg-light sidebar">
     {% include 'Restaurant_handling/restaurant_dashboard.html' %}
   </div>
 </div>
-<div>
-  <h2>{{ business.business_name }}</h2>
-  <p>Status: {% if is_open %}Open{% else %}Closed{% endif %}</p>
+  <h1 class="section-title">Your dashboard</h1>
+  <h3 class="section-title">Status: {% if is_open %}Open{% else %}Closed{% endif %}<h3>
+  <div class="container">
+  <div class="row">
+    <div class="col-md-4">
+      <div class="card">
+        <div class="card-body">
+          <h5 class="card-title">Today's Reservations</h5>
+          <p class="card-text">{{ stats.today }}</p>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="card">
+        <div class="card-body">
+          <h5 class="card-title">Upcoming Reservations</h5>
+          <p class="card-text">{{ stats.upcoming }}</p>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="card">
+        <div class="card-body">
+          <h5 class="card-title">Total Reservations</h5>
+          <p class="card-text">{{ stats.total }}</p>
+        </div>
+      </div>
+    </div>
+  </div>
+  </div>
+  <h3 class="section-title">Working hours</h3>
+  <div class="container">
+    <div class="card">
   
-  <h3>Today's Statistics</h3>
-  <p>Total Reservations: {{ stats.total }}</p>
-  <p>Upcoming Reservations: {{ stats.upcoming }}</p>
-  <p>Today's Reservations: {{ stats.today }}</p>
+        <div class="card-body">
+          <div class="row">
+      <div class="col">
+        <h5>Monday</h5>
+        <p>{{ business.monday_open|time:"H:i" }} - {{ business.monday_close|time:"H:i" }}</p>
+      </div>
+      <div class="col">
+        <h5>Tuesday</h5>
+        <p>{{ business.tuesday_open|time:"H:i" }} - {{ business.tuesday_close|time:"H:i" }}</p>
+      </div>
+      <div class="col">
+        <h5>Wednesday</h5>
+        <p>{{ business.wednesday_open|time:"H:i" }} - {{ business.wednesday_close|time:"H:i" }}</p>
+      </div>
+      <div class="col">
+        <h5>Thursday</h5>
+        <p>{{ business.thursday_open|time:"H:i" }} - {{ business.thursday_close|time:"H:i" }}</p>
+      </div>
+      <div class="col">
+        <h5>Friday</h5>
+        <p>{{ business.friday_open|time:"H:i" }} - {{ business.friday_close|time:"H:i" }}</p>
+      </div>
+      <div class="col">
+        <h5>Saturday</h5>
+        <p>{{ business.saturday_open|time:"H:i" }} - {{ business.saturday_close|time:"H:i" }}</p>
+      </div>
+      <div class="col">
+        <h5>Sunday</h5>
+        <p>{{ business.sunday_open|time:"H:i" }} - {{ business.sunday_close|time:"H:i" }}</p>
+      </div>
+    </div>
+      </div>
+      
+  </div>
   
-  <h3>Available Time Slots Today</h3>
+  <h3 class="section-title">Today's Slots</h3>
+
   <ul>
   {% for slot in today_slots %}
       <li>{{ slot|time:"H:i" }}</li>
   {% empty %}
       <li>No available slots today</li>
-  {% endfor %}
-  </ul>
-  
-  <h3>Today's Reservations</h3>
-  <ul>
-  {% for reservation in today_reservations %}
-      <li>
-          {{ reservation.reservation_time|time:"H:i" }} - 
-          Party of {{ reservation.reservation_party_size }}
-      </li>
-  {% empty %}
-      <li>No reservations today</li>
   {% endfor %}
   </ul>
 </div>
