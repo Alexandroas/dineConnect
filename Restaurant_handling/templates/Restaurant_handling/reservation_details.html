@@ -17,11 +17,11 @@
                 <button class="open-button" onclick="openForm()"> Cancel Reservation</button>
                 <div class="modal-overlay">
                 <div class="form-popup" id="myForm">
-                    <form action="{% url 'Restaurant_handling:delete_reservation' business.business_id reservation.reservation_id %}" method="post" class="form-container">
+                    <form action="{% url 'Restaurant_handling:cancel_reservation' business.business_id reservation.reservation_id %}" method="post" class="form-container">
                         {% csrf_token %}
                         <h3>Are you sure you want to cancel this reservation?</h3>
                         <p>This action cannot be undone.</p>
-                        <a href="{% url 'Restaurant_handling:delete_reservation' business.business_id reservation.reservation_id %}" 
+                        <a href="{% url 'Restaurant_handling:cancel_reservation' business.business_id reservation.reservation_id %}" 
                             class="btn btn-primary"> Yes</a>
                         <button type="button" class="btn btn-primary" onclick="closeForm()">No</button>
                     </form>
