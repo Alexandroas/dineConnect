@@ -1,0 +1,100 @@
+<!-- templates/gfgauth/view_reservation.html -->
+{% extends 'main/header.html' %}
+{% block content %}
+{%load static%} 
+<link rel="stylesheet" type="text/css" href="{% static 'Restaurant_handling\reservation_details.css' %}">
+
+<div class="container mt-4">
+    <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h3>Reservation Details</h3>
+            <div>
+                <a href="{% url 'profile' user.username %}" class="btn btn-outline-secondary me-2">
+                    Back to Profile
+                </a>
+                {% if reservation.reservation_status != 'Cancelled' %}
+                    <button onclick="openForm()" class="btn btn-danger">
+                        Cancel Reservation
+                    </button>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Modal for Cancel Confirmation -->
+        <div class="modal-overlay">
+            <div class="form-popup" >
+                <form action="{% url 'cancel_reservation' reservation.reservation_id %}" method="post" class="form-container">
+                    {% csrf_token %}
+                    <h3>Cancel Reservation</h3>
+                    <p>Are you sure you want to cancel this reservation?</p>
+                    <p class="text-muted">This action cannot be undone.</p>
+                    <div class="d-flex justify-content-end gap-2">
+                        <button type="button" class="btn btn-secondary" onclick="closeForm()">No, Keep it</button>
+                        <button type="submit" class="btn btn-danger">Yes, Cancel</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <h4>Restaurant Information</h4>
+                    <p><strong>Name:</strong> {{ reservation.business_id.business_name }}</p>
+                    <p><strong>Address:</strong> {{ reservation.business_id.business_address }}</p>
+                    <p><strong>Contact:</strong> {{ reservation.business_id.contact_number }}</p>
+                </div>
+                
+                <div class="col-md-6">
+                    <h4>Reservation Details</h4>
+                    <p><strong>Date:</strong> {{ reservation.reservation_date }}</p>
+                    <p><strong>Time:</strong> {{ reservation.reservation_time }}</p>
+                    <p><strong>Party Size:</strong> {{ reservation.reservation_party_size }}</p>
+                    <p><strong>Status:</strong> {{ reservation.reservation_status }}</p>
+                    
+                    {% if reservation.reservation_special_requests %}
+                        <p><strong>Special Requests:</strong> {{ reservation.reservation_special_requests }}</p>
+                    {% endif %}
+                </div>
+            </div>
+
+            {% if reservation.dish_id.all %}
+                <div class="mt-4">
+                    <h4>Ordered Items</h4>
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Item</th>
+                                <th>Price</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for dish in reservation.dish_id.all %}
+                                <tr>
+                                    <td>{{ dish.dish_name }}</td>
+                                    <td>${{ dish.dish_cost }}</td>
+                                </tr>
+                            {% endfor %}
+                            <tr class="table-active">
+                                <th>Total</th>
+                                <td>${{ total_amount }}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+<script>
+    function openForm() {
+        document.querySelector('.modal-overlay').style.display = "block";
+        document.querySelector('.form-popup').style.display = "block";
+      }
+      
+      function closeForm() {
+        document.querySelector('.modal-overlay').style.display = "none";
+        document.querySelector('.form-popup').style.display = "none";
+      }
+
+</script>
+{% endblock %}
