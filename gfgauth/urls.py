@@ -15,4 +15,6 @@ urlpatterns = [
     # urls.py
     path('toggle-favorite/<int:business_id>/', views.toggle_favorite, name='toggle_favorite'),
     path('favorites/', views.favorite_restaurants, name='favorite_restaurants'),
+    path('view_reservation/<int:reservation_id>', views.view_reservation, name='view_reservation'),
+    path('cancel_reservation/<int:reservation_id>', views.cancel_reservation, name='cancel_reservation'),
 ]
