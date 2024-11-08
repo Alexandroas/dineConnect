@@ -2,7 +2,7 @@ from django.contrib import admin
 
 from Restaurant_handling.models import DieteryPreference
 
-from . models import CustomUser, Business
+from . models import CustomUser, Business, businessHours
 
 
 from Restaurant_handling.admin import DishInline
@@ -17,6 +17,7 @@ admin.register(DieteryPreference)
 class DieteryPreferenceAdmin(admin.ModelAdmin):
     filter_horizontal = ('dietery_name',)
     search_fields = ('dietery_name',)
+admin.site.register(businessHours)
 
 
 admin.site.register(Business, BusinessAdmin)
