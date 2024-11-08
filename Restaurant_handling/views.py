@@ -5,12 +5,13 @@ from django.core.paginator import Paginator
 from django.shortcuts import render, redirect, get_object_or_404
 from dineConnect_project import settings
 from gfgauth.forms import BusinessUpdateForm, UserUpdateForm  # Import your existing form
-from gfgauth.models import Business, CustomUser
+from gfgauth.models import Business, CustomUser, businessHours, get_buisness_hours
 from django.db.models import Q
 from .decorators import business_required, login_required
 from .forms import DishForm, ReservationForm, DishUpdateForm
 from .models import Dish, Payment, Reservation
-from main.utils import send_reservation_email, send_cancellation_email
+from django.db import models
+from main.utils import send_reservation_email, send_cancellation_email, send_initial_res_confirmation_email
 import json
 import stripe # type: ignore
 from django.http import JsonResponse
@@ -41,8 +42,9 @@ def add_dish(request):
                 # Set the business_id field
                 dish.business_id = business  # or dish.BusinessID depending on your model
                 dish.save()
+                messages.success(request, 'Dish saved successfully!')
                 print(f"Dish saved successfully with business_id: {business.business_id}")
-                return redirect('add_dish')
+                return redirect('Restaurant_handling:add_dish')
             except Business.DoesNotExist:
                 print("No business found for user:", request.user)
                 messages.error(request, "Error: No business associated with this account")
@@ -90,7 +92,8 @@ def edit_dish(request, dish_id=None):
 def delete_dish(request, dish_id=None):
     dish = get_object_or_404(Dish, dish_id=dish_id)
     dish.delete()
-    return redirect(restaurant_menu) #Redirect to the restaurant menu page
+    messages.success(request, 'Dish deleted successfully!')
+    return redirect('Restaurant_handling:restaurant_menu') #Redirect to the restaurant menu page
 
 @business_required
 def restaurant_profile(request):
@@ -135,14 +138,14 @@ def permission_denied_view(request, exception):
 def restaurant_menu(request):
     # Get the business associated with the logged-in user
     business = Business.objects.filter(business_owner=request.user).first()
-    dishes = Dish.objects.filter(business_id=business)
+    dishes = Dish.objects.filter(business_id=business).order_by('dish_type__dish_type_name')
     return render(request, 'Restaurant_handling/registered_dishes.html', {
         'dishes': dishes,
         'business': business  # Add business to the context
     })
 def restaurant_detail(request, business_id):
     business = get_object_or_404(Business, business_id=business_id)
-    dishes = Dish.objects.filter(business_id=business)
+    dishes = Dish.objects.filter(business_id=business).order_by('dish_type__dish_type_name')
     context = {
         'business': business,
         'dishes': dishes  # Add dishes to context
@@ -153,8 +156,14 @@ def restaurant_detail(request, business_id):
 def restaurant_home(request):
     business = get_object_or_404(Business, business_owner=request.user)
     stats = business.get_reservation_stats()
+    hours_by_day = {}
+    for day_number, day_name in businessHours.DAYS_OF_WEEK:
+        hours = business.business_hours.filter(day_of_week=day_number).order_by('opening_time')
+        hours_by_day[day_name] = hours
+    
     context = {
         'business': business,
+        'hours_by_day': hours_by_day,
         'stats': stats
     }
     return render(request, 'Restaurant_handling/restaurant_home.html', context)
@@ -162,7 +171,7 @@ def restaurant_home(request):
 @login_required
 def make_reservation(request, business_id):
     business = get_object_or_404(Business, business_id=business_id)
-    dishes = Dish.objects.filter(business_id=business)
+    dishes = Dish.objects.filter(business_id=business).order_by('dish_type__dish_type_name')
    
     if request.method == 'POST':
         form = ReservationForm(request.POST)
@@ -173,9 +182,12 @@ def make_reservation(request, business_id):
                 reservation.business_id = business
                 reservation.user_id = request.user
                 reservation.reservation_status = 'Pending'  # Add status
-               
+                if reservation.reservation_time <= timezone.now().time() or reservation.reservation_date <= timezone.now().date():
+                    messages.error(request, 'Reservation time cannot be in the past.')
+                    return redirect('Restaurant_handling:restaurant_reservation', business_id=business_id)
                 # Save the reservation first
-                reservation.save()
+                else:
+                    reservation.save()
                
                 # Handle selected dishes
                 selected_dishes = request.POST.getlist('selected_dishes')
@@ -191,7 +203,7 @@ def make_reservation(request, business_id):
                         return redirect('Restaurant_handling:payment', reservation_id=reservation.reservation_id)
                     
                 # If no dishes selected, just send confirmation email
-                send_reservation_email(request.user, reservation)
+                send_initial_res_confirmation_email(request.user, reservation)
                 messages.success(request, 'Your reservation has been saved!')
                 return redirect('Restaurant_handling:restaurant_detail', business_id=business_id)
                
@@ -391,7 +403,7 @@ def upcoming_reservations(request, business_id):
         
     except Exception as e:
         messages.error(request, f"An error occurred while loading reservations: {str(e)}")
-        return redirect('restaurant_home')
+        return redirect('Restaurant_handling:restaurant_home')
     
     
 @business_required
@@ -431,12 +443,20 @@ def cancel_reservation(request, business_id, reservation_id):
     }
     return render(request, 'Restaurant_handling/upcoming_reservations.html', context)
 @business_required
-def reservation_confirmation(request, business_id, reservation_id):
+def confirm_reservation(request, business_id, reservation_id):
+    reservation = get_object_or_404(Reservation, reservation_id=reservation_id, business_id=business_id)
+    if reservation.reservation_status == 'Confirmed':
+        messages.error(request, 'Reservation already confirmed!')
+        return redirect('Restaurant_handling:upcoming_reservations', business_id=business_id)
+    
+    
+    
     reservation = get_object_or_404(Reservation, 
                                   reservation_id=reservation_id,
                                   business_id=business_id)
     reservation.reservation_status = 'Confirmed'
     reservation.save()
+    send_reservation_email(reservation.user_id, reservation)
     messages.success(request, 'Reservation confirmed successfully!')
     context = {
         'business': reservation.business_id,
@@ -455,7 +475,7 @@ def manage_customers(request):
     }
     
     return render(request, 'Restaurant_handling/manage_customers.html', context)
-from django.db import models
+
 @business_required
 def customer_details(request, user_id):
     user = get_object_or_404(CustomUser, id=user_id)
