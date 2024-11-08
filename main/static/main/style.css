@@ -306,7 +306,9 @@ a.step-link {
   box-shadow: 0 0 0 0.2rem rgba(0,123,255,.25);
 }
 
-
+p.card-text {
+  color: #ffffff !important;
+}
 /* Reservation items styling */
 .list-group-item {
   transition: background-color 0.2s ease;
@@ -367,4 +369,25 @@ a.step-link {
   background-color: #e3f2fd;
   border-color: #bee5eb;
   color: #0c5460;
+}
+.testimonial-card{
+  background: #1a1a1a;
+  border: none;
+  border-radius: 15px;
+  overflow: hidden;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  user-select: none;
+}
+.page-link {
+  background-color: black !important;
+}
+.page-link:hover {
+  color: #ffd900 !important;
+}
+.page-item.active .page-link {
+  z-index: 3;
+  color: #fff;
+  background-color: #d0b100 !important; 
+  border-color: #d0b100 !important;
 }
