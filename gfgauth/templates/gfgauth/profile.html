@@ -18,10 +18,10 @@
             <h3>Profile Information</h3>
           </div>
           <div class="card-body">
-            {% if customer.profile_image %}
-            <img src="{{ customer.profile_image.url }}" 
+            {% if user.profile_image %}
+            <img src="{{ user.profile_image.url }}" 
              class="img-fluid rounded-circle mb-3 center:" 
-             style="width: 50px; height: 50px; margin-left: auto; margin-right: auto; display: block;" />
+             style="width: 100px; height: 100px; margin-left: auto; margin-right: auto; display: block;" />
           {% else %}
         <!-- Display a default placeholder image -->
               <img src="{% static 'images/default_profile.png' %}" 
