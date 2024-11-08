@@ -1,160 +1,153 @@
 {% extends 'main/header.html' %}
 {% load static %}
 {% block content %}
-  <div class="container business-grid">
-    <!-- Search and Filter Section -->
-     <br>
-    <div class="search-section">
-      <div class="row">
+<main class="container-fluid py-5">
+  <!-- Hero Section -->
+  <section class="hero-section text-center mb-5">
+    <h1 class="display-4 mb-4">Discover Your Next Dining Experience</h1>
+    <p class="lead text-muted mb-5">Explore the finest local restaurants, curated just for you</p>
+    
+    <!-- Search and Filters -->
+    <div class="search-container p-4 rounded-3 shadow-sm mb-5">
+      <div class="row g-3">
         <div class="col-md-6">
-          <input type="text" class="form-control search-input" placeholder="Search restaurants..." id="searchInput" />
+          <div class="input-group">
+            <span class="input-group-text border-end-0">
+              <i class="fas fa-search text-muted"></i>
+            </span>
+            <input type="text" class="form-control border-start-0" placeholder="Search restaurants..." id="searchInput" />
+          </div>
         </div>
         <div class="col-md-6">
-          <div class="d-flex gap-2">
-            <select class="form-select search-input" id="cuisineTypeSearch" onchange="filterByCuisineType()">
+          <div class="d-flex gap-3">
+            <select class="form-select" id="cuisineTypeSearch" onchange="filterByCuisineType()">
               <option value="all">All Cuisines</option>
               {% for cuisine in cuisines %}
                 <option value="{{ cuisine.cuisine_name|lower }}">{{ cuisine.cuisine_name }}</option>
               {% endfor %}
             </select>
-            <select class="form-select search-input">
+            <select class="form-select">
               <option value="">Sort By</option>
-              <option value="rating">Rating</option>
-              <option value="name">Name</option>
-              <option value="price">Price</option>
+              <option value="rating">Top Rated</option>
+              <option value="name">Name (A-Z)</option>
+              <option value="price">Price (Low-High)</option>
             </select>
           </div>
         </div>
       </div>
     </div>
+  </section>
 
-    <!-- Title Section -->
-    <h1 class="section-title">Discover Local Restaurants</h1>
-
-    <!-- Business Grid -->
-    <div class="row row-cols-1 row-cols-md-3 g-4">
+  <!-- Restaurant Grid -->
+  <section class="restaurants-grid mb-5">
+    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
       {% for business in businesses %}
         <div class="col">
-          <div class="card business-card cuisine_type_filter" data-cuisines="{{ business.get_cuisine_names|lower }}">
+          <div class="card h-100 border-0 shadow-sm hover-shadow cuisine_type_filter" data-cuisines="{{ business.get_cuisine_names|lower }}">
             <a href="{% url 'Restaurant_handling:restaurant_detail' business.business_id %}" class="text-decoration-none">
-              <div class="card-img-wrapper">
+              <div class="position-relative">
                 {% if business.business_image %}
-                  <img src="{{ business.business_image.url }}" alt="{{ business.business_name }}" class="card-img" />
+                  <img src="{{ business.business_image.url }}" alt="{{ business.business_name }}" 
+                       class="card-img-top object-fit-cover" style="height: 200px;" />
                 {% else %}
-                  <img src="/api/placeholder/400/320" alt="No Image Available" class="card-img" />
+                  <img src="/api/placeholder/400/320" alt="No Image Available" 
+                       class="card-img-top object-fit-cover" style="height: 200px;" />
                 {% endif %}
-                <!--Favourite button-->
-                <button class="favorite-btn {% if business in user.favourite_restaurants.all %}active{% endif %}" 
-        onclick="event.preventDefault(); toggleFavorite(this, {{ business.business_id }});"
-        {% if not user.is_authenticated %}disabled{% endif %}
-        title="{% if not user.is_authenticated %}Please login to add favorites{% endif %}">
-    <i class="bi {% if business in user.favourite_restaurants.all %}bi-heart-fill{% else %}bi-heart{% endif %}"></i>
-</button>           
-      </div>
+                <button class="favorite-btn position-absolute top-0 end-0 m-3 p-2 shadow-sm 
+                               {% if business in user.favourite_restaurants.all %}active{% endif %}"
+                        onclick="event.preventDefault(); toggleFavorite(this, {{ business.business_id }});"
+                        {% if not user.is_authenticated %}disabled{% endif %}
+                        title="{% if not user.is_authenticated %}Please login to add favorites{% endif %}">
+                  <i class="bi {% if business in user.favourite_restaurants.all %}bi-heart-fill text-danger{% else %}bi-heart{% endif %}"></i>
+                </button>
+              </div>
 
               <div class="card-body">
-                <h5 class="business-name">{{ business.business_name }}</h5>
-
-                <div class="business-info">
-                  <p class="business-info">
-                    <i class="fas fa-user"></i> {{ business.business_owner }}
-                  </p>
-                  <p class="business-info">
-                    <i class="fas fa-map-marker-alt"></i> {{ business.business_address }}
-                  </p>
-                  <p class="business-info">
-                    <i class="fas fa-phone"></i> {{ business.contact_number }}
-                  </p>
-                  <p class="business-info">
-                    <i class="fas fa-utensils"></i> {{ business.get_cuisine_names }}
-                  </p>
-                </div>
-
-                <div class="d-flex align-items-center mb-3">
-                  <div class="rating-business">
-                    <i class="fas fa-star"></i>
-                    <i class="fas fa-star"></i>
-                    <i class="fas fa-star"></i>
-                    <i class="fas fa-star"></i>
-                    <i class="fas fa-star-half-alt"></i>
+                <h5 class="card-title mb-3">{{ business.business_name }}</h5>
+                <div class="mb-3">
+                  <span class="badge">{{ business.get_cuisine_names }}</span>
+                  <div class="mt-2">
+                    <span class="text-warning">
+                      <i class="fas fa-star"></i>
+                      <i class="fas fa-star"></i>
+                      <i class="fas fa-star"></i>
+                      <i class="fas fa-star"></i>
+                      <i class="fas fa-star-half-alt"></i>
+                    </span>
+                    <span class="ms-2 text-muted">
+                      <i class="fas fa-dollar-sign"></i>
+                      <i class="fas fa-dollar-sign"></i>
+                    </span>
                   </div>
-                  <span class="price-level">
-                    <i class="fas fa-dollar-sign"></i>
-                    <i class="fas fa-dollar-sign"></i>
-                  </span>
                 </div>
+                <ul class="list-unstyled text-muted small">
+                  <li class="mb-2"><i class="fas fa-user me-2"></i>{{ business.business_owner }}</li>
+                  <li class="mb-2"><i class="fas fa-map-marker-alt me-2"></i>{{ business.business_address }}</li>
+                  <li><i class="fas fa-phone me-2"></i>{{ business.contact_number }}</li>
+                </ul>
               </div>
             </a>
           </div>
         </div>
       {% endfor %}
-      <div class="pagination">
-        <span class="step-link">
-          {% if businesses.has_previous %}
-            <a href="?page=1" class ="btn btn-primary">&laquo; First</a>
-            <a href="?page={{ businesses.previous_page_number }}" class ="btn btn-primary">Previous</a>
-          {% endif %}
-          <span class="current">
-            Page {{ businesses.number }} of {{ businesses.paginator.num_pages }}.
-          </span>
-          {% if businesses.has_next %}
-            <a href="?page={{ businesses.next_page_number }}" class ="btn btn-primary">Next</a>
-            <a href="?page={{ businesses.paginator.num_pages }}" class ="btn btn-primary">Last &raquo;</a>
-          {% endif %}
-        </span>
-      </div>
     </div>
-    <div class="container-fluid card-body">
-      <div class="row">
-        <h1 class="section-title">What is dineConnect?</h1>
-        <div class="card-body">
-          <p>DineConnect is an innovative restaurant discovery platform designed to transform how people explore and connect with local dining establishments. Unlike traditional review sites, DineConnect focuses on creating meaningful connections between diners and restaurants through personalized recommendations and detailed insights into each establishment's unique offerings, ambiance, and culinary specialties. The platform empowers users to discover restaurants based on specific dietary preferences, cuisine types, and special requirements, while also allowing them to save their favorite spots for future reference. Whether you're a food enthusiast looking for your next culinary adventure, a casual diner seeking the perfect spot + a family gathering, or a busy professional in need of reliable lunch options, DineConnect streamlines the restaurant discovery process. The platform's user-friendly interface combines detailed restaurant information, user preferences, and community insights to help users make informed dining decisions. By bridging the gap between diners and local restaurants, DineConnect aims to enhance the dining experience while supporting local businesses and fostering a vibrant culinary community.</p>
-        </div>
-      </div>
-    </div>
-  </div>
-  <div class="container-fluid">
-    <h1 class="section-title">Testimonials</h1>
+
+    <!-- Pagination -->
+    <nav class="mt-5" aria-label="Restaurant navigation">
+      <ul class="pagination justify-content-center">
+        {% if businesses.has_previous %}
+          <li class="page-item">
+            <a class="page-link" href="?page=1">&laquo; First</a>
+          </li>
+          <li class="page-item">
+            <a class="page-link" href="?page={{ businesses.previous_page_number }}">Previous</a>
+          </li>
+        {% endif %}
+        <li class="page-item active">
+          <span class="page-link">Page {{ businesses.number }} of {{ businesses.paginator.num_pages }}</span>
+        </li>
+        {% if businesses.has_next %}
+          <li class="page-item">
+            <a class="page-link" href="?page={{ businesses.next_page_number }}">Next</a>
+          </li>
+          <li class="page-item">
+            <a class="page-link" href="?page={{ businesses.paginator.num_pages }}">Last &raquo;</a>
+          </li>
+        {% endif %}
+      </ul>
+    </nav>
+  </section>
+
+  <!-- About Section -->
+  <section class="about-section bg-dark rounded-3 p-5 mb-5">
+    <h2 class="display-6 mb-4">What is dineConnect?</h2>
+    <p class="lead mb-0">DineConnect is an innovative restaurant discovery platform designed to transform how people explore and connect with local dining establishments. We focus on creating meaningful connections between diners and restaurants through personalized recommendations and detailed insights into each establishment's unique offerings, ambiance, and culinary specialties.</p>
+  </section>
+
+  <!-- Testimonials Section -->
+  <section class="testimonials-section">
+    <h2 class="display-6 text-center mb-5">What Our Users Say</h2>
     {% if testimonials %}
-      <div id="carouselExampleIndicators" class="carousel slide">
+      <div id="carouselTestimonials" class="carousel slide" data-bs-ride="carousel">
         <div class="carousel-indicators">
           {% for testimonial in testimonials %}
-            <button type="button"
-              data-bs-target="#carouselExampleIndicators"
-              data-bs-slide-to="{{ forloop.counter0 }}"
-              class="{% if forloop.first %}active{% endif %}"
-              aria-current="{% if forloop.first %}
-                
-                true
-
-              {% else %}
-                
-                false
-
-              {% endif %}"
-              aria-label="Slide {{ forloop.counter }}">
-
-            </button>
+            <button type="button" data-bs-target="#carouselTestimonials" data-bs-slide-to="{{ forloop.counter0 }}"
+                    class="{% if forloop.first %}active{% endif %}"
+                    aria-current="{% if forloop.first %}true{% else %}false{% endif %}"
+                    aria-label="Slide {{ forloop.counter }}"></button>
           {% endfor %}
         </div>
         <div class="carousel-inner">
           {% for testimonial in testimonials %}
             <div class="carousel-item {% if forloop.first %}active{% endif %}">
-              <div class="testimonial-content text-center">
-                <p class="testimonial-text">"{{ testimonial.content }}"</p>
-                <div class="testimonial-author">
-                  <img src="{% if testimonial.user.profile_image %}
-                      {{ testimonial.user.profile_image.url }}
-                    {% else %}
-                      {% static 'gfgauth/img/default_profile.jpg' %}
-                    {% endif %}"
-                    style="width: 50px; height: 50px;"
-                    alt=""
-                    aria-hidden="true"
-                    class="rounded-circle" />
-                  <p class="author-name">- {{ testimonial.user.get_full_name|default:testimonial.user.username }}</p>
+              <div class="testimonial-card p-5 rounded-3 shadow-sm mx-auto" style="max-width: 700px;">
+                <div class="d-flex flex-column align-items-center text-center">
+                  <img src="{% if testimonial.user.profile_image %}{{ testimonial.user.profile_image.url }}{% else %}{% static 'gfgauth/img/default_profile.jpg' %}{% endif %}"
+                       class="rounded-circle mb-3" style="width: 80px; height: 80px; object-fit: cover;" alt="" />
+                  <p class="lead mb-3">"{{ testimonial.content }}"</p>
+                  <h6 class="fw-bold mb-1">{{ testimonial.user.get_full_name|default:testimonial.user.username }}</h6>
                   {% if testimonial.rating %}
-                    <div class="rating" style="margin-bottom: 2%;">
+                    <div class="rating mb-2">
                       {% with range=''|center:testimonial.rating %}
                         {% for _ in range %}
                           <i class="bi bi-star-fill text-warning"></i>
@@ -169,27 +162,29 @@
           {% endfor %}
         </div>
         {% if testimonials.count > 1 %}
-          <button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide="prev">
-            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-            <span class="">Previous</span>
+          <button class="carousel-control-prev" type="button" data-bs-target="#carouselTestimonials" data-bs-slide="prev">
+            <span class="carousel-control-prev-icon bg-dark rounded-circle" aria-hidden="true"></span>
+            <span class="visually-hidden">Previous</span>
           </button>
-          <button class="carousel-control-next" type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide="next">
-            <span class="carousel-control-next-icon" aria-hidden="true"></span>
-            <span>Next</span>
+          <button class="carousel-control-next" type="button" data-bs-target="#carouselTestimonials" data-bs-slide="next">
+            <span class="carousel-control-next-icon bg-dark rounded-circle" aria-hidden="true"></span>
+            <span class="visually-hidden">Next</span>
           </button>
         {% endif %}
       </div>
     {% else %}
       <div class="text-center py-5">
-        <p>No testimonials yet. Be the first to share your experience!</p>
+        <p class="lead mb-4">No testimonials yet. Be the first to share your experience!</p>
         {% if user.is_authenticated %}
-          <a href="{% url 'testimonials' %}" class="btn btn-primary">Add Testimonial</a>
+          <a href="{% url 'testimonials' %}" class="btn btn-primary btn-lg">Add Testimonial</a>
         {% endif %}
       </div>
     {% endif %}
-  </div>
-  <script src="{% static 'gfgauth/js/cuisine_type_filtering.js' %}"></script>
-  <script src="{% static 'gfgauth/js/search_function.js' %}"></script>
-  <script src="{% static 'gfgauth/js/add_favourite.js' %}"></script>
-  <script src="{%static 'gfgauth/js/sorting.js'%}"></script>
+  </section>
+</main>
+
+<script src="{% static 'gfgauth/js/cuisine_type_filtering.js' %}"></script>
+<script src="{% static 'gfgauth/js/search_function.js' %}"></script>
+<script src="{% static 'gfgauth/js/add_favourite.js' %}"></script>
+<script src="{% static 'gfgauth/js/sorting.js' %}"></script>
 {% endblock %}
