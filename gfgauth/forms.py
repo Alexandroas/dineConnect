@@ -2,8 +2,9 @@ from django import forms
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 from django.contrib.auth import get_user_model
 from Restaurant_handling.models import DieteryPreference
-from .models import Business, CustomUser
+from .models import Business, CustomUser, businessHours
 from django.apps import apps
+from django.db import models
 from django.core.exceptions import ValidationError
 
 # forms.py
@@ -164,23 +165,38 @@ class BusinessDetailsForm(forms.Form):
     )
 
 class BusinessHoursForm(forms.Form):
-    contact_number = forms.CharField(
-        max_length=20,
-        widget=forms.TextInput(attrs={
-            'class': 'form-control', 
-            'placeholder': 'Enter contact number'
-        })
-    )
+    # Checkboxes for each day of the week
+    monday = forms.BooleanField(required=False, initial=False)
+    tuesday = forms.BooleanField(required=False, initial=False)
+    wednesday = forms.BooleanField(required=False, initial=False)
+    thursday = forms.BooleanField(required=False, initial=False)
+    friday = forms.BooleanField(required=False, initial=False)
+    saturday = forms.BooleanField(required=False, initial=False)
+    sunday = forms.BooleanField(required=False, initial=False)
+
     opening_time = forms.TimeField(
         widget=forms.TimeInput(attrs={
             'class': 'form-control',
-            'type': 'time'  # HTML5 time input
+            'type': 'time'
         })
     )
     closing_time = forms.TimeField(
         widget=forms.TimeInput(attrs={
             'class': 'form-control',
-            'type': 'time'  # HTML5 time input
+            'type': 'time'
+        })
+    )
+    is_closed = forms.BooleanField(
+        required=False,
+        initial=False,
+        label='Closed on selected days'
+    )
+    shift_name = forms.CharField(
+        max_length=50,
+        required=False,
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'e.g., Lunch, Dinner'
         })
     )
 
@@ -188,10 +204,22 @@ class BusinessHoursForm(forms.Form):
         cleaned_data = super().clean()
         opening_time = cleaned_data.get('opening_time')
         closing_time = cleaned_data.get('closing_time')
+        is_closed = cleaned_data.get('is_closed')
         
-        if opening_time and closing_time and opening_time >= closing_time:
-            raise ValidationError("Closing time must be later than opening time.")
+        # Check if at least one day is selected
+        days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday']
+        selected_days = any(cleaned_data.get(day) for day in days)
         
+        if not selected_days:
+            raise ValidationError("Please select at least one day of the week.")
+
+        if not is_closed:
+            if not opening_time or not closing_time:
+                raise ValidationError("Opening and closing times are required when the business is open.")
+            
+            if opening_time and closing_time and opening_time >= closing_time:
+                raise ValidationError("Closing time must be later than opening time.")
+
         return cleaned_data
 
 class BusinessImageForm(forms.Form):
@@ -211,12 +239,48 @@ class BusinessImageForm(forms.Form):
     )
 
 class BusinessUpdateForm(forms.ModelForm):
+    # Add fields for business hours
+    monday = forms.BooleanField(required=False, initial=False)
+    tuesday = forms.BooleanField(required=False, initial=False)
+    wednesday = forms.BooleanField(required=False, initial=False)
+    thursday = forms.BooleanField(required=False, initial=False)
+    friday = forms.BooleanField(required=False, initial=False)
+    saturday = forms.BooleanField(required=False, initial=False)
+    sunday = forms.BooleanField(required=False, initial=False)
+    
+    hours_opening_time = forms.TimeField(
+        required=False,
+        widget=forms.TimeInput(attrs={
+            'class': 'form-control',
+            'type': 'time'
+        })
+    )
+    hours_closing_time = forms.TimeField(
+        required=False,
+        widget=forms.TimeInput(attrs={
+            'class': 'form-control',
+            'type': 'time'
+        })
+    )
+    hours_is_closed = forms.BooleanField(
+        required=False,
+        initial=False,
+        label='Closed on selected days'
+    )
+    hours_shift_name = forms.CharField(
+        max_length=50,
+        required=False,
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'e.g., Regular Hours'
+        })
+    )
+
     class Meta:
         model = Business
         fields = [
-            'business_name', 'business_address', 'business_description', 
-            'business_tax_code', 'contact_number', 'opening_time', 
-            'closing_time', 'business_image', 'cuisine'
+            'business_name', 'business_address', 'business_description',
+            'business_tax_code', 'contact_number', 'business_image', 'cuisine'
         ]
         widgets = {
             'business_address': forms.Textarea(attrs={
@@ -232,16 +296,76 @@ class BusinessUpdateForm(forms.ModelForm):
             'business_name': forms.TextInput(attrs={'class': 'form-control'}),
             'business_tax_code': forms.TextInput(attrs={'class': 'form-control'}),
             'contact_number': forms.TextInput(attrs={'class': 'form-control'}),
-            'opening_time': forms.TimeInput(attrs={
-                'class': 'form-control',
-                'type': 'time'
-            }),
-            'closing_time': forms.TimeInput(attrs={
-                'class': 'form-control',
-                'type': 'time'
-            }),
             'business_image': forms.FileInput(attrs={
                 'class': 'form-control',
                 'accept': 'image/*'
             }),
         }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        instance = kwargs.get('instance')
+        
+        if instance:
+            # Pre-populate business hours if they exist
+            for day_number, day_name in businessHours.DAYS_OF_WEEK:
+                day_field = day_name.lower()
+                hours = instance.business_hours.filter(day_of_week=day_number).first()
+                
+                if hours:
+                    setattr(self.fields[day_field], 'initial', True)
+                    if not hours.is_closed:
+                        self.fields['hours_opening_time'].initial = hours.opening_time
+                        self.fields['hours_closing_time'].initial = hours.closing_time
+                    self.fields['hours_is_closed'].initial = hours.is_closed
+                    self.fields['hours_shift_name'].initial = hours.shift_name
+
+    def save(self, commit=True):
+        instance = super().save(commit=False)
+        if commit:
+            instance.save()
+            
+            # Handle business hours
+            days_mapping = {
+                'monday': 0, 'tuesday': 1, 'wednesday': 2, 'thursday': 3,
+                'friday': 4, 'saturday': 5, 'sunday': 6
+            }
+
+            # Delete existing hours
+            instance.business_hours.all().delete()
+
+            # Create new hours for selected days
+            for day_name, day_number in days_mapping.items():
+                if self.cleaned_data.get(day_name):
+                    businessHours.objects.create(
+                        business=instance,
+                        day_of_week=day_number,
+                        opening_time=self.cleaned_data['hours_opening_time'] if not self.cleaned_data['hours_is_closed'] else None,
+                        closing_time=self.cleaned_data['hours_closing_time'] if not self.cleaned_data['hours_is_closed'] else None,
+                        is_closed=self.cleaned_data['hours_is_closed'],
+                        shift_name=self.cleaned_data['hours_shift_name']
+                    )
+
+        return instance
+
+    def clean(self):
+        cleaned_data = super().clean()
+        is_closed = cleaned_data.get('hours_is_closed')
+        opening_time = cleaned_data.get('hours_opening_time')
+        closing_time = cleaned_data.get('hours_closing_time')
+        
+        # Check if at least one day is selected
+        days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday']
+        selected_days = any(cleaned_data.get(day) for day in days)
+        
+        if not selected_days:
+            raise ValidationError("Please select at least one day of the week for business hours.")
+
+        if not is_closed and any(cleaned_data.get(day) for day in days):
+            if not opening_time or not closing_time:
+                raise ValidationError("Opening and closing times are required when the business is open.")
+            
+            if opening_time and closing_time and opening_time >= closing_time:
+                raise ValidationError("Closing time must be later than opening time.")
+
+        return cleaned_data
