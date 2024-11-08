@@ -4,6 +4,8 @@ from django.conf import settings
 from django.utils import timezone
 from datetime import datetime, timedelta
 from Restaurant_handling.models import Cuisine, DieteryPreference
+from django.utils.translation import gettext_lazy as _
+from django.core.exceptions import ValidationError
 
 
 # Regular User Model
@@ -77,6 +79,7 @@ class Business(models.Model):
         blank=True, 
         null=True
     )
+    
     opening_time = models.TimeField()
     closing_time = models.TimeField()
 
@@ -201,3 +204,93 @@ class Business(models.Model):
             'upcoming': upcoming_reservations,
             'today': today_reservations
         }
+    def is_open(self, check_datetime=None):
+        """Check if business is open at a specific datetime"""
+        if check_datetime is None:
+            check_datetime = timezone.localtime()
+        
+        return self.business_hours.filter(
+            day_of_week=check_datetime.weekday(),
+            opening_time__lte=check_datetime.time(),
+            closing_time__gte=check_datetime.time(),
+            is_closed=False
+        ).exists()
+
+class businessHours(models.Model):
+        DAYS_OF_WEEK = [
+            (0, _('Monday')),
+            (1, _('Tuesday')),
+            (2, _('Wednesday')),
+            (3, _('Thursday')),
+            (4, _('Friday')),
+            (5, _('Saturday')),
+            (6, _('Sunday')),
+        ]
+        business = models.ForeignKey(
+        Business,
+        on_delete=models.CASCADE,
+        related_name='business_hours'
+    )
+        day_of_week = models.IntegerField(choices=DAYS_OF_WEEK)
+        opening_time = models.TimeField()
+        closing_time = models.TimeField()
+        is_closed = models.BooleanField(default=False)
+        shift_name = models.CharField(
+            max_length=50,
+            blank=True,
+            help_text="Optional name for this shift (e.g., 'Lunch', 'Dinner')"
+        )
+
+class Meta:
+    verbose_name = 'business hours'
+    verbose_name_plural = 'business hours'
+    ordering = ['day_of_week', 'opening_time']
+    # Ensure we don't have overlapping hours for the same business/day
+    constraints = [
+        models.UniqueConstraint(
+            fields=['business', 'day_of_week', 'shift_name'],
+            name='unique_business_hours_shift'
+        )
+    ]
+
+    def clean(self):
+        """Validate that closing time is after opening time"""
+        if self.opening_time and self.closing_time:
+            if self.closing_time <= self.opening_time:
+                raise ValidationError(
+                    _('Closing time must be after opening time')
+                )
+            
+            # Check for overlapping hours on the same day
+            overlapping = businessHours.objects.filter(
+                business=self.business,
+                day_of_week=self.day_of_week,
+                is_closed=False
+            ).exclude(pk=self.pk).filter(
+                models.Q(opening_time__lte=self.closing_time,
+                        closing_time__gte=self.opening_time)
+            )
+            
+            if overlapping.exists():
+                raise ValidationError(
+                    _('Hours overlap with existing business hours for this day')
+                )
+
+    def __str__(self):
+        day_name = self.get_day_of_week_display()
+        if self.is_closed:
+            return f"{day_name}: Closed"
+        return f"{day_name}: {self.opening_time.strftime('%H:%M')} - {self.closing_time.strftime('%H:%M')}"
+def get_buisness_hours(self):
+    """
+    Return business hours as a dictionary
+    """
+    hours = {}
+    for hour in self.business_hours.all():
+        day_name = hour.get_day_of_week_display()
+        if hour.is_closed:
+            hours[day_name] = 'Closed'
+        else:
+            hours[day_name] = f"{hour.opening_time.strftime('%H:%M')} - {hour.closing_time.strftime('%H:%M')}"
+    
+    return hours
