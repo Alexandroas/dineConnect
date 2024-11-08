@@ -1,89 +1,115 @@
 {% extends 'main/header.html' %}
 {% block content %}
 <div class="container-fluid mt-4">
-<div class="row">
-  <!-- Sidebar -->
-  <div class="col-md-3 col-lg-2 d-md-block bg-light sidebar">
-    {% include 'Restaurant_handling/restaurant_dashboard.html' %}
-  </div>
-</div>
-  <h1 class="section-title">Your dashboard</h1>
-  <h3 class="section-title">Status: {% if is_open %}Open{% else %}Closed{% endif %}<h3>
-  <div class="container">
   <div class="row">
-    <div class="col-md-4">
-      <div class="card">
-        <div class="card-body">
-          <h5 class="card-title">Today's Reservations</h5>
-          <p class="card-text">{{ stats.today }}</p>
-        </div>
-      </div>
+    <!-- Sidebar -->
+    <div class="col-md-3 col-lg-2 d-md-block bg-light sidebar">
+      {% include 'Restaurant_handling/restaurant_dashboard.html' %}
     </div>
-    <div class="col-md-4">
-      <div class="card">
-        <div class="card-body">
-          <h5 class="card-title">Upcoming Reservations</h5>
-          <p class="card-text">{{ stats.upcoming }}</p>
-        </div>
-      </div>
-    </div>
-    <div class="col-md-4">
-      <div class="card">
-        <div class="card-body">
-          <h5 class="card-title">Total Reservations</h5>
-          <p class="card-text">{{ stats.total }}</p>
-        </div>
-      </div>
-    </div>
-  </div>
-  </div>
-  <h3 class="section-title">Working hours</h3>
-  <div class="container">
-    <div class="card">
-  
-        <div class="card-body">
-          <div class="row">
-      <div class="col">
-        <h5>Monday</h5>
-        <p>{{ business.monday_open|time:"H:i" }} - {{ business.monday_close|time:"H:i" }}</p>
-      </div>
-      <div class="col">
-        <h5>Tuesday</h5>
-        <p>{{ business.tuesday_open|time:"H:i" }} - {{ business.tuesday_close|time:"H:i" }}</p>
-      </div>
-      <div class="col">
-        <h5>Wednesday</h5>
-        <p>{{ business.wednesday_open|time:"H:i" }} - {{ business.wednesday_close|time:"H:i" }}</p>
-      </div>
-      <div class="col">
-        <h5>Thursday</h5>
-        <p>{{ business.thursday_open|time:"H:i" }} - {{ business.thursday_close|time:"H:i" }}</p>
-      </div>
-      <div class="col">
-        <h5>Friday</h5>
-        <p>{{ business.friday_open|time:"H:i" }} - {{ business.friday_close|time:"H:i" }}</p>
-      </div>
-      <div class="col">
-        <h5>Saturday</h5>
-        <p>{{ business.saturday_open|time:"H:i" }} - {{ business.saturday_close|time:"H:i" }}</p>
-      </div>
-      <div class="col">
-        <h5>Sunday</h5>
-        <p>{{ business.sunday_open|time:"H:i" }} - {{ business.sunday_close|time:"H:i" }}</p>
-      </div>
-    </div>
-      </div>
-      
-  </div>
-  
-  <h3 class="section-title">Today's Slots</h3>
+    
+    <!-- Main Content -->
+    <div class="col-md-9 col-lg-10">
+      <h1 class="section-title">Your dashboard</h1>
+      <h3 class="section-title mb-4">
+        Status: 
+        <span class="badge {% if is_open %}bg-success{% else %}bg-danger{% endif %}">
+          {% if is_open %}Open{% else %}Closed{% endif %}
+        </span>
+      </h3>
 
-  <ul>
-  {% for slot in today_slots %}
-      <li>{{ slot|time:"H:i" }}</li>
-  {% empty %}
-      <li>No available slots today</li>
-  {% endfor %}
-  </ul>
+      <!-- Stats Cards -->
+      <div class="row mb-4">
+        <div class="col-md-4">
+          <div class="card shadow-sm">
+            <div class="card-body">
+              <h5 class="card-title text-muted">Today's Reservations</h5>
+              <p class="card-text h2">{{ stats.today }}</p>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="card shadow-sm">
+            <div class="card-body">
+              <h5 class="card-title text-muted">Upcoming Reservations</h5>
+              <p class="card-text h2">{{ stats.upcoming }}</p>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="card shadow-sm">
+            <div class="card-body">
+              <h5 class="card-title text-muted">Total Reservations</h5>
+              <p class="card-text h2">{{ stats.total }}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Working Hours -->
+      <div class="card shadow-sm mb-4">
+        <div class="card-header bg-white">
+          <h3 class="card-title h5 mb-0">Working Hours</h3>
+        </div>
+        <div class="card-body p-0">
+          <div class="table-responsive">
+            <table class="table table-striped table-hover mb-0">
+              <thead>
+                <tr>
+                  <th class="ps-4">Day</th>
+                  <th>Hours</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for day_name, day_hours in hours_by_day.items %}
+                <tr>
+                  <td class="ps-4 fw-medium">{{ day_name }}</td>
+                  <td>
+                    {% if day_hours %}
+                      {% for hours in day_hours %}
+                        {% if hours.is_closed %}
+                          <span class="text-danger">Closed</span>
+                        {% else %}
+                          {% if hours.shift_name %}
+                            <span class="fw-medium">{{ hours.shift_name }}:</span>
+                          {% endif %}
+                          <span class="text-dark">
+                            {{ hours.opening_time|time:"H:i" }} - {{ hours.closing_time|time:"H:i" }}
+                          </span>
+                          {% if not forloop.last %}<br>{% endif %}
+                        {% endif %}
+                      {% endfor %}
+                    {% else %}
+                      <span class="text-danger">Closed</span>
+                    {% endif %}
+                  </td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- Today's Slots -->
+      <div class="card">
+        <div class="card-header bg-dark">
+          <h3 class="card-title h5 mb-0">Today's Available Slots</h3>
+        </div>
+        <div class="card-body">
+          {% if today_slots %}
+            <div class="row g-2">
+              {% for slot in today_slots %}
+                <div class="col-auto">
+                  <span class="badge bg-light text-dark border">{{ slot|time:"H:i" }}</span>
+                </div>
+              {% endfor %}
+            </div>
+          {% else %}
+            <p class="text-muted mb-0">No available slots today</p>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
 </div>
 {% endblock %}
