@@ -11,7 +11,7 @@ urlpatterns = [
     path('restaurant_dashboard/', views.restaurant_dashboard, name='restaurant_dashboard'),
     path('restaurant_profile/', views.restaurant_profile, name='restaurant_profile'),
     path('restaurant_menu/', views.restaurant_menu, name='restaurant_menu'),
-    path('restaurant/<int:business_id>/', views.restaurant_detail, name='restaurant_detail'),
+    path('restaurant/<int:business_id>/hours/', views.restaurant_detail, name='restaurant_detail'),
     path('restaurant_home/', views.restaurant_home, name='restaurant_home'),
     path('restaurant_reservation/<int:business_id>/', views.make_reservation, name='restaurant_reservation'),
     path('upcoming_reservations<int:business_id>/', views.upcoming_reservations, name='upcoming_reservations'),
@@ -22,6 +22,7 @@ urlpatterns = [
     path('payment-success/<int:reservation_id>/',views.payment_success,name='payment_success'),
     path('reservation_details/<int:business_id>/<int:reservation_id>',views.reservation_details,name='reservation_details'),
     path('cancel_reservation/<int:business_id>/<int:reservation_id>/', views.cancel_reservation, name='cancel_reservation'),
+    path('confirm_reservation/<int:business_id>/<int:reservation_id>/', views.confirm_reservation, name='confirm_reservation'),
     path('manage_customers/', views.manage_customers, name='manage_customers'),
     path('customer_details/<int:user_id>/', views.customer_details, name='customer_details'),
 ]
