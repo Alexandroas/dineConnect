@@ -17,19 +17,33 @@
         </div>
 
         <!-- Dishes Grid -->
-        <div class="row row-cols-1 row-cols-md-3 g-4">
-          {% for dish in dishes %}
-            <div class="col">
-              <div class="card h-100">
-                <div class="card-body">
-                  <h5 class="card-title">{{ dish.dish_name }}</h5>
-                  <h6 class="card-subtitle mb-2 text-muted">${{ dish.dish_cost }}</h6>
-                  <p class="card-text">{{ dish.dish_description }}</p>
-                  <a href="{% url 'Restaurant_handling:edit_dish' dish.dish_id %}" class="btn btn-sm btn-outline-primary">View/Edit dish</a>
+        <div class="container">
+          {% regroup dishes by dish_type as dish_list %}
+          
+          {% for type in dish_list %}
+          <div class="mb-4">
+            <h3 class="section-title mb-3">{{ type.grouper.dish_type_name }}</h3>
+            <div class="row row-cols-1 row-cols-md-3 g-4">
+              {% for dish in type.list %}
+                <div class="col">
+                  <div class="card h-100">
+                    <div class="card-body">
+                      <h5 class="card-title">{{ dish.dish_name }}</h5>
+                      <h6 class="card-subtitle mb-2 text-muted">${{ dish.dish_cost }}</h6>
+                      <p class="card-text">{{ dish.dish_description }}</p>
+                      <a href="{% url 'Restaurant_handling:edit_dish' dish.dish_id %}" class="btn btn-sm btn-outline-primary">View/Edit dish</a>
+                    </div>
+                  </div>
                 </div>
-              </div>
+              {% endfor %}
             </div>
+          </div>
+          {% empty %}
+          <div class="alert alert-info">
+            No dishes available.
+          </div>
           {% endfor %}
+        </div>
         </div>
       </div>
     </div>
