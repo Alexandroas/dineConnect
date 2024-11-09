@@ -11,7 +11,7 @@ from .decorators import business_required, login_required
 from .forms import DishForm, ReservationForm, DishUpdateForm
 from .models import Dish, Payment, Reservation
 from django.db import models
-from main.utils import send_reservation_email, send_cancellation_email, send_initial_res_confirmation_email
+from main.utils import send_reservation_email, send_cancellation_email, send_initial_res_confirmation_email, send_reservation_email_business
 import json
 import stripe # type: ignore
 from django.http import JsonResponse
@@ -182,7 +182,7 @@ def make_reservation(request, business_id):
                 reservation.business_id = business
                 reservation.user_id = request.user
                 reservation.reservation_status = 'Pending'  # Add status
-                if reservation.reservation_time <= timezone.now().time() or reservation.reservation_date <= timezone.now().date():
+                if reservation.reservation_time <= business.opening_time or business.closing_time >= reservation.reservatio_time or reservation.reservation_date <= timezone.now().date():
                     messages.error(request, 'Reservation time cannot be in the past.')
                     return redirect('Restaurant_handling:restaurant_reservation', business_id=business_id)
                 # Save the reservation first
@@ -204,6 +204,7 @@ def make_reservation(request, business_id):
                     
                 # If no dishes selected, just send confirmation email
                 send_initial_res_confirmation_email(request.user, reservation)
+                send_reservation_email_business(business, reservation)
                 messages.success(request, 'Your reservation has been saved!')
                 return redirect('Restaurant_handling:restaurant_detail', business_id=business_id)
                
