@@ -18,11 +18,16 @@
     <link rel="stylesheet" type="text/css" href="{% static 'main/style.css' %}">
     <link rel="stylesheet" type="text/css" href="{% static 'main/navbar.css' %}">
     <link rel="stylesheet" type="text/css" href="{% static 'main/footer.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'notifications\css\notifications.css' %}">
+    <!--Notifications -->
+    <script src="{% static 'notifications/js/notifications.js' %}"></script>
 
     <!-- jQuery -->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 </head>
-<body>
+<body data-notification-url="{% url 'notifications:notification_stream' %}">
+    {% csrf_token %}
+
     {% include 'main/includes/navbar.html' %}
     
     <main role="main" class="container-xl">
