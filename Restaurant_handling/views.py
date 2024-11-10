@@ -1,12 +1,13 @@
 from django.utils import timezone
-from venv import logger
 from django.contrib import messages
 from django.core.paginator import Paginator
 from django.shortcuts import render, redirect, get_object_or_404
 from dineConnect_project import settings
 from gfgauth.forms import BusinessUpdateForm, UserUpdateForm  # Import your existing form
-from gfgauth.models import Business, CustomUser, businessHours, get_buisness_hours
+from gfgauth.models import Business, CustomUser, businessHours
 from django.db.models import Q
+
+from notifications.utils import create_notification
 from .decorators import business_required, login_required
 from .forms import DishForm, ReservationForm, DishUpdateForm
 from .models import Dish, Payment, Reservation
@@ -157,14 +158,19 @@ def restaurant_home(request):
     business = get_object_or_404(Business, business_owner=request.user)
     stats = business.get_reservation_stats()
     hours_by_day = {}
+    
     for day_number, day_name in businessHours.DAYS_OF_WEEK:
         hours = business.business_hours.filter(day_of_week=day_number).order_by('opening_time')
         hours_by_day[day_name] = hours
-    
+    if timezone.now().time() >= business.opening_time and timezone.now().time() <= business.closing_time:
+        is_open = True
+    else:
+        is_open = False
     context = {
         'business': business,
         'hours_by_day': hours_by_day,
-        'stats': stats
+        'stats': stats,
+        'is_open': is_open
     }
     return render(request, 'Restaurant_handling/restaurant_home.html', context)
 
@@ -182,13 +188,15 @@ def make_reservation(request, business_id):
                 reservation.business_id = business
                 reservation.user_id = request.user
                 reservation.reservation_status = 'Pending'  # Add status
-                if reservation.reservation_time <= business.opening_time or business.closing_time >= reservation.reservatio_time or reservation.reservation_date <= timezone.now().date():
+                if reservation.reservation_time <= business.opening_time or business.closing_time >= reservation.reservation_time or reservation.reservation_date <= timezone.now().date():
                     messages.error(request, 'Reservation time cannot be in the past.')
                     return redirect('Restaurant_handling:restaurant_reservation', business_id=business_id)
                 # Save the reservation first
                 else:
                     reservation.save()
-               
+                    notification_message = f"New reservation from {request.user.get_full_name()} for {reservation.reservation_party_size} people on {reservation.reservation_date} at {reservation.reservation_time}."
+                    create_notification(business.business_owner, notification_message)
+                    
                 # Handle selected dishes
                 selected_dishes = request.POST.getlist('selected_dishes')
                 if selected_dishes:
@@ -285,7 +293,7 @@ def payment_cancel(request, reservation_id):
     messages.warning(request, 'Payment was cancelled. Your reservation is still pending.')
     return redirect('Restaurant_handling:restaurant_detail', business_id=reservation.business_id.business_id)
 
-# views.py
+
 
 
 @require_POST
@@ -472,7 +480,7 @@ def manage_customers(request):
     
     context = {
         'business': business,
-        'customers': users_with_stats
+        'customers': users_with_stats,
     }
     
     return render(request, 'Restaurant_handling/manage_customers.html', context)
