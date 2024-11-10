@@ -5,10 +5,18 @@
     <div class="row justify-content-center">
       <div class="col-md-8">
         <div class="contact-card">
-          <a href="/" class="footer-logo">
-            <i class="fas fa-utensils me-2"></i>
-            DineConnect
-          </a>
+          {%if not is_business%}
+            <a href="/" class="footer-logo">
+              <i class="fas fa-utensils me-2"></i>
+              DineConnect
+            </a>
+          {%endif%}
+          {% if is_business %}
+            <a href="{% url 'Restaurant_handling:restaurant_home' %}" class="footer-logo">
+              <i class="fas fa-utensils me-2"></i>
+              DineConnect
+            </a>
+          {% endif %}
           <div class="footer-line"></div>
 
           <div class="row">
