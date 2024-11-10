@@ -77,6 +77,20 @@
                                     <td>{{ reservation.reservation_special_requests }}</td>
                                 </tr>
                                 {% endif %}
+                                <tr>
+                                    <th>Dietary Preferences:</th>
+                                    <td>
+                                        {% if reservation.user_id.dietery_preference.all %}
+                                            <ul class="li">
+                                                {% for preference in reservation.user_id.dietery_preference.all %}
+                                                    <li>{{ preference }}</li>
+                                                {% endfor %}
+                                            </ul>
+                                        {% else %}
+                                            <span class="text-muted">No dietary preferences specified</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
                             </table>
                         </div>
                         
