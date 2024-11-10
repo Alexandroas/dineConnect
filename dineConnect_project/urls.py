@@ -24,7 +24,9 @@ urlpatterns = [
     path('', include('gfgauth.urls')),
     path('main/', include('main.urls')),
     path('accounts/', include('allauth.urls')),
+    path('notifications/', include('notifications.urls')),
     path('restaurant_handling/', include('Restaurant_handling.urls')),
+    path('api/', include('notifications.urls')),
 ]
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
