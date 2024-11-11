@@ -40,7 +40,7 @@
                     
                     {% if user.is_authenticated %}
                         <div class="mt-4">
-                            <a href="{% url 'Restaurant_handling:restaurant_reservation' business_id=business.business_id %}" 
+                            <a href="{% url 'reservations:restaurant_reservation' business_id=business.business_id %}" 
                                class="btn btn-primary w-100">
                                 <i class="bi bi-calendar-check me-2"></i>
                                 Make Reservation
@@ -94,7 +94,7 @@
                     
                     {% for type in dish_list %}
                     <div class="menu-section mb-4">
-                        <h4 class="text-primary mb-3">{{ type.grouper }}</h4>
+                        <h4 class="section-title mb-3">{{ type.grouper.dish_type_name }}</h4>
                         <div class="row">
                             {% for dish in type.list %}
                             <div class="col-md-6 mb-3">
