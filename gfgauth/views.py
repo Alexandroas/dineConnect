@@ -13,7 +13,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.contrib.auth.forms import SetPasswordForm
 from django.contrib.auth import get_user_model
-from Restaurant_handling.models import Reservation
+from reservations.models import Reservation
 from formtools.wizard.views import SessionWizardView # type: ignore
 from django.core.files.storage import FileSystemStorage
 from .models import Business, CustomUser
@@ -28,6 +28,7 @@ from .forms import (
     BusinessImageForm,
     UserUpdateForm,
     UserLoginForm)
+
 def home(request):
     Business = apps.get_model('gfgauth', 'Business')
     Cuisine = apps.get_model('Restaurant_handling', 'Cuisine')
@@ -208,7 +209,10 @@ def custom_login(request):
             if user is not None:
                 auth_login(request, user)  # Use the renamed function to avoid conflict
                 messages.success(request, f"Hello {user.username}! Successful login!")
-                return redirect("home")
+                if user.groups.filter(name='Business').exists():
+                    return redirect("Restaurant_handling:restaurant_home")
+                else:
+                    return redirect("home")
         else:
             for error in list(form.errors.values()):
                 messages.error(request, error)
