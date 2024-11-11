@@ -4,15 +4,14 @@
 }
 
 body {
-  background: #121212;
-  color: #ffffff;
+  background: #f5f7fa;
+  color: #2c3e50;
 }
 
 a:link, a:visited {
   text-decoration: underline;
-  color: #d0b100;
+  color: #34495e;
 }
-
 
 /* Form elements */
 #iframe {
@@ -21,63 +20,62 @@ a:link, a:visited {
 
 /* Card styles */
 .card {
-  background-color: #1a1a1a;
+  background-color: #ffffff;
   border: none;
   border-radius: 15px;
   overflow: hidden;
   transition: all 0.3s ease;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   user-select: none;
 }
 
 .card:hover, .card-hover:hover {
   transform: translateY(-5px);
-  box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3);
-  border: 1px solid rgba(255, 215, 0, 0.2);
+  box-shadow: 0 15px 30px rgba(52, 73, 94, 0.15);
+  border: 1px solid rgba(52, 73, 94, 0.2);
 }
 
 .card-body {
   padding: 1.5rem;
-  color: #e0e0e0;
+  color: #2c3e50;
 }
 
 .card-title {
-  color: #d0b100;
+  color: #34495e;
   margin-bottom: 0.5rem;
 }
 
 .card-subtitle {
-  color: #ffed4a;
+  color: #3498db;
   font-weight: bold;
 }
 
 .card-text {
-  color: #b3b3b3;
+  color: #7f8c8d;
   font-size: 0.9rem;
 }
 
 /* Business card specific styles */
 .business-card {
-  background: #1a1a1a;
-  border: 1px solid rgba(255, 215, 0, 0.1);
+  background: #ffffff;
+  border: 1px solid rgba(52, 73, 94, 0.1);
 }
 
 .business-name {
   font-size: 1.4rem;
   font-weight: 600;
-  color: #d0b100;
+  color: #34495e;
   transition: all 0.3s ease;
 }
+
 .business-name:hover {
-  color: #ffed4a;
-  text-shadow: 0 0 10px rgba(255, 215, 0, 0.3);
+  color: #3498db;
+  text-shadow: 0 0 10px rgba(52, 73, 94, 0.2);
 }
 
 .business-info {
-  color: #ffffff;
+  color: #2c3e50;
 }
-
-
 
 /* Image wrapper */
 .card-img-wrapper {
@@ -97,12 +95,25 @@ a:link, a:visited {
 }
 
 .rating-business {
-  color: #ffed4a;
+  color: #3498db;
   margin-right: 5%;
 }
-.fa-dollar-sign{
-  color: green;
+
+.fa-dollar-sign {
+  color: #27ae60;
 }
+
+/* Buttons and Interactive Elements */
+.btn-primary {
+  background-color: #ffffff;
+  color: #34495e;
+  border: 1px solid #34495e;
+  padding: 0.5rem 1.2rem;
+  font-size: 0.875rem;
+  border-radius: 6px;
+  transition: all 0.3s ease;
+}
+
 
 /* Favorite button */
 .favorite-btn {
@@ -114,13 +125,13 @@ a:link, a:visited {
   background: rgba(26, 26, 26, 0.9);
   border: 1px solid rgba(255, 215, 0, 0.2);
   border-radius: 50%;
-  color: #d0b100;
+  color: #405b75;
   transition: all 0.3s ease;
   z-index: 2;
 }
 
 .favorite-btn:hover {
-  background: #d0b100;
+  background: #34495e;
   color: #1a1a1a;
   transform: scale(1.1);
 }
@@ -128,57 +139,38 @@ a:link, a:visited {
 .favorite-btn.active i {
   color: #ff0000;
 }
-p.card-text {
-  color: #d0b100 !important;
+
+.btn-primary:hover {
+  background-color: #34495e;
+  color: #ffffff;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(52, 73, 94, 0.2);
 }
+
 /* Search section */
 .search-section {
-  background: #1a1a1a;
+  background: #ffffff;
   padding: 1.5rem;
   border-radius: 15px;
-  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
   margin-bottom: 2rem;
-  border: 1px solid rgba(255, 215, 0, 0.1);
+  border: 1px solid rgba(52, 73, 94, 0.1);
 }
 
 .search-input {
-  background: #2a2a2a;
-  border: 2px solid rgba(255, 215, 0, 0.1);
+  background: #f5f7fa;
+  border: 2px solid rgba(52, 73, 94, 0.1);
   border-radius: 8px;
   padding: 0.8rem 1rem;
-  color: #ffffff;
+  color: #2c3e50;
   transition: all 0.3s ease;
 }
 
 .search-input:focus {
-  border-color: #d0b100;
-  box-shadow: 0 0 0 2px rgba(255, 215, 0, 0.2);
+  border-color: #34495e;
+  box-shadow: 0 0 0 2px rgba(52, 73, 94, 0.1);
 }
 
-/* Section titles */
-.section-title {
-  font-size: 2.5rem;
-  font-weight: 700;
-  color: #d0b100;
-  margin-bottom: 2rem;
-  position: relative;
-  padding-bottom: 1rem;
-}
-
-.section-title::after {
-  content: '';
-  position: absolute;
-  left: 0;
-  bottom: 0;
-  width: 60px;
-  height: 4px;
-  background: linear-gradient(to right, #d0b100, #ffed4a);
-  border-radius: 2px;
-}
-
-
-
-/* Alerts and messages */
 .alert, .messages {
   position: fixed;
   top: 20px;
@@ -186,208 +178,8 @@ p.card-text {
   z-index: 1000;
   width: 300px;
   border-radius: 10px;
-  background-color: rgba(26, 26, 26, 0.95);
+  background-color: rgba(26, 26, 26, 0.623);
   color: #ffffff !important;
-  box-shadow: 0 4px 15px #d0b1006a;
-}
-/* Style the close button */
-.btn-close {
-  background: transparent url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%23d0b100'%3e%3cpath d='M.293.293a1 1 0 011.414 0L8 6.586 14.293.293a1 1 0 111.414 1.414L9.414 8l6.293 6.293a1 1 0 01-1.414 1.414L8 9.414l-6.293 6.293a1 1 0 01-1.414-1.414L6.586 8 .293 1.707a1 1 0 010-1.414z'/%3e%3c/svg%3e") center/1em auto no-repeat !important;
-  opacity: 1;
+  box-shadow: 0 4px 15px #006fd06a;
 }
 
-.btn-close:hover {
-  opacity: 0.75;
-}
-
-/* Preferences grid */
-.preferences-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-  gap: 1rem;
-  padding: 1rem;
-  background-color: #1a1a1a;
-  border-radius: 0.25rem;
-  border: 1px solid rgba(255, 215, 0, 0.1);
-}
-
-/* Responsive styles */
-@media (max-width: 768px) {
-  .section-title {
-    font-size: 2rem;
-  }
-  
-  .business-card {
-    margin-bottom: 1rem;
-  }
-}
-h3 {
-  color: #d0b100;
-}
-
-.btn-primary {
-  background-color: #1a1a1a;
-  color: #d0b100;
-
-  border: 1px solid #d0b100;
-  padding: 0.5rem 1.2rem;
-  font-size: 0.875rem;
-  border-radius: 6px;
-  transition: all 0.3s ease;
-  text-decoration: none;
-  display: inline-block;
-}
-
-.btn-primary:hover {
-  background-color: #d0b100;
-  color: #1a1a1a;
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(255, 215, 0, 0.2);
-}
-
-.btn-primary:active {
-  transform: translateY(0);
-  box-shadow: 0 2px 6px rgba(255, 215, 0, 0.1);
-}
-
-.btn-sm {
-  padding: 0.375rem 1rem;
-  font-size: 0.8125rem;
-}
-h6.text-muted {
-  color : #2ecc71 !important;
-}
-h5 {
-  color: #d0b100;
-}
-.text-muted {
-  color: #d0b100 !important;
-}
-p {
-  color: #d0b100;
-}
-a.btn-primary {
-  color: black;
-  height: auto;
-  width: auto;
-}
-/* Pagination Styles */
-.pagination {
-  margin: 20px 0;
-}
-small.text-muted {
-  color: #ffffff !important;
-}
-a.step-link {
-  color: #333;
-  border: 1px solid #dee2e6;
-  padding: 8px 16px;
-}
-.pagination .page-item.active .page-link {
-  background-color: #007bff;
-  border-color: #007bff;
-  color: white;
-}
-
-.pagination .page-item.disabled .page-link {
-  color: #6c757d;
-  pointer-events: none;
-  background-color: #fff;
-  border-color: #dee2e6;
-}
-
-.pagination .page-link:hover {
-  background-color: #e9ecef;
-  border-color: #dee2e6;
-  color: #0056b3;
-}
-
-.pagination .page-link:focus {
-  box-shadow: 0 0 0 0.2rem rgba(0,123,255,.25);
-}
-
-p.card-text {
-  color: #ffffff !important;
-}
-/* Reservation items styling */
-.list-group-item {
-  transition: background-color 0.2s ease;
-}
-
-.list-group-item:hover {
-  background-color: #f8f9fa;
-}
-
-/* Collapse animation */
-.collapse {
-  transition: all 0.3s ease-out;
-}
-
-/* Toggle button styling */
-.btn-outline-primary {
-  padding: 0.375rem 0.75rem;
-  color: #d0b100;
-  border-color: #d0b100;
-  transition: all 0.2s ease;
-}
-
-.btn-outline-primary:hover {
-  background-color: #d0b100;
-  border-color: #d0b100;
-  transform: translateY(-1px);
-}
-
-/* Icon rotation animation */
-.bi-chevron-down {
-  transition: transform 0.3s ease;
-}
-
-.rotate {
-  transform: rotate(180deg);
-}
-
-/* Reservation details */
-.reservation-details i {
-  width: 20px;
-  color: #6c757d;
-  margin-right: 5px;
-}
-
-/* View Restaurant button */
-.btn-outline-secondary {
-  font-size: 0.875rem;
-  padding: 0.25rem 0.5rem;
-}
-
-.btn-outline-secondary:hover {
-  background-color: #6c757d;
-  color: white;
-}
-
-/* Alert styling */
-.alert-info {
-  background-color: #e3f2fd;
-  border-color: #bee5eb;
-  color: #0c5460;
-}
-.testimonial-card{
-  background: #1a1a1a;
-  border: none;
-  border-radius: 15px;
-  overflow: hidden;
-  transition: all 0.3s ease;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-  user-select: none;
-}
-.page-link {
-  background-color: black !important;
-}
-.page-link:hover {
-  color: #ffd900 !important;
-}
-.page-item.active .page-link {
-  z-index: 3;
-  color: #fff;
-  background-color: #d0b100 !important; 
-  border-color: #d0b100 !important;
-}
