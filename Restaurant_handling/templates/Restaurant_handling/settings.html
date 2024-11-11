@@ -1,0 +1,45 @@
+{% extends "main/header.html" %}
+{% block content %}
+<div class="notification-settings">
+    <h5>Notification Sound</h5>
+    <select id="notificationSound" class="form-select">
+        <option value="arrow">Arrow</option>
+        <option value="metalplate">Metal Plate</option>
+        <option value="melody">Melody</option>
+        <option value="bell">Bell</option>
+    </select>
+   
+    <div class="d-flex align-items-center gap-2 mt-2">
+        <button class="btn btn-sm btn-outline-primary" id="testSound">
+            <i class="bi bi-play-fill"></i> Test Sound
+        </button>
+    </div>
+    <h5 class="mt-3">Volume</h5>
+    <input type="range" class="form-range" id="notificationVolume" min="0" max="100" value="50">
+    <div class="d-flex align-items-center gap-2 mt-2">
+        <button class="btn btn-sm btn-primary" id="saveSettings">
+            <i class="bi bi-save"></i> Save
+        </button>
+    </div>
+
+
+</div>
+<style>
+    .settings-toast {
+        min-width: 200px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        animation: slideIn 0.3s ease-out;
+    }
+
+    @keyframes slideIn {
+        from {
+            transform: translateY(100%);
+            opacity: 0;
+        }
+        to {
+            transform: translateY(0);
+            opacity: 1;
+        }
+    }
+</style>
+{% endblock %}
