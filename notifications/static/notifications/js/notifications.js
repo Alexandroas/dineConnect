@@ -1,25 +1,29 @@
 // notifications.js
 document.addEventListener('DOMContentLoaded', () => {
     const notificationHandler = {
-        init() {
-            console.log('Initializing notification handler');
-            this.notificationUrl = document.body.dataset.notificationUrl;
-            this.notifications = [];
-            this.unreadCount = 0;
-            this.processedNotifications = new Set(); // Add this to track processed notifications
-            
-            if (!this.notificationUrl) {
-                console.error('Notification URL not found');
-                return;
-            }
-            
-            this.setupNotificationContainer();
-            this.setupEventSource();
-            this.setupAudioElement();
-            this.setupMarkAllRead();
-            this.loadNotifications(); 
+        NOTIFICATION_SOUNDS: {
+            arrow: 'http://codeskulptor-demos.commondatastorage.googleapis.com/pang/arrow.mp3',
+            metalplate: 'https://cdnjs.cloudflare.com/ajax/libs/ion-sound/3.0.7/sounds/metal_plate.mp3',
+            melody: 'http://codeskulptor-demos.commondatastorage.googleapis.com/descent/gotitem.mp3',
+            bell: 'https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3'
         },
 
+        init() {
+            // Initialize core functionality first
+            this.setupAudioElement();
+            this.loadSavedSettings();
+            this.setupSettingsListeners();
+
+            // Only setup notifications if URL is available
+            this.notificationUrl = document.body.dataset.notificationUrl;
+            if (this.notificationUrl) {
+                this.setupNotificationContainer();
+                this.setupEventSource();
+                this.loadNotifications();
+            }
+
+            console.log('Notification handler initialized');
+        },
         setupNotificationContainer() {
             if (!document.getElementById('notification-container')) {
                 const container = document.createElement('div');
@@ -30,26 +34,32 @@ document.addEventListener('DOMContentLoaded', () => {
 
         setupAudioElement() {
             try {
-                // Available notification sounds
-                const NOTIFICATION_SOUNDS = {
-                    SUBTLE: 'https://cdn.jsdelivr.net/gh/ferdium/ferdium-app/src/renderer/sounds/subtle.mp3',
-                    DING: 'https://cdn.jsdelivr.net/gh/ferdium/ferdium-app/src/renderer/sounds/notification.mp3',
-                    POP: 'https://cdn.jsdelivr.net/gh/ferdium/ferdium-app/src/renderer/sounds/pop.mp3',
-                    BELL: 'https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3'
-                };
-
-                const audio = new Audio(NOTIFICATION_SOUNDS.DING);
-                audio.id = 'notificationSound';
+                // Create audio element first
+                const audio = new Audio();
+                
+                // Get saved sound preference with fallback
+                const savedSound = localStorage.getItem('notificationSound') || 'bell';
+                const soundUrl = this.NOTIFICATION_SOUNDS[savedSound];
+                
+                if (soundUrl) {
+                    audio.src = soundUrl;
+                } else {
+                    audio.src = this.NOTIFICATION_SOUNDS.ding; // Fallback to default
+                }
+                
                 audio.preload = 'auto';
-                audio.volume = 0.5;
-
-                audio.onerror = (e) => {
-                    console.error('Audio loading error:', e);
-                    // Fallback to another sound if the first one fails
-                    audio.src = NOTIFICATION_SOUNDS.BELL;
-                };
-
+                
+                // Set initial volume with fallback
+                const savedVolume = localStorage.getItem('notificationVolume');
+                audio.volume = savedVolume ? parseFloat(savedVolume) / 100 : 0.5;
+                
                 this.audio = audio;
+                
+                console.log('Audio setup complete:', {
+                    sound: savedSound,
+                    volume: audio.volume,
+                    url: audio.src
+                });
             } catch (error) {
                 console.error('Error setting up audio:', error);
             }
@@ -114,7 +124,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         'X-CSRFToken': this.getCsrfToken(),
                     }
                 });
-                
+
                 if (response.ok) {
                     const notificationItems = document.querySelectorAll('.notification-item.unread');
                     notificationItems.forEach(item => {
@@ -133,48 +143,45 @@ document.addEventListener('DOMContentLoaded', () => {
         },
 
         setupEventSource() {
+            // Only setup EventSource if we have a URL
+            if (!this.notificationUrl) {
+                console.log('No notification URL available, skipping EventSource setup');
+                return;
+            }
+
             try {
                 if (this.eventSource) {
                     this.eventSource.close();
                 }
 
-                const streamUrl = this.notificationUrl.replace(/\/$/, '');
-                console.log('Connecting to EventSource at:', streamUrl);
-                
-                this.eventSource = new EventSource(streamUrl);
-                
+                console.log('Setting up EventSource...');
+                this.eventSource = new EventSource(this.notificationUrl);
+
                 this.eventSource.onmessage = (event) => {
-                    console.log('Received message:', event.data);
                     try {
                         const data = JSON.parse(event.data);
-                        if (data.ping) {
-                            console.log('Received ping');
-                            return;
-                        }
-                        if (!this.processedNotifications.has(data.id)) {
-                            this.processedNotifications.add(data.id);
-                            this.handleNewNotification(data);
-                        }
+                        if (data.ping) return;
+                        this.handleNewNotification(data);
                     } catch (error) {
                         console.error('Error processing message:', error);
                     }
                 };
+
                 this.eventSource.onerror = (error) => {
-                    console.error('EventSource failed:', error);
+                    console.log('EventSource error - will retry connection');
                     if (this.eventSource) {
                         this.eventSource.close();
                         this.eventSource = null;
                     }
+                    // Retry connection after 5 seconds
                     setTimeout(() => this.setupEventSource(), 5000);
                 };
 
-                this.eventSource.onopen = () => {
-                    console.log('EventSource connection established');
-                };
             } catch (error) {
-                console.error('Error setting up EventSource:', error);
+                console.error('Error in setupEventSource:', error);
             }
         },
+
         handleNewNotification(data) {
             this.showNotification(data);
             this.addNotificationToInbox(data);
@@ -221,7 +228,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 `;
 
                 notificationList.insertBefore(notificationItem, notificationList.firstChild);
-                
+
                 if (!notification.is_read) {
                     this.unreadCount++;
                     this.updateNotificationCounter();
@@ -255,8 +262,135 @@ document.addEventListener('DOMContentLoaded', () => {
                 }, 5000);
             }
         },
+        loadSavedSettings() {
+            try {
+                const soundSelect = document.getElementById('notificationSound');
+                const volumeInput = document.getElementById('notificationVolume');
+                
+                if (soundSelect) {
+                    const savedSound = localStorage.getItem('notificationSound') || 'ding';
+                    soundSelect.value = savedSound;
+                }
+                
+                if (volumeInput) {
+                    const savedVolume = localStorage.getItem('notificationVolume') || '50';
+                    volumeInput.value = savedVolume;
+                }
+            } catch (error) {
+                console.error('Error loading saved settings:', error);
+            }
+        },
+        setupSettingsListeners() {
+            // Test sound button
+            const testButton = document.getElementById('testSound');
+            if (testButton) {
+                testButton.addEventListener('click', () => {
+                    console.log('Testing sound...');
+                    this.playTestSound();
+                });
+            }
+
+            // Sound selection
+            const soundSelect = document.getElementById('notificationSound');
+            if (soundSelect) {
+                soundSelect.addEventListener('change', (e) => {
+                    const selectedSound = e.target.value;
+                    console.log('Changing sound to:', selectedSound);
+                    
+                    const soundUrl = this.NOTIFICATION_SOUNDS[selectedSound];
+                    if (soundUrl && this.audio) {
+                        this.audio.src = soundUrl;
+                        localStorage.setItem('notificationSound', selectedSound);
+                        // Don't auto-play test sound on change
+                    }
+                });
+            }
+            const volumeControl = document.getElementById('notificationVolume');
+            if (volumeControl) {
+                volumeControl.addEventListener('input', (e) => {
+                    const volumeValue = e.target.value;
+                    const volume = volumeValue / 100;
+                    
+                    this.setVolume(volume);
+                    localStorage.setItem('notificationVolume', volumeValue);
+                });
+            }
+        },
+
+
+        
+        setVolume(volume) {
+            if (this.audio) {
+                this.audio.volume = Math.max(0, Math.min(1, volume));
+            }
+        },
+
+        playTestSound() {
+            if (this.audio && this.audio.src) {
+                const testAudio = new Audio(this.audio.src);
+                testAudio.volume = this.audio.volume;
+                
+                testAudio.play().catch(error => {
+                    console.error('Could not play test sound:', error);
+                });
+            }
+        },
+        
+        saveSettings() {
+            try {
+                const soundSelect = document.getElementById('notificationSound');
+                const volumeInput = document.getElementById('notificationVolume');
+        
+                if (soundSelect && volumeInput) {
+                    // Save to localStorage
+                    localStorage.setItem('notificationSound', soundSelect.value);
+                    localStorage.setItem('notificationVolume', volumeInput.value);
+        
+                    // Apply settings immediately
+                    if (this.audio) {
+                        this.audio.src = this.NOTIFICATION_SOUNDS[soundSelect.value];
+                        this.audio.volume = volumeInput.value / 100;
+                    }
+
+                    // Show success message
+                    this.showSettingsToast('Settings saved successfully!');
+                }
+            } catch (error) {
+                console.error('Error saving settings:', error);
+                this.showSettingsToast('Error saving settings', 'danger');
+            }
+        },
+
+        showSettingsToast(message, type = 'success') {
+            // Remove any existing toasts
+            const existingToast = document.querySelector('.settings-toast');
+            if (existingToast) {
+                existingToast.remove();
+            }
+
+            // Create new toast
+            const toast = document.createElement('div');
+            toast.className = `settings-toast alert alert-${type} position-fixed bottom-0 end-0 m-3`;
+            toast.style.zIndex = '1050';
+            toast.innerHTML = `
+                <div class="d-flex align-items-center">
+                    <i class="bi bi-${type === 'success' ? 'check' : 'exclamation'}-circle me-2"></i>
+                    ${message}
+                </div>
+            `;
+
+            // Add toast to document
+            document.body.appendChild(toast);
+
+            // Remove toast after 3 seconds
+            setTimeout(() => {
+                if (toast.parentElement) {
+                    toast.remove();
+                }
+            }, 3000);
+        }
     };
 
-notificationHandler.init();
-}
-);
+    notificationHandler.init();
+    window.notificationHandler = notificationHandler;
+});
