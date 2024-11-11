@@ -1,0 +1,150 @@
+{% extends 'main/header.html' %}
+{% block content %}
+{%load static%}
+<link rel="stylesheet" type="text/css" href="{% static 'reservations\css\reservation_details.css' %}">
+<div class="container-fluid">
+    <div class="row">
+            <div class="col-md-3 col-lg-2 d-md-block bg-light sidebar">
+                {% include 'Restaurant_handling/restaurant_dashboard.html' %}
+            </div>
+        <div class="col-md-9 col-lg-10 ms-sm-auto px-4">
+            <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                <h2>Reservation Details</h2>
+                <a href="{% url 'reservations:upcoming_reservations' business.business_id %}" 
+                   class="btn btn-outline-secondary">
+                    Back to Reservations
+                </a>
+                {% if reservation.reservation_status == 'Pending' or reservation.reservation_status == 'Confirmed'%}
+                    <button class="open-button" onclick="openForm()"> Cancel Reservation</button>
+                    <div class="modal-overlay">
+                    <div class="form-popup" id="myForm">
+                        <form action="{% url 'reservations:cancel_reservation' business.business_id reservation.reservation_id %}" method="post" class="form-container">
+                            {% csrf_token %}
+                            <h3>Are you sure you want to cancel this reservation?</h3>
+                            <p>This action cannot be undone.</p>
+                            <a href="{% url 'reservations:cancel_reservation' business.business_id reservation.reservation_id %}" 
+                                class="btn btn-primary"> Yes</a>
+                            <button type="button" class="btn btn-primary" onclick="closeForm()">No</button>
+                        </form>
+                    </div>
+                    </div>
+                {%endif%}
+                {%if reservation.reservation_status == 'Pending'%}
+                    <button class="open-button" onclick="openFormConf()"> Confirm Reservation</button>
+                    <div class="modal-overlay-conf">
+                    <div class="form-popup-conf" id="myForm">
+                        <form action="{% url 'reservations:confirm_reservation' business.business_id reservation.reservation_id %}" method="post" class="form-container">
+                            {% csrf_token %}
+                            <h3>Are you sure you want to confirm this reservation?</h3>
+                            <a href="{% url 'reservations:confirm_reservation' business.business_id reservation.reservation_id %}" 
+                                class="btn btn-primary"> Yes</a>
+                            <button type="button" class="btn btn-primary" onclick="closeFormConf()">No</button>
+                        </form>
+                    </div>
+                    </div>
+                {%endif%}
+                </div>
+            
+            <div class="card">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h3>Reservation Summary</h3>
+                            <table class="table table-borderless">
+                                <tr>
+                                    <th>Date:</th>
+                                    <td>{{ reservation.reservation_date|date:"F d, Y" }}</td>
+                                </tr>
+                                <tr>
+                                    <th>Time:</th>
+                                    <td>{{ reservation.reservation_time|time:"H:i" }}</td>
+                                </tr>
+                                <tr>
+                                    <th>Customer:</th>
+                                    <td>{{ reservation.user_id.get_full_name }}</td>
+                                </tr>
+                                <tr>
+                                    <th>Party Size:</th>
+                                    <td>{{ reservation.reservation_party_size }}</td>
+                                </tr>
+                                <tr>
+                                    <th>Status:</th>
+                                    <td>{{ reservation.reservation_status }}</td>
+                                </tr>
+                                {% if reservation.reservation_special_requests %}
+                                <tr>
+                                    <th>Special Requests:</th>
+                                    <td>{{ reservation.reservation_special_requests }}</td>
+                                </tr>
+                                {% endif %}
+                                <tr>
+                                    <th>Dietary Preferences:</th>
+                                    <td>
+                                        {% if reservation.user_id.dietery_preference.all %}
+                                            <ul class="li">
+                                                {% for preference in reservation.user_id.dietery_preference.all %}
+                                                    <li>{{ preference }}</li>
+                                                {% endfor %}
+                                            </ul>
+                                        {% else %}
+                                            <span class="text-muted">No dietary preferences specified</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                            </table>
+                        </div>
+                        
+                        {% if reservation.dish_id.all %}
+                        <div class="col-md-6">
+                            <h3>Ordered Items</h3>
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>Item</th>
+                                        <th>Price</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for dish in reservation.dish_id.all %}
+                                    <tr>
+                                        <td>{{ dish.dish_name }}</td>
+                                        <td>${{ dish.dish_cost }}</td>
+                                    </tr>
+                                    {% endfor %}
+                                    <tr class="table-active">
+                                        <th>Total:</th>
+                                        <td><strong>${{ total_amount }}</strong></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function openForm() {
+        document.querySelector('.modal-overlay').style.display = "block";
+        document.querySelector('.form-popup').style.display = "block";
+      }
+      
+      function closeForm() {
+        document.querySelector('.modal-overlay').style.display = "none";
+        document.querySelector('.form-popup').style.display = "none";
+      }
+      function openFormConf() {
+        document.querySelector('.modal-overlay-conf').style.display = "block";
+        document.querySelector('.form-popup-conf').style.display = "block";
+      }
+      
+      function closeFormConf() {
+        document.querySelector('.modal-overlay-conf').style.display = "none";
+        document.querySelector('.form-popup-conf').style.display = "none";
+      }
+
+</script>
+{% endblock %}
