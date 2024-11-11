@@ -44,6 +44,31 @@
                         {% if not is_business %}
                             <!-- Regular User Dropdown -->
                             <li class="nav-item dropdown">
+                                <a class="nav-link position-relative" href="#" id="notificationDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <i class="bi bi-bell"></i>
+                                    <span class="notification-badge" id="notification-counter" style="display: none;">0</span>
+                                </a>
+                                
+                                <div class="dropdown-menu dropdown-menu-end notification-dropdown" aria-labelledby="notificationDropdown">
+                                    <div class="dropdown-header">
+                                        <strong>Notifications</strong>
+                                        <a href="{%url 'notifications:mark_all_read'%}" id="markAllRead">Mark all as read</a>
+                                    </div>
+                                    <div class="dropdown-divider"></div>
+                                    <form method="POST" action="{% url 'notifications:delete_all_notifications' %}" class="d-inline">
+                                        {% csrf_token %}
+                                        <button type="submit" class="modern-delete-btn">
+                                            <i class="bi bi-trash"></i> Delete All
+                                        </button>
+                                    </form>
+                                
+                                    <div id="notificationItems">
+                                        <!-- Notifications will be inserted here -->
+                                        <div class="no-notifications">No notifications yet</div>
+                                    </div>
+                                </div>
+                            </li>
+                            <li class="nav-item dropdown">
                                 <a class="nav-link dropdown-toggle d-flex align-items-center" href="#"
                                 id="userDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                                     <span>{{ user.username }}</span>
@@ -82,7 +107,6 @@
                                         <i class="bi bi-trash"></i> Delete All
                                     </button>
                                 </form>
-                            
                                 <div id="notificationItems">
                                     <!-- Notifications will be inserted here -->
                                     <div class="no-notifications">No notifications yet</div>
