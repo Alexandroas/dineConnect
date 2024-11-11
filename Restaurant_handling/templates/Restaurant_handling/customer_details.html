@@ -171,7 +171,7 @@
                                         </td>
                                         <td>{{ reservation.reservation_special_requests|default:"-" }}</td>
                                         <td>
-                                            <a href="{% url 'Restaurant_handling:reservation_details' business.business_id reservation.reservation_id %}" class="btn btn-sm btn-info">
+                                            <a href="{% url 'reservations:reservation_details' business.business_id reservation.reservation_id %}" class="btn btn-sm btn-info">
                                                 View
                                             </a>
                                         </td>
