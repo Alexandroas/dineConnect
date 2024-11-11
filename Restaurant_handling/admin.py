@@ -1,5 +1,6 @@
 from django.contrib import admin
-from .models import Cuisine, DieteryPreference, Dish, DishType, Reservation
+from .models import Cuisine, DieteryPreference, Dish, DishType
+
 
 
 # Register the Cuisine model
@@ -17,5 +18,4 @@ class CuisineAdmin(admin.ModelAdmin):
 # Register the Dish model if needed
 admin.site.register(Dish)
 admin.site.register(DishType)
-admin.site.register(Reservation)
 admin.site.register(DieteryPreference)
