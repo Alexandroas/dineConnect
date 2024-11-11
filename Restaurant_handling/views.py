@@ -153,7 +153,7 @@ def restaurant_home(request):
     for day_number, day_name in businessHours.DAYS_OF_WEEK:
         hours = business.business_hours.filter(day_of_week=day_number).order_by('opening_time')
         hours_by_day[day_name] = hours
-    if timezone.now().time() >= business.opening_time and timezone.now().time() <= business.closing_time:
+    if is_open := business.is_open():
         is_open = True
     else:
         is_open = False
