@@ -202,6 +202,8 @@ def cancel_reservation(request, business_id, reservation_id):
     reservation.save()
     messages.success(request, 'Reservation canceled successfully!')
     send_cancellation_email(reservation.user_id, reservation)
+    notification_message = f"The business {reservation.business_id} has cancelled your reservation on {reservation.reservation_date} at time, {reservation.reservation_time}."
+    create_notification(reservation.user_id, notification_message)
     context = {
         'business': reservation.business_id,
         'reservation': reservation
@@ -213,15 +215,14 @@ def confirm_reservation(request, business_id, reservation_id):
     if reservation.reservation_status == 'Confirmed':
         messages.error(request, 'Reservation already confirmed!')
         return redirect('reservations:upcoming_reservations', business_id=business_id)
-    
-    
-    
     reservation = get_object_or_404(Reservation, 
                                   reservation_id=reservation_id,
                                   business_id=business_id)
     reservation.reservation_status = 'Confirmed'
     reservation.save()
     send_reservation_email(reservation.user_id, reservation)
+    notification_message = f"The business {reservation.business_id} has confirmed your reservation on {reservation.reservation_date} at time, {reservation.reservation_time}."
+    create_notification(reservation.user_id, notification_message)
     messages.success(request, 'Reservation confirmed successfully!')
     context = {
         'business': reservation.business_id,
