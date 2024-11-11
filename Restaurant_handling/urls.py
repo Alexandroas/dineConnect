@@ -15,4 +15,5 @@ urlpatterns = [
     path('restaurant_home/', views.restaurant_home, name='restaurant_home'),
     path('manage_customers/', views.manage_customers, name='manage_customers'),
     path('customer_details/<int:user_id>/', views.customer_details, name='customer_details'),
+    path('settings/', views.settings, name='settings'),
 ]

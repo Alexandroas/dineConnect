@@ -235,3 +235,10 @@ def customer_details(request, user_id):
     }
    
     return render(request, 'Restaurant_handling/customer_details.html', context)
+
+
+@business_required
+def settings(request):
+    business = Business.objects.get(business_owner=request.user)
+    
+    return render(request, 'Restaurant_handling/settings.html')
