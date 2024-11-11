@@ -1,4 +1,4 @@
-from django.http import JsonResponse
+from django.http import HttpResponseRedirect, JsonResponse
 from django.views.decorators.http import require_http_methods
 from .models import Notification
 from django.utils.timezone import now
@@ -6,7 +6,7 @@ import json
 import time
 from django.views.decorators.csrf import csrf_exempt
 from django.http import StreamingHttpResponse
-
+from django.contrib import messages
 
 
 
@@ -65,7 +65,8 @@ def get_notifications(request):
         'is_read', 
         'created_at'
     )
-    return JsonResponse(list(notifications), safe=False)
+    notification_count = Notification.objects.filter(recipient=request.user, is_read=False).count()
+    return JsonResponse(list(notifications), safe=False, headers={'X-Notification-Count': notification_count})
 
 @require_http_methods(["POST"])
 def mark_as_read(request, notification_id):
@@ -90,3 +91,14 @@ def mark_all_read(request):
         
     Notification.objects.filter(recipient=request.user).update(is_read=True)
     return JsonResponse({'status': 'success'})
+
+@require_http_methods(["POST"])
+def delete_all_notifications(request):
+    if not request.user.is_authenticated:
+        return JsonResponse({'error': 'Not authenticated'}, status=403)
+        
+    Notification.objects.filter(recipient=request.user).delete()
+    messages.success(request, 'All notifications deleted successfully')
+    
+    # Option 1: Redirect to previous page
+    return HttpResponseRedirect(request.META.get('HTTP_REFERER', '/'))
