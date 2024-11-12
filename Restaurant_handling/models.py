@@ -33,12 +33,12 @@ class Dish(models.Model):
     def __str__(self):
         return self.dish_name
         
-"""class Review(models.Model):
+class Review(models.Model):
     review_id = models.AutoField(primary_key=True)
     review_rating = models.IntegerField()
     review_text = models.TextField(max_length=100)
     business_id = models.ForeignKey('gfgauth.Business', on_delete=models.CASCADE)
-    user_id = models.ForeignKey('gfgauth.User', on_delete=models.CASCADE)
+    user_id = models.ForeignKey('gfgauth.CustomUser', on_delete=models.CASCADE)
     
     def __str__(self):
-        return self.review_id """
+        return self.review_id

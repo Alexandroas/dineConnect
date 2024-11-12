@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Cuisine, DieteryPreference, Dish, DishType
+from .models import Cuisine, DieteryPreference, Dish, DishType, Review
 
 
 
@@ -15,6 +15,10 @@ class DishInline(admin.TabularInline):
 
 class CuisineAdmin(admin.ModelAdmin):
     inlines = [DishInline]
+    
+class reviewInline(admin.TabularInline):
+    model = Review
+    extra = 1  # Number of extra forms to display
 # Register the Dish model if needed
 admin.site.register(Dish)
 admin.site.register(DishType)

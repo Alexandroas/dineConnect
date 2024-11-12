@@ -1,5 +1,5 @@
 from django import forms
-from .models import Dish
+from .models import Dish, Review
 
 class DishForm(forms.ModelForm):
     class Meta:
@@ -33,3 +33,24 @@ class DishUpdateForm(forms.ModelForm):
         
     def clean_is_available(self):
         return self.cleaned_data['is_available'] == 'True'
+
+class ReviewForm(forms.ModelForm):
+    review_rating = forms.ChoiceField(
+        choices=[(i, str(i)) for i in range(1, 6)],
+        widget=forms.RadioSelect(attrs={
+            'class': 'hidden peer'
+        })
+    )
+    
+    review_text = forms.CharField(
+        widget=forms.Textarea(attrs={
+            'class': 'w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500',
+            'placeholder': 'Share your experience...',
+            'rows': 4
+        }),
+        required=True
+    )
+
+    class Meta:
+        model = Review
+        fields = ['review_rating', 'review_text']

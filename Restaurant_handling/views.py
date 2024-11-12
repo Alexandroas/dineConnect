@@ -1,14 +1,15 @@
-from django.utils import timezone
+from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.shortcuts import render, redirect, get_object_or_404
 from gfgauth.forms import BusinessUpdateForm, UserUpdateForm
 from gfgauth.models import Business, CustomUser, businessHours
 from .decorators import business_required
-from .forms import DishForm, DishUpdateForm
-from .models import Dish
+from .forms import DishForm, DishUpdateForm, ReviewForm
+from .models import Dish, Review
 from reservations.models import Reservation
 from payments.models import Payment
 from django.db import models
+from django.core.paginator import Paginator
 @business_required
 def restaurant_dashboard(request):
     try:
@@ -135,13 +136,53 @@ def restaurant_menu(request):
         'dishes': dishes,
         'business': business  # Add business to the context
     })
+
+
+# In your views.py
 def restaurant_detail(request, business_id):
     business = get_object_or_404(Business, business_id=business_id)
     dishes = Dish.objects.filter(business_id=business).order_by('dish_type__dish_type_name')
+    reviews = Review.objects.filter(business_id=business)
+    form = None
+   
+    if request.user.is_authenticated:
+        # Check if user has already reviewed
+        existing_review = Review.objects.filter(
+            business_id=business, 
+            user_id=request.user
+        ).first()
+        
+        if request.method == 'POST':
+            if existing_review:
+                messages.error(request, 'You have already reviewed this restaurant.')
+                return redirect('Restaurant_handling:restaurant_detail', business_id=business_id)
+                
+            form = ReviewForm(request.POST)
+            if form.is_valid():
+                review = form.save(commit=False)
+                review.business_id = business
+                review.user_id = request.user
+                review.save()
+                messages.success(request, 'Review saved successfully!')
+                return redirect('Restaurant_handling:restaurant_detail', business_id=business_id)
+        else:
+            if not existing_review:  # Only show form if user hasn't reviewed
+                form = ReviewForm()
+
+    paginator = Paginator(reviews, 10)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    
     context = {
         'business': business,
-        'dishes': dishes  # Add dishes to context
+        'dishes': dishes,
+        'reviews': reviews,
+        'page_obj': page_obj,
+        'has_reviewed': Review.objects.filter(business_id=business, user_id=request.user).exists() if request.user.is_authenticated else False
     }
+   
+    if form is not None:
+        context['form'] = form
     return render(request, 'Restaurant_handling/restaurant_detail.html', context)
 
 @business_required
@@ -236,7 +277,28 @@ def customer_details(request, user_id):
    
     return render(request, 'Restaurant_handling/customer_details.html', context)
 
-
+@login_required
+def review_restaurant(request, business_id, reservation_id):
+    reservation_id = get_object_or_404(Reservation, reservation_id=reservation_id)
+    user = get_object_or_404(CustomUser, id=reservation_id.user_id)
+    business = get_object_or_404(Business, business_id=business_id)
+    if user != request.user: # Check if the user is the same as the one who made the reservation
+        messages.error(request, 'You are not authorized to review this restaurant.')
+        return redirect('Restaurant_handling:restaurant_detail', business_id=business_id)
+    else:
+        if request.method == 'POST':
+            form = ReviewForm(request.POST)
+            if form.is_valid():
+                review = form.save(commit=False)
+                review.business_id = business
+                review.user_id = request.user
+                review.save()
+                messages.success(request, 'Review saved successfully!')
+                return redirect('Restaurant_handling:restaurant_detail', business_id=business_id)
+        else:
+            form = ReviewForm()
+    return render(request, 'Restaurant_handling/review_restaurant.html', {'form': form, 'business': business})
+    
 @business_required
 def settings(request):
     business = Business.objects.get(business_owner=request.user)
