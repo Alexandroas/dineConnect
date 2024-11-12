@@ -1,0 +1,141 @@
+.review-form-container {
+  max-width: 600px;
+  margin: 20px auto;
+  padding: 25px;
+  background: white;
+  border-radius: 15px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+/* Form Title */
+.review-title {
+  font-size: 24px;
+  color: #2d3748;
+  margin-bottom: 20px;
+  font-weight: 600;
+  text-align: center;
+}
+
+/* Star Rating */
+    /* Updated star rating styles */
+    .star-rating {
+        display: flex;
+        flex-direction: row-reverse; /* Reverse the order of stars */
+        gap: 8px;
+        justify-content: center;
+        margin-bottom: 20px;
+    }
+
+    .star-label {
+        cursor: pointer;
+        transition: transform 0.2s ease;
+    }
+
+    .star-label:hover {
+        transform: scale(1.1);
+    }
+
+    .hidden {
+        display: none;
+    }
+
+    .star-icon {
+        width: 32px;
+        height: 32px;
+        fill: #cbd5e0;
+        transition: fill 0.3s ease;
+    }
+
+    /* This makes stars fill from right to left on hover */
+    .star-label:hover .star-icon,
+    .star-label:hover ~ .star-label .star-icon {
+        fill: #fbbf24;
+    }
+
+    /* This makes stars fill from right to left when selected */
+    input[name="review_rating"]:checked ~ .star-label .star-icon {
+        fill: #f59e0b;
+    }
+
+/* Review Textarea */
+.review-textarea {
+  width: 100%;
+  min-height: 120px;
+  padding: 12px;
+  border: 2px solid #e2e8f0;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  font-size: 16px;
+  resize: vertical;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.review-textarea:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+}
+
+/* Submit Button */
+.submit-button {
+  width: 100%;
+  padding: 12px;
+  background-color: #3b82f6;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.submit-button:hover {
+  background-color: #2563eb;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 6px rgba(37, 99, 235, 0.2);
+}
+
+.submit-button:active {
+  transform: translateY(0);
+  box-shadow: none;
+}
+
+/* Form Labels */
+.form-label {
+  display: block;
+  margin-bottom: 8px;
+  color: #4a5568;
+  font-weight: 500;
+}
+
+/* Error Messages */
+.error-message {
+  color: #dc2626;
+  font-size: 14px;
+  margin-top: 4px;
+}
+
+/* Success Message Animation */
+@keyframes slideIn {
+  from {
+      transform: translateY(100%);
+      opacity: 0;
+  }
+  to {
+      transform: translateY(0);
+      opacity: 1;
+  }
+}
+
+.success-message {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  background-color: #10b981;
+  color: white;
+  padding: 12px 24px;
+  border-radius: 8px;
+  animation: slideIn 0.3s ease-out;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
