@@ -70,9 +70,15 @@ document.addEventListener('DOMContentLoaded', () => {
                 const response = await fetch('/api/notifications/');
                 if (response.ok) {
                     const notifications = await response.json();
+                    // Reset count before loading
+                    this.unreadCount = 0;
+                    
                     notifications.forEach(notification => {
-                        this.addNotificationToInbox(notification, false);
+                        this.addNotificationToInbox(notification);
                     });
+                    
+                    // Update counter after loading all notifications
+                    this.updateNotificationCounter();
                 }
             } catch (error) {
                 console.error('Error loading notifications:', error);
@@ -226,6 +232,12 @@ document.addEventListener('DOMContentLoaded', () => {
                         </div>
                     </div>
                 `;
+
+                // Remove "No notifications" message if it exists
+                const noNotificationsDiv = notificationList.querySelector('.no-notifications');
+                if (noNotificationsDiv) {
+                    noNotificationsDiv.remove();
+                }
 
                 notificationList.insertBefore(notificationItem, notificationList.firstChild);
 
