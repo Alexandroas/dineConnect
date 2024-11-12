@@ -1,133 +1,220 @@
-{% extends "main/header.html" %}
+{% extends 'main/header.html' %}
+{% load crispy_forms_tags %}
 {% block content %}
-<div class="container mt-4">
+  {% load static %}
+  <link rel="stylesheet" type="text/css" href="{% static 'Restaurant_handling/review_form.css' %}" />
+  <div class="container mt-4">
     <!-- Restaurant Header -->
     <div class="row mb-4">
-        <div class="col-md-8">
-            <div class="position-relative">
-                {% if business.business_image %}
-                    <img src="{{ business.business_image.url }}"
-                         alt="{{ business.business_name }}"
-                         class="img-fluid rounded shadow-sm" 
-                         style="width: 100%; height: 400px; object-fit: cover;">
-                {% else %}
-                    <img src="https://via.placeholder.com/800x400"
-                         alt="No Image Available"
-                         class="img-fluid rounded shadow-sm">
-                {% endif %}
-            </div>
+      <div class="col-md-8">
+        <div class="position-relative">
+          {% if business.business_image %}
+            <img src="{{ business.business_image.url }}" alt="{{ business.business_name }}" class="img-fluid rounded shadow-sm" style="width: 100%; height: 400px; object-fit: cover;" />
+          {% else %}
+            <img src="https://via.placeholder.com/800x400" alt="No Image Available" class="img-fluid rounded shadow-sm" />
+          {% endif %}
         </div>
+      </div>
 
-        <!-- Contact Sidebar -->
-        <div class="col-md-4">
-            <div class="card shadow-sm h-100">
-                <div class="card-body">
-                    <h5 class="card-title border-bottom pb-2">Contact Information</h5>
-                    <div class="mt-3">
-                        <p class="mb-2">
-                            <i class="bi bi-person-circle me-2"></i>
-                            <strong>Owner:</strong> {{ business.business_owner}}
-                        </p>
-                        <p class="mb-2">
-                            <i class="bi bi-geo-alt me-2"></i>
-                            <strong>Address:</strong> {{ business.business_address }}
-                        </p>
-                        <p class="mb-2">
-                            <i class="bi bi-telephone me-2"></i>
-                            <strong>Phone:</strong> {{ business.contact_number }}
-                        </p>
-                    </div>
-                    
-                    {% if user.is_authenticated %}
-                        <div class="mt-4">
-                            <a href="{% url 'reservations:restaurant_reservation' business_id=business.business_id %}" 
-                               class="btn btn-primary w-100">
-                                <i class="bi bi-calendar-check me-2"></i>
-                                Make Reservation
-                            </a>
-                        </div>
-                    {% else %}
-                        <div class="mt-4 text-center">
-                            <p class="text-muted">Please <a href="{% url 'login' %}">login</a> to make a reservation</p>
-                        </div>
-                    {% endif %}
-                </div>
+      <!-- Contact Sidebar -->
+      <div class="col-md-4">
+        <div class="card shadow-sm h-100">
+          <div class="card-body">
+            <h5 class="card-title border-bottom pb-2">Contact Information</h5>
+            <div class="mt-3">
+              <p class="mb-2">
+                <i class="bi bi-person-circle me-2"></i>
+                <strong>Owner:</strong> {{ business.business_owner }}
+              </p>
+              <p class="mb-2">
+                <i class="bi bi-geo-alt me-2"></i>
+                <strong>Address:</strong> {{ business.business_address }}
+              </p>
+              <p class="mb-2">
+                <i class="bi bi-telephone me-2"></i>
+                <strong>Phone:</strong> {{ business.contact_number }}
+              </p>
             </div>
+
+            {% if user.is_authenticated %}
+              <div class="mt-4">
+                <a href="{% url 'reservations:restaurant_reservation' business_id=business.business_id %}" class="btn btn-primary w-100">
+                  <i class="bi bi-calendar-check me-2"></i>
+                  Make Reservation
+                </a>
+              </div>
+            {% else %}
+              <div class="mt-4 text-center">
+                <p class="text-muted">
+                  Please <a href="{% url 'login' %}">login</a> to make a reservation
+                </p>
+              </div>
+            {% endif %}
+          </div>
         </div>
+      </div>
+      <div class="col-md-4">
+        <div class="card shadow-sm h-100">
+          <div class="card-body">
+            <h5 class="card-title border-bottom">Restaurant reviews</h5>
+            <div class="mt-3">
+              {% for review in reviews %}
+                <div class="card mb-3">
+                  <div class="card-body">
+                    <h6 class="card-title">{{ review.user }}</h6>
+                    <p class="card-text">{{ review.review_text }}</p>
+                    <div class="d-flex justify-content-between">
+                      <small class="text-muted
+                                            {% if review.rating == 1 %}
+                          
+                          text-danger
+
+
+                        {% elif review.rating == 2 %}
+                          
+                          text-warning
+
+
+                        {% elif review.rating == 3 %}
+                          
+                          text-info
+
+
+                        {% elif review.rating == 4 %}
+                          
+                          text-primary
+
+
+                        {% elif review.rating == 5 %}
+                          
+                          text-success
+
+
+                        {% endif %}">
+
+                      </small>
+                      <small class="text-muted">{{ review.created_at|date:'F d, Y' }}</small>
+                    </div>
+                  </div>
+                </div>
+              {% endfor %}
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
 
     <!-- Restaurant Details -->
     <div class="row">
-        <div class="col-md-8">
-            <div class="card shadow-sm mb-4">
-                <div class="card-body">
-                    <h1 class="card-title h2 mb-3">{{ business.business_name }}</h1>
-                    {%for cuisine in business.cuisine.all%}
-                        {{ cuisine.cuisine_name }}{% if not forloop.last %}, {% endif %}
-                    {%endfor%}
-                    <div class="mt-4">
-                        <h5 class="border-bottom pb-2"><i class="bi bi-info-circle me-2"></i>About</h5>
-                        <p class="mt-3">{{ business.business_description|default:"No description available." }}</p>
-                    </div>
-
-                    <div class="mt-4">
-                        <h5 class="border-bottom pb-2"><i class="bi bi-clock me-2"></i>Business Hours</h5>
-                        <div class="row mt-3">
-                            <div class="col-6">
-                                <p class="mb-2"><strong>Opens:</strong> {{ business.opening_time }}</p>
-                            </div>
-                            <div class="col-6">
-                                <p class="mb-2"><strong>Closes:</strong> {{ business.closing_time }}</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+      <div class="col-md-8">
+        <div class="card shadow-sm mb-4">
+          <div class="card-body">
+            <h1 class="card-title h2 mb-3">{{ business.business_name }}</h1>
+            {% for cuisine in business.cuisine.all %}
+              {{ cuisine.cuisine_name }}{% if not forloop.last %}, {% endif %}
+            {% endfor %}
+            <div class="mt-4">
+              <h5 class="border-bottom pb-2"><i class="bi bi-info-circle me-2"></i>About</h5>
+              <p class="mt-3">{{ business.business_description|default:'No description available.' }}</p>
             </div>
 
-            <div class="card shadow-sm mb-4">
-                <div class="card-body">
-                    <h5 class="border-bottom pb-2">
-                        <i class="bi bi-journal-text me-2"></i>Menu
-                    </h5>
-                    
-                    {% regroup dishes by dish_type as dish_list %}
-                    
-                    {% for type in dish_list %}
-                    <div class="menu-section mb-4">
-                        <h4 class="section-title mb-3">{{ type.grouper.dish_type_name }}</h4>
-                        <div class="row">
-                            {% for dish in type.list %}
-                            <div class="col-md-6 mb-3">
-                                <div class="card h-100">
-                                    <div class="card-body">
-                                        <h5 class="card-title">{{ dish.dish_name }}</h5>
-                                        <h6 class="card-subtitle mb-2 text-muted">${{ dish.dish_cost }}</h6>
-                                        <p class="card-text">{{ dish.dish_description }}</p>
-                                        {% if dish.allergens %}
-                                        <div class="mt-2">
-                                            <small class="text-warning">
-                                                <i class="bi bi-exclamation-triangle me-1"></i>
-                                                Contains: {{ dish.allergens }}
-                                            </small>
-                                        </div>
-                                        {% endif %}
-                                    </div>
-                                </div>
-                            </div>
-                            {% endfor %}
-                        </div>
-                    </div>
-                    {% empty %}
-                    <div class="alert alert-info">
-                        No menu items available.
-                    </div>
-                    {% endfor %}
+            <div class="mt-4">
+              <h5 class="border-bottom pb-2"><i class="bi bi-clock me-2"></i>Business Hours</h5>
+              <div class="row mt-3">
+                <div class="col-6">
+                  <p class="mb-2">
+                    <strong>Opens:</strong> {{ business.opening_time }}
+                  </p>
                 </div>
+                <div class="col-6">
+                  <p class="mb-2">
+                    <strong>Closes:</strong> {{ business.closing_time }}
+                  </p>
+                </div>
+              </div>
             </div>
-        <!-- Additional Information or Features -->
-        <div class="col-md-4">
-            <!-- You can add more cards here for reviews, ratings, etc. -->
+          </div>
         </div>
+
+        <div class="card shadow-sm mb-4">
+          <div class="card-body">
+            <h5 class="border-bottom pb-2"><i class="bi bi-journal-text me-2"></i>Menu</h5>
+
+            {% regroup dishes by dish_type as dish_list %}
+
+            {% for type in dish_list %}
+              <div class="menu-section mb-4">
+                <h4 class="section-title mb-3">{{ type.grouper.dish_type_name }}</h4>
+                <div class="row">
+                  {% for dish in type.list %}
+                    <div class="col-md-6 mb-3">
+                      <div class="card h-100">
+                        <div class="card-body">
+                          <h5 class="card-title">{{ dish.dish_name }}</h5>
+                          <h6 class="card-subtitle mb-2 text-muted">${{ dish.dish_cost }}</h6>
+                          <p class="card-text">{{ dish.dish_description }}</p>
+                          {% if dish.allergens %}
+                            <div class="mt-2">
+                              <small class="text-warning">
+                                <i class="bi bi-exclamation-triangle me-1"></i>
+                                Contains: {{ dish.allergens }}
+                              </small>
+                            </div>
+                          {% endif %}
+                        </div>
+                      </div>
+                    </div>
+                  {% endfor %}
+                </div>
+              </div>
+            {% empty %}
+              <div class="alert alert-info">No menu items available.</div>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
     </div>
-</div>
+  <!--Review rating form-->
+    {% if user.is_authenticated %}
+      {% if has_reviewed %}
+        <div class="review-form-container">
+          <p class="text-center text-gray-600">You have already submitted a review for this restaurant.</p>
+        </div>
+      {% else %}
+        <div class="review-form-container">
+          <h3 class="review-title">Write a Review</h3>
+          <form method="post">
+            {% csrf_token %}
+
+            <div class="form-group">
+              <label class="form-label">Rating</label>
+              <div class="star-rating">
+                {% for i in '12345'|make_list %}
+                  <input type="radio" name="review_rating" value="{{ forloop.counter }}" id="star{{ forloop.counter }}" class="hidden" required />
+                  <label for="star{{ forloop.counter }}" class="star-label">
+                    <svg class="star-icon" viewBox="0 0 20 20">
+                      <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                    </svg>
+                  </label>
+                {% endfor %}
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Your Review</label>
+              <textarea name="review_text" class="review-textarea" placeholder="Share your experience..." required></textarea>
+            </div>
+
+            <button type="submit" class="submit-button">Submit Review</button>
+          </form>
+        </div>
+      {% endif %}
+    {% else %}
+      <div class="login-prompt">
+        <p>
+          Please <a href="{% url 'login' %}" class="login-link">login</a> to leave a review.
+        </p>
+      </div>
+    {% endif %}
+  </div>
 {% endblock %}
