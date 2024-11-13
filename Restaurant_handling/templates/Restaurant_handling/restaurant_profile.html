@@ -31,6 +31,7 @@
                 <p class="text-secondary">Contact: {{ business.contact_number }}</p>
                 <p class="text-secondary">Hours: {{ business.opening_time }} - {{ business.closing_time }}</p>
                 <p class="text-secondary">Cuisine: {% for cuisine in business.cuisine.all %}{{ cuisine.name }}{% if not forloop.last %}, {% endif %}{% endfor %}</p>
+                <p class="text-secondary">Max table size: {{ business.buisness_max_table_capacity }}</p>
                 {% if business.business_image %}
                     <img src="{{ business.business_image.url }}" alt="Business Image" class="img-thumbnail" style="max-width: 200px;">
                 {% endif %}
