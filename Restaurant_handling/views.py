@@ -151,23 +151,33 @@ def restaurant_detail(request, business_id):
             business_id=business, 
             user_id=request.user
         ).first()
+    has_confirmed_reservation = Reservation.objects.filter(
+        business_id=business,
+        user_id=request.user,
+        reservation_status='Completed'  # Adjust this based on your status field
+    ).exists()
+
         
-        if request.method == 'POST':
-            if existing_review:
-                messages.error(request, 'You have already reviewed this restaurant.')
-                return redirect('Restaurant_handling:restaurant_detail', business_id=business_id)
-                
-            form = ReviewForm(request.POST)
-            if form.is_valid():
-                review = form.save(commit=False)
-                review.business_id = business
-                review.user_id = request.user
-                review.save()
-                messages.success(request, 'Review saved successfully!')
-                return redirect('Restaurant_handling:restaurant_detail', business_id=business_id)
-        else:
-            if not existing_review:  # Only show form if user hasn't reviewed
-                form = ReviewForm()
+        
+    if request.method == 'POST':
+        if existing_review:
+            messages.error(request, 'You have already reviewed this restaurant.')
+            return redirect('Restaurant_handling:restaurant_detail', business_id=business_id)
+        if not has_confirmed_reservation:
+            messages.error(request, 'You must have a completed reservation to review this restaurant.')
+            return redirect('Restaurant_handling:restaurant_detail', business_id=business_id)
+            
+        form = ReviewForm(request.POST)
+        if form.is_valid():
+            review = form.save(commit=False)
+            review.business_id = business
+            review.user_id = request.user
+            review.save()
+            messages.success(request, 'Review saved successfully!')
+            return redirect('Restaurant_handling:restaurant_detail', business_id=business_id)
+    else:
+        if not existing_review:  # Only show form if user hasn't reviewed
+            form = ReviewForm()
 
     paginator = Paginator(reviews, 10)
     page_number = request.GET.get('page')
