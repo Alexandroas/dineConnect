@@ -67,6 +67,7 @@ class Business(models.Model):
     )
     business_address = models.TextField(max_length=255)
     business_tax_code = models.CharField(max_length=100)
+    business_max_table_capacity = models.IntegerField(default=4)
     contact_number = models.CharField(max_length=20)
     business_description = models.TextField(max_length=255)
     cuisine = models.ManyToManyField(
@@ -281,7 +282,7 @@ class Meta:
         if self.is_closed:
             return f"{day_name}: Closed"
         return f"{day_name}: {self.opening_time.strftime('%H:%M')} - {self.closing_time.strftime('%H:%M')}"
-def get_buisness_hours(self):
+def get_business_hours(self):
     """
     Return business hours as a dictionary
     """
