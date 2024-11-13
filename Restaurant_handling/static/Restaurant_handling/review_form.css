@@ -128,14 +128,48 @@
   }
 }
 
-.success-message {
-  position: fixed;
-  bottom: 20px;
-  right: 20px;
-  background-color: #10b981;
-  color: white;
-  padding: 12px 24px;
+.review-card {
+  min-height: 150px;
+  background: #f8f9fa;
   border-radius: 8px;
-  animation: slideIn 0.3s ease-out;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.review-text {
+  max-height: 80px;
+  overflow-y: auto;
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+.carousel-control-prev,
+.carousel-control-next {
+  width: 10%;
+}
+
+.carousel-control-prev-icon,
+.carousel-control-next-icon {
+  padding: 15px;
+  background-size: 50%;
+}
+
+.rating .bi {
+  font-size: 0.8rem;
+}
+
+/* Custom scrollbar */
+.review-text::-webkit-scrollbar {
+  width: 4px;
+}
+
+.review-text::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+.review-text::-webkit-scrollbar-thumb {
+  background: #adb5bd;
+  border-radius: 4px;
+}
+
+.review-text::-webkit-scrollbar-thumb:hover {
+  background: #6c757d;
 }
