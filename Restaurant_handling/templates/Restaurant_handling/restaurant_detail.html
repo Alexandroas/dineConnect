@@ -16,94 +16,93 @@
         </div>
       </div>
 
-      <!-- Contact Sidebar -->
-      <div class="col-md-4">
-        <div class="card shadow-sm h-100">
-          <div class="card-body">
-            <h5 class="card-title border-bottom pb-2">Contact Information</h5>
-            <div class="mt-3">
+<!-- Contact Card -->
+<div class="col-md-4">
+  <div class="card shadow-sm mb-4">
+      <div class="card-body">
+          <h5 class="card-title border-bottom pb-2">Contact Information</h5>
+          <div class="mt-3">
               <p class="mb-2">
-                <i class="bi bi-person-circle me-2"></i>
-                <strong>Owner:</strong> {{ business.business_owner }}
+                  <i class="bi bi-person-circle me-2"></i>
+                  <strong>Owner:</strong> {{ business.business_owner }}
               </p>
               <p class="mb-2">
-                <i class="bi bi-geo-alt me-2"></i>
-                <strong>Address:</strong> {{ business.business_address }}
+                  <i class="bi bi-geo-alt me-2"></i>
+                  <strong>Address:</strong> {{ business.business_address }}
               </p>
               <p class="mb-2">
-                <i class="bi bi-telephone me-2"></i>
-                <strong>Phone:</strong> {{ business.contact_number }}
+                  <i class="bi bi-telephone me-2"></i>
+                  <strong>Phone:</strong> {{ business.contact_number }}
               </p>
-            </div>
+          </div>
 
-            {% if user.is_authenticated %}
+          {% if user.is_authenticated %}
               <div class="mt-4">
-                <a href="{% url 'reservations:restaurant_reservation' business_id=business.business_id %}" class="btn btn-primary w-100">
-                  <i class="bi bi-calendar-check me-2"></i>
-                  Make Reservation
-                </a>
+                  <a href="{% url 'reservations:restaurant_reservation' business_id=business.business_id %}" 
+                     class="btn btn-primary w-100">
+                      <i class="bi bi-calendar-check me-2"></i>Make Reservation
+                  </a>
               </div>
-            {% else %}
+          {% else %}
               <div class="mt-4 text-center">
-                <p class="text-muted">
-                  Please <a href="{% url 'login' %}">login</a> to make a reservation
-                </p>
+                  <p class="text-muted">Please <a href="{% url 'login' %}">login</a> to make a reservation</p>
               </div>
-            {% endif %}
-          </div>
-        </div>
+          {% endif %}
       </div>
-      <div class="col-md-4">
-        <div class="card shadow-sm h-100">
-          <div class="card-body">
-            <h5 class="card-title border-bottom">Restaurant reviews</h5>
-            <div class="mt-3">
-              {% for review in reviews %}
-                <div class="card mb-3">
-                  <div class="card-body">
-                    <h6 class="card-title">{{ review.user }}</h6>
-                    <p class="card-text">{{ review.review_text }}</p>
-                    <div class="d-flex justify-content-between">
-                      <small class="text-muted
-                                            {% if review.rating == 1 %}
-                          
-                          text-danger
+  </div>
 
-
-                        {% elif review.rating == 2 %}
-                          
-                          text-warning
-
-
-                        {% elif review.rating == 3 %}
-                          
-                          text-info
-
-
-                        {% elif review.rating == 4 %}
-                          
-                          text-primary
-
-
-                        {% elif review.rating == 5 %}
-                          
-                          text-success
-
-
-                        {% endif %}">
-
-                      </small>
-                      <small class="text-muted">{{ review.created_at|date:'F d, Y' }}</small>
+  <!-- Reviews Section -->
+  <div class="card shadow-sm">
+      <div class="card-body">
+          <h5 class="card-title d-flex justify-content-between align-items-center border-bottom pb-2">
+              Customer Reviews
+              <span class="badge bg-primary rounded-pill">{{ reviews.count }}</span>
+          </h5>
+          
+          {% if reviews %}
+              <div id="reviewCarousel" class="carousel slide mt-3" data-bs-ride="carousel">
+                  <div class="carousel-inner">
+                    {% for review in reviews %}
+                    <div class="carousel-item {% if forloop.first %}active{% endif %}">
+                        <div class="review-card p-3 text-center">
+                            <h6 class="mb-3 fw-bold">{{ review.user_id.username }}</h6>
+                            
+                            <div class="rating mb-3">
+                                {% for i in '12345'|make_list %}
+                                    <i class="bi bi-star{% if forloop.counter <= review.review_rating %}-fill{% endif %} text-warning"></i>
+                                {% endfor %}
+                            </div>
+                            
+                            <div class="review-content">
+                                <p class="review-text mb-3 fst-italic">
+                                    "{{ review.review_text }}"
+                                </p>
+                                <small class="text-muted d-block">{{ review.created_at|date:"F d, Y" }}</small>
+                            </div>
+                        </div>
                     </div>
+                {% endfor %}
                   </div>
-                </div>
-              {% endfor %}
-            </div>
-          </div>
-        </div>
+                  {% if reviews.count > 1 %}
+                      <button class="carousel-control-prev" type="button" data-bs-target="#reviewCarousel" data-bs-slide="prev">
+                          <span class="carousel-control-prev-icon bg-dark rounded-circle" aria-hidden="true"></span>
+                          <span class="visually-hidden">Previous</span>
+                      </button>
+                      <button class="carousel-control-next" type="button" data-bs-target="#reviewCarousel" data-bs-slide="next">
+                          <span class="carousel-control-next-icon bg-dark rounded-circle" aria-hidden="true"></span>
+                          <span class="visually-hidden">Next</span>
+                      </button>
+                  {% endif %}
+              </div>
+          {% else %}
+              <div class="text-center py-4">
+                  <i class="bi bi-chat-square-text fs-1 text-muted"></i>
+                  <p class="text-muted mt-2">No reviews yet</p>
+              </div>
+          {% endif %}
       </div>
-    </div>
-
+  </div>
+</div>
     <!-- Restaurant Details -->
     <div class="row">
       <div class="col-md-8">
