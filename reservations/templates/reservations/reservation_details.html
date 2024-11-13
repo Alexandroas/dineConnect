@@ -43,6 +43,20 @@
                     </div>
                     </div>
                 {%endif%}
+                {%if reservation.reservation_status == 'Confirmed'%}
+                    <button class="open-button" onclick="openFormComplete()"> Complete Reservation</button>
+                    <div class="modal-overlay-complete">
+                    <div class="form-popup-complete" id="myForm">
+                        <form action="{% url 'reservations:complete_reservation' business.business_id reservation.reservation_id %}" method="post" class="form-container">
+                            {% csrf_token %}
+                            <h3>Are you sure you want to complete this reservation?</h3>
+                            <a href="{% url 'reservations:complete_reservation' business.business_id reservation.reservation_id %}" 
+                                class="btn btn-primary"> Yes</a>
+                            <button type="button" class="btn btn-primary" onclick="closeFormComplete()">No</button>
+                        </form>
+                    </div>
+                    </div>
+                {%endif%}
                 </div>
             
             <div class="card">
@@ -145,6 +159,15 @@
         document.querySelector('.modal-overlay-conf').style.display = "none";
         document.querySelector('.form-popup-conf').style.display = "none";
       }
+    function openFormComplete() {
+        document.querySelector('.modal-overlay-complete').style.display = "block";
+        document.querySelector('.form-popup-complete').style.display = "block";
+    }
+    function closeFormComplete() {
+        document.querySelector('.modal-overlay-complete').style.display = "none";
+        document.querySelector('.form-popup-complete').style.display = "none";
+    }
+
 
 </script>
 {% endblock %}
