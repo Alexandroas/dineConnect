@@ -16,6 +16,7 @@ class Reservation(models.Model):
         ('Pending', 'Pending'),
         ('Confirmed', 'Confirmed'),
         ('Cancelled', 'Cancelled'),
+        ('Completed', 'Completed'),
     ]
     reservation_status = models.CharField(
         max_length=20,
@@ -61,3 +62,4 @@ class Reservation(models.Model):
 
     def __str__(self):
         return f"Reservation for {self.user_id.username} at {self.business_id.business_name} - {str(self.reservation_date)}"
+    
