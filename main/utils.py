@@ -142,7 +142,34 @@ def send_cancellation_email_business(user, reservation):
     except Exception as e:
         print(f"Error sending email: {str(e)}")
         return False
+
+def send_completion_email(user, reservation):
+    context = {
+        'user': user,
+        'reservation': reservation,
+        'business': reservation.business_id,
+        'dishes' : reservation.dish_id.all(),
+        'debug': True
+    }
+    print(f"Sending email for reservation {reservation.reservation_id}")
+    print(f"Number of dishes: {reservation.dish_id.count()}")
+    print(f"Dishes: {list(reservation.dish_id.all())}")
+    html_message = render_to_string('main/email/completed_reservation_email.html', context)
     
+    try:
+        send_mail(
+            subject=f'Reservation Completion - {reservation.business_id.business_name}',
+            message='',
+            html_message=html_message,
+            from_email=settings.DEFAULT_FROM_EMAIL,
+            recipient_list=[user.email],
+            fail_silently=False,
+        )
+        return True
+    except Exception as e:
+        print(f"Error sending email: {str(e)}")
+        return False
+
 def send_cancellation_email(user, reservation):
     context = {
         'user': user,
