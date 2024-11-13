@@ -163,7 +163,12 @@ class BusinessDetailsForm(forms.Form):
             'placeholder': 'Enter tax code'
         })
     )
-
+    buisness_max_table_capacity = forms.IntegerField(
+        widget=forms.NumberInput(attrs={
+            'class': 'form-control', 
+            'placeholder': 'Enter max table capacity'
+        })
+    )
 class BusinessHoursForm(forms.Form):
     # Checkboxes for each day of the week
     monday = forms.BooleanField(required=False, initial=False)
@@ -279,7 +284,7 @@ class BusinessUpdateForm(forms.ModelForm):
     class Meta:
         model = Business
         fields = [
-            'business_name', 'business_address', 'business_description',
+            'business_name', 'business_address', 'business_description','business_max_table_capacity',
             'business_tax_code', 'contact_number', 'business_image', 'cuisine'
         ]
         widgets = {
@@ -293,6 +298,7 @@ class BusinessUpdateForm(forms.ModelForm):
                 'maxlength': '255',
                 'rows': 3
             }),
+            'business_max_table_capacity': forms.NumberInput(attrs={'class': 'form-control'}),
             'business_name': forms.TextInput(attrs={'class': 'form-control'}),
             'business_tax_code': forms.TextInput(attrs={'class': 'form-control'}),
             'contact_number': forms.TextInput(attrs={'class': 'form-control'}),
