@@ -90,7 +90,7 @@
     box-shadow: rgba(0, 0, 0, 0.3);
 }
 
-.modal-overlay, .modal-overlay-conf {
+.modal-overlay, .modal-overlay-conf, .modal-overlay-complete{
     display: none;
     position: fixed;
     top: 0;
@@ -171,7 +171,7 @@
 }
 
 /* Overlay background */
-.modal-overlay, .modal-overlay-conf {
+.modal-overlay, .modal-overlay-conf, .modal-overlay-complete{
     display: none;
     position: fixed;
     top: 0;
@@ -184,7 +184,7 @@
 }
 
 /* The popup form - centered positioning */
-.form-popup, .form-popup-conf {
+.form-popup, .form-popup-conf, .form-popup-complete {
     display: none;
     position: fixed;
     top: 50%;
@@ -305,7 +305,10 @@
     border-radius: 10px;
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
-
+.card-text.h2 {
+    font-size: 0.875rem;
+    color:  #ffffff !important;
+}
 
 .badge {
     padding: 8px 12px;
