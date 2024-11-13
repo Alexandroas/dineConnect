@@ -1,5 +1,5 @@
 from django.shortcuts import render
-from main.utils import send_reservation_email, send_cancellation_email, send_initial_res_confirmation_email, send_reservation_email_business
+from main.utils import send_reservation_email, send_cancellation_email, send_initial_res_confirmation_email, send_reservation_email_business, send_completion_email
 from notifications.utils import create_notification
 from Restaurant_handling.decorators import business_required, login_required
 from reservations.forms import ReservationForm
@@ -35,6 +35,9 @@ def make_reservation(request, business_id):
                 # Check if date is in the past
                 if reservation.reservation_date < timezone.now().date():
                     messages.error(request, 'Reservation time cannot be in the past.')
+                    return redirect('reservations:restaurant_reservation', business_id=business_id)
+                if reservation.reservation_party_size > business.business_max_table_capacity:
+                    messages.error(request, f"Party size cannot exceed the restaurant max party size of: {business.business_max_table_capacity}.")
                     return redirect('reservations:restaurant_reservation', business_id=business_id)
                 
                 # Get the day of the week for the reservation
@@ -224,6 +227,20 @@ def confirm_reservation(request, business_id, reservation_id):
     notification_message = f"The business {reservation.business_id} has confirmed your reservation on {reservation.reservation_date} at time, {reservation.reservation_time}."
     create_notification(reservation.user_id, notification_message)
     messages.success(request, 'Reservation confirmed successfully!')
+    context = {
+        'business': reservation.business_id,
+        'reservation': reservation
+    }
+    return render(request, 'reservations/upcoming_reservations.html', context)
+@business_required
+def complete_reservation(request, business_id, reservation_id):
+    reservation = get_object_or_404(Reservation, 
+                                  reservation_id=reservation_id,
+                                  business_id=business_id)
+    reservation.reservation_status = 'Completed'
+    reservation.save()
+    send_completion_email(reservation.user_id, reservation)
+    messages.success(request, 'Reservation completed successfully!')
     context = {
         'business': reservation.business_id,
         'reservation': reservation
