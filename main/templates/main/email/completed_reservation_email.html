@@ -1,0 +1,17 @@
+<html>
+<head>
+<link rel = "stylesheet" type = "text/css" href = "main/email_styling.css" />
+</head>
+<body>
+    <h2> Reservation completed! </h2>
+    <p> We are very happy that your reservation at {{ business.business_name }} on {{ reservation.reservation_date }} has been carried out succefully! </p>
+    <p> We hope you had a great time and we are looking forward to seeing you again soon! </p>
+    <p> If you have any questions or would like to reschedule, please contact us at {{ business.contact_number }}. </p>
+    <p> Thank you for choosing us! </p>
+    <p> Best regards, </p>
+    <p> The {{ business.business_name }} team </p>
+    <p> <img src="main/static/main/images/logo.png" alt="logo" style="width:100px;height:100px;"> </p>
+    <p> If you enjoyed your time on our establishment please leave a review! <a href="#">   </a> </p>
+    <p> If you have any questions or would like to reschedule, please contact us at {{ business.contact_number }}. </p>
+</body>
+</html>
