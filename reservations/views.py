@@ -2,6 +2,7 @@ from django.shortcuts import render
 from main.utils import send_reservation_email, send_cancellation_email, send_initial_res_confirmation_email, send_reservation_email_business, send_completion_email
 from notifications.utils import create_notification
 from Restaurant_handling.decorators import business_required, login_required
+from payments.models import Payment
 from reservations.forms import ReservationForm
 from django.contrib import messages
 from django.core.paginator import Paginator
@@ -12,6 +13,9 @@ from .models import Reservation
 from django.core.paginator import Paginator
 from django.utils import timezone
 from datetime import datetime
+from payments.views import refund_payment
+import stripe # type: ignore
+from django.conf import settings
 
 @login_required
 def make_reservation(request, business_id):
@@ -198,19 +202,58 @@ def reservation_details(request, business_id, reservation_id):
 
 @business_required
 def cancel_reservation(request, business_id, reservation_id):
-    reservation = get_object_or_404(Reservation, 
+    reservation = get_object_or_404(Reservation,
                                   reservation_id=reservation_id,
                                   business_id=business_id)
+    
+    print(f"DEBUG: Cancelling reservation {reservation_id} for business {business_id}")
+    
+    # Check for payments
+    payments = Payment.objects.filter(reservation=reservation)
+    print(f"DEBUG: Found {payments.count()} payments for this reservation")
+    
+    # Get the associated payment
+    try:
+        payment = Payment.objects.get(
+            reservation=reservation,
+            status='succeded'
+        )
+        print(f"DEBUG: Found payment {payment.id} with status {payment.status}")
+        
+        stripe.api_key = settings.STRIPE_SECRET_KEY
+        refund = stripe.Refund.create(
+            payment_intent=payment.stripe_payment_intent_id
+        )
+        
+        payment.status = 'refunded'
+        payment.save()
+        
+        messages.success(request, 'Reservation canceled and payment refunded successfully!')
+        
+    except Payment.DoesNotExist:
+        print(f"DEBUG: No successful payment found for reservation {reservation_id}")
+        # Check if there are any payments in other statuses
+        other_payments = Payment.objects.filter(reservation=reservation)
+        for p in other_payments:
+            print(f"DEBUG: Found payment {p.id} with status: {p.status}")
+        messages.success(request, 'Reservation canceled successfully!')
+    except stripe.error.StripeError as e:
+        print(f"DEBUG: Stripe error: {str(e)}")
+        messages.warning(request, f'Reservation canceled but there was an issue processing the refund: {str(e)}')
+    
+    # Continue with rest of your code...
     reservation.reservation_status = 'Cancelled'
     reservation.save()
-    messages.success(request, 'Reservation canceled successfully!')
+    
     send_cancellation_email(reservation.user_id, reservation)
     notification_message = f"The business {reservation.business_id} has cancelled your reservation on {reservation.reservation_date} at time, {reservation.reservation_time}."
     create_notification(reservation.user_id, notification_message)
+    
     context = {
         'business': reservation.business_id,
         'reservation': reservation
     }
+    
     return render(request, 'reservations/upcoming_reservations.html', context)
 @business_required
 def confirm_reservation(request, business_id, reservation_id):
