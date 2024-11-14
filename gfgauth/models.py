@@ -91,6 +91,13 @@ class Business(models.Model):
 
     def __str__(self):
         return self.business_name
+    
+    def get_average_rating(self):
+        reviews = self.review_set.all()
+        if reviews:
+            total_rating = sum(review.review_rating for review in reviews)
+            return round(total_rating / reviews.count(), 1)  # Rounds to 1 decimal place
+        return 0
 
     def get_cuisines(self):
         """Return all cuisines for this business"""
