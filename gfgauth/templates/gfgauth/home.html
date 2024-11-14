@@ -26,12 +26,12 @@
                 <option value="{{ cuisine.cuisine_name|lower }}">{{ cuisine.cuisine_name }}</option>
               {% endfor %}
             </select>
-            <select class="form-select">
+            <select class="form-select" id="sortSelect" onchange="sortBusinesses(this.value)">
               <option value="">Sort By</option>
               <option value="rating">Top Rated</option>
               <option value="name">Name (A-Z)</option>
-              <option value="price">Price (Low-High)</option>
-            </select>
+              <option value="name-desc">Name (Z-A)</option>
+          </select>
           </div>
         </div>
       </div>
