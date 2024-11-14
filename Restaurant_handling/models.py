@@ -41,4 +41,4 @@ class Review(models.Model):
     user_id = models.ForeignKey('gfgauth.CustomUser', on_delete=models.CASCADE)
     
     def __str__(self):
-        return self.review_id
+        return str (self.review_id)
