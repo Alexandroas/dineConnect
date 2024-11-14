@@ -90,7 +90,8 @@ def mark_all_read(request):
         return JsonResponse({'error': 'Not authenticated'}, status=403)
         
     Notification.objects.filter(recipient=request.user).update(is_read=True)
-    return JsonResponse({'status': 'success'})
+    messages.success(request, 'All notifications marked as read')
+    return HttpResponseRedirect(request.META.get('HTTP_REFERER', '/'))
 
 @require_http_methods(["POST"])
 def delete_all_notifications(request):
