@@ -38,59 +38,82 @@
     </div>
   </section>
 
-  <!-- Restaurant Grid -->
-  <section class="restaurants-grid mb-5">
-    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
-      {% for business in businesses %}
-        <div class="col">
-          <div class="card h-100 border-0 shadow-sm hover-shadow cuisine_type_filter" data-cuisines="{{ business.get_cuisine_names|lower }}">
-            <a href="{% url 'Restaurant_handling:restaurant_detail' business.business_id %}" class="text-decoration-none">
-              <div class="position-relative">
-                {% if business.business_image %}
-                  <img src="{{ business.business_image.url }}" alt="{{ business.business_name }}" 
-                       class="card-img-top object-fit-cover" style="height: 200px;" />
-                {% else %}
-                  <img src="/api/placeholder/400/320" alt="No Image Available" 
-                       class="card-img-top object-fit-cover" style="height: 200px;" />
-                {% endif %}
-                <button class="favorite-btn position-absolute top-0 end-0 m-3 p-2 shadow-sm 
-                               {% if business in user.favourite_restaurants.all %}active{% endif %}"
-                        onclick="event.preventDefault(); toggleFavorite(this, {{ business.business_id }});"
-                        {% if not user.is_authenticated %}disabled{% endif %}
-                        title="{% if not user.is_authenticated %}Please login to add favorites{% endif %}">
-                  <i class="bi {% if business in user.favourite_restaurants.all %}bi-heart-fill text-danger{% else %}bi-heart{% endif %}"></i>
-                </button>
+<!-- Restaurant Grid -->
+<section class="restaurants-grid mb-5">
+  <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+    {% for business in businesses %}
+      <div class="col">
+        <div class="card h-100 border-0 shadow-sm hover-shadow cuisine_type_filter" data-cuisines="{{ business.get_cuisine_names|lower }}">
+          <a href="{% url 'Restaurant_handling:restaurant_detail' business.business_id %}" class="text-decoration-none">
+            <div class="position-relative">
+              {% if business.business_image %}
+                <img src="{{ business.business_image.url }}" alt="{{ business.business_name }}" 
+                     class="card-img-top object-fit-cover" style="height: 200px;" />
+              {% else %}
+                <img src="/api/placeholder/400/320" alt="No Image Available" 
+                     class="card-img-top object-fit-cover" style="height: 200px;" />
+              {% endif %}
+              <button class="favorite-btn position-absolute top-0 end-0 m-3 p-2 shadow-sm 
+                           {% if business in user.favourite_restaurants.all %}active{% endif %}"
+                      onclick="event.preventDefault(); toggleFavorite(this, {{ business.business_id }});"
+                      {% if not user.is_authenticated %}disabled{% endif %}
+                      title="{% if not user.is_authenticated %}Please login to add favorites{% endif %}">
+                <i class="bi {% if business in user.favourite_restaurants.all %}bi-heart-fill text-danger{% else %}bi-heart{% endif %}"></i>
+              </button>
+            </div>
+
+            <div class="card-body">
+              <h5 class="card-title mb-3">{{ business.business_name }}</h5>
+              <div class="mb-3">
+                <span class="badge">{{ business.get_cuisine_names }}</span>
+                <div class="mt-2">
+                  {% with reviews=business.review_set.all %}
+                      {% if reviews %}
+                          {% with avg_rating=reviews|dictsort:"review_rating"|length %}
+                              <span class="text-warning">
+                                  {% for i in '12345'|make_list %}
+                                      <i class="fas fa-star{% if forloop.counter <= business.get_average_rating %}{% else %}-o{% endif %}"></i>
+                                  {% endfor %}
+                              </span>
+                              <small class="text-muted ms-2">({{ reviews.count }} reviews)</small>
+                          {% endwith %}
+                      {% else %}
+                          <small class="text-muted">No reviews yet</small>
+                      {% endif %}
+                  {% endwith %}
+              </div>
               </div>
 
-              <div class="card-body">
-                <h5 class="card-title mb-3">{{ business.business_name }}</h5>
-                <div class="mb-3">
-                  <span class="badge">{{ business.get_cuisine_names }}</span>
-                  <div class="mt-2">
-                    <span class="text-warning">
-                      <i class="fas fa-star"></i>
-                      <i class="fas fa-star"></i>
-                      <i class="fas fa-star"></i>
-                      <i class="fas fa-star"></i>
-                      <i class="fas fa-star-half-alt"></i>
-                    </span>
-                    <span class="ms-2 text-muted">
-                      <i class="fas fa-dollar-sign"></i>
-                      <i class="fas fa-dollar-sign"></i>
-                    </span>
+              <!-- Latest Review Preview -->
+              {% with latest_review=business.review_set.last %}
+                {% if latest_review %}
+                  <div class="latest-review mb-3">
+                    <div class="review-preview p-2 bg-light rounded">
+                      <div class="d-flex align-items-center mb-1">
+                        <div class="rating">
+                          {% for i in '12345'|make_list %}
+                            <i class="fas fa-star{% if forloop.counter <= latest_review.review_rating %}{% else %}-o{% endif %} text-warning small"></i>
+                          {% endfor %}
+                        </div>
+                      </div>
+                      <p class="small text-muted mb-0 text-truncate">"{{ latest_review.review_text }}"</p>
+                    </div>
                   </div>
-                </div>
-                <ul class="list-unstyled text-muted small">
-                  <li class="mb-2"><i class="fas fa-user me-2"></i>{{ business.business_owner }}</li>
-                  <li class="mb-2"><i class="fas fa-map-marker-alt me-2"></i>{{ business.business_address }}</li>
-                  <li><i class="fas fa-phone me-2"></i>{{ business.contact_number }}</li>
-                </ul>
-              </div>
-            </a>
-          </div>
+                {% endif %}
+              {% endwith %}
+
+              <ul class="list-unstyled text-muted small">
+                <li class="mb-2"><i class="fas fa-user me-2"></i>{{ business.business_owner }}</li>
+                <li class="mb-2"><i class="fas fa-map-marker-alt me-2"></i>{{ business.business_address }}</li>
+                <li><i class="fas fa-phone me-2"></i>{{ business.contact_number }}</li>
+              </ul>
+            </div>
+          </a>
         </div>
-      {% endfor %}
-    </div>
+      </div>
+    {% endfor %}
+  </div>
+
 
     <!-- Pagination -->
     <nav class="mt-5" aria-label="Restaurant navigation">
@@ -116,10 +139,11 @@
         {% endif %}
       </ul>
     </nav>
+    
   </section>
 
   <!-- About Section -->
-  <section class="about-section bg-dark rounded-3 p-5 mb-5">
+  <section class="about-section bg-light rounded-3 p-5 mb-5">
     <h2 class="display-6 mb-4">What is dineConnect?</h2>
     <p class="lead mb-0">DineConnect is an innovative restaurant discovery platform designed to transform how people explore and connect with local dining establishments. We focus on creating meaningful connections between diners and restaurants through personalized recommendations and detailed insights into each establishment's unique offerings, ambiance, and culinary specialties.</p>
   </section>
@@ -181,6 +205,7 @@
       </div>
     {% endif %}
   </section>
+  
 </main>
 
 <script src="{% static 'gfgauth/js/cuisine_type_filtering.js' %}"></script>
