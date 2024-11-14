@@ -183,3 +183,31 @@ a:link, a:visited {
   box-shadow: 0 4px 15px #006fd06a;
 }
 
+.latest-review {
+  border-left: 3px solid #ffc107;
+  background-color: #f8f9fa;
+  padding: 0.5rem;
+  margin: 1rem 0;
+}
+
+.review-preview {
+  font-style: italic;
+  max-height: 60px;
+  overflow: hidden;
+}
+
+.rating .fas {
+  font-size: 0.8rem;
+}
+
+.review-count {
+  font-size: 0.8rem;
+  color: #6c757d;
+}
+
+.text-truncate {
+  max-width: 100%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
