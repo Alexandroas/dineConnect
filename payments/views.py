@@ -8,47 +8,73 @@ from gfgauth.models import Business
 from django.views.decorators.http import require_POST
 import json
 from django.http import JsonResponse
+from .models import Payment
 from django.urls import reverse
 from dineConnect_project import settings
 # Create your views here.
 def payment_view(request, reservation_id):
     # Get the reservation and verify it belongs to the current user
-    reservation = get_object_or_404(Reservation, 
-                                  reservation_id=reservation_id, 
-                                  user_id=request.user)
+    reservation = get_object_or_404(
+        Reservation,
+        reservation_id=reservation_id,
+        user_id=request.user
+    )
     
     # Calculate total amount from selected dishes
     total_amount = sum(dish.dish_cost for dish in reservation.dish_id.all())
     
+    # Ensure there's no existing successful payment for this reservation
+    existing_payment = Payment.objects.filter(
+        reservation=reservation,
+        status='succeeded'
+    ).first()
+    
+    if existing_payment:
+        messages.warning(request, "This reservation has already been paid for.")
+        return redirect('reservation_detail', reservation_id=reservation_id)
+
     if request.method == 'POST':
         try:
-            # Create Stripe payment intent
             stripe.api_key = settings.STRIPE_SECRET_KEY
+            
+            # Create Stripe payment intent
             intent = stripe.PaymentIntent.create(
                 amount=int(total_amount * 100),  # Convert to cents
                 currency='usd',
                 metadata={
                     'reservation_id': reservation.reservation_id,
-                    'user_email': request.user.email
-                }
+                    'user_email': request.user.email,
+                    'business_id': reservation.business_id.business_id
+                },
+                description=f"Reservation #{reservation.reservation_id} at {reservation.business_id.business_name}"
             )
-            
+
             return render(request, 'payments/payment.html', {
                 'reservation': reservation,
                 'total_amount': total_amount,
                 'client_secret': intent.client_secret,
-                'stripe_publishable_key': settings.STRIPE_PUBLISHABLE_KEY
+                'stripe_publishable_key': settings.STRIPE_PUBLISHABLE_KEY,
             })
             
-        except Exception as e:
+        except stripe.error.StripeError as e:
+            # Handle Stripe-specific errors
             messages.error(request, f"Payment error: {str(e)}")
-            return redirect('restaurant_detail', business_id=reservation.business_id.business_id)
+            return redirect('reservation_detail', reservation_id=reservation_id)
+            
+        except Exception as e:
+            # Handle other unexpected errors
+            messages.error(request, "An unexpected error occurred. Please try again.")
+            return redirect('reservation_detail', reservation_id=reservation_id)
     
-    return render(request, 'payments/payment.html', {
+    # GET request - show payment form
+    context = {
         'reservation': reservation,
         'total_amount': total_amount,
-        'stripe_publishable_key': settings.STRIPE_PUBLISHABLE_KEY
-    })
+        'stripe_publishable_key': settings.STRIPE_PUBLISHABLE_KEY,
+        'business_name': reservation.business_id.business_name
+    }
+    
+    return render(request, 'payments/payment.html', context)
 
 def payment_success(request, reservation_id):
     reservation = get_object_or_404(Reservation, 
@@ -72,9 +98,6 @@ def payment_cancel(request, reservation_id):
     
     messages.warning(request, 'Payment was cancelled. Your reservation is still pending.')
     return redirect('Restaurant_handling:restaurant_detail', business_id=reservation.business_id.business_id)
-
-# views.py
-
 
 @require_POST
 def process_payment(request, reservation_id):
@@ -100,8 +123,17 @@ def process_payment(request, reservation_id):
             ),
             metadata={
                 'reservation_id': reservation.reservation_id,
-                'user_email': request.user.email
+                'user_email': request.user.email,
+                'business_id': reservation.business_id.business_id
             }
+        )
+        Payment.objects.create(
+            reservation=reservation,
+            amount=total_amount,
+            stripe_payment_intent_id=intent.id,
+            user=request.user,
+            business=reservation.business_id,
+            status ='succeded' if intent.status == 'succeeded' else 'pending'
         )
         
         if intent.status == 'succeeded':
