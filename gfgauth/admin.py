@@ -5,11 +5,11 @@ from Restaurant_handling.models import DieteryPreference
 from . models import CustomUser, Business, businessHours
 
 
-from Restaurant_handling.admin import DishInline
+from Restaurant_handling.admin import DishInline, reviewInline
 
 class BusinessAdmin(admin.ModelAdmin):
     filter_horizontal = ('cuisine',)
-    inlines = [DishInline]
+    inlines = [DishInline, reviewInline]
 class userAdmin(admin.ModelAdmin):
     filter_horizontal = ('groups', 'user_permissions')
     
