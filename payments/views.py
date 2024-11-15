@@ -164,3 +164,7 @@ def process_payment(request, reservation_id):
             'success': False,
             'error': str(e)
         })
+        
+def payment_history(request):
+    payments = Payment.objects.filter(user=request.user)
+    return render(request, 'payments/payment_history.html', {'payments': payments})
