@@ -24,9 +24,9 @@
              style="width: 100px; height: 100px; margin-left: auto; margin-right: auto; display: block;" />
           {% else %}
         <!-- Display a default placeholder image -->
-              <img src="{% static 'images/default_profile.png' %}" 
+              <img src="{% static 'gfgauth\images\default_profile.png' %}" 
                   class="img-fluid rounded-circle mb-3 center:" 
-                  style="width: 50px; height: 50px; margin-left: auto; margin-right: auto; display: block;" />
+                  style="width: 100px; height: 100px; margin-left: auto; margin-right: auto; display: block;" />
               {% endif %}
             <form method="POST" enctype="multipart/form-data">
               {% csrf_token %}
@@ -62,8 +62,10 @@
               </div>
               <div class="d-flex justify-content-between align-items-center">
                 <button type="submit" class="btn btn-primary">Save Changes</button>
+                <a style ="margin-top: 2%; background-color: greenyellow;"href="{% url 'payments:payment_history' %}" class="btn btn-primary">Payment history</a>
               </div>
             </form>
+            
             <div class="card mt-4">
               <div class="card-header">
                 <h3>My Favorite Restaurants</h3>
