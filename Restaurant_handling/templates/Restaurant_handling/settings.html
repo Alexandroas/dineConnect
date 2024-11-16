@@ -1,6 +1,9 @@
 {% extends "main/header.html" %}
 {% block content %}
 <div class="notification-settings">
+    <div class="col-md-3 col-lg-2 d-md-block bg-light sidebar">
+        {% include 'Restaurant_handling/restaurant_dashboard.html' %}
+      </div>
     <h5>Notification Sound</h5>
     <select id="notificationSound" class="form-select">
         <option value="arrow">Arrow</option>

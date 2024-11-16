@@ -3,6 +3,9 @@
 
 {% block content %}
 <link rel = "stylesheet" type = "text/css" href = "{% static 'Restaurant_handling/customer_details.css' %}">
+<div class="col-md-3 col-lg-2 d-md-block bg-light sidebar">
+    {% include 'Restaurant_handling/restaurant_dashboard.html' %}
+  </div>
 <div class="container-fluid mt-4">
     <div class="row">
         <div class="col-md-9 col-lg-10 ms-sm-auto px-4">
