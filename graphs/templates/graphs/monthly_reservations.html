@@ -1,0 +1,119 @@
+{%extends "main/header.html" %}
+{% block content %}
+<div class="container mt-4">
+    <div class="col-md-3 col-lg-2 d-md-block bg-light sidebar">
+        {% include 'Restaurant_handling/restaurant_dashboard.html' %}
+      </div>
+    <h2>Monthly Reservations Report - {{ current_year }}</h2>
+    
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Total Reservations</h5>
+                    <p class="card-text">{{ total_reservations|floatformat:0 }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Average Monthly Reservations</h5>
+                    <p class="card-text">{{ average_monthly_reservations|floatformat:0 }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="table-responsive">
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Month</th>
+                    <th>Total People</th>
+                    <th>Comparison</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for data in business_reservations_data %}
+                <tr>
+                    <td>{{ data.month }}</td>
+                    <td>{{ data.total|floatformat:0 }}</td>
+                    <td>
+                        {% if data.total > average_monthly_reservations %}
+                            <span class="text-success">Above Average</span>
+                        {% elif data.total < average_monthly_reservations %}
+                            <span class="text-danger">Below Average</span>
+                        {% else %}
+                            <span class="text-warning">Average</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Add a bar chart using Chart.js -->
+    <div class="mt-4">
+        <canvas id="salesChart"></canvas>
+    </div>
+</div>
+
+<!-- Include Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+    const ctx = document.getElementById('salesChart').getContext('2d');
+    const salesData = {
+        labels: [{% for data in business_reservations_data %}'{{ data.month }}',{% endfor %}],
+        datasets: [{
+            label: 'Reservations',
+            data: [{% for data in business_reservations_data %}{{ data.total }},{% endfor %}],
+            backgroundColor: 'rgba(54, 162, 235, 0.2)',
+            borderColor: 'rgba(54, 162, 235, 1)',
+            borderWidth: 1
+        }]
+    };
+
+    new Chart(ctx, {
+        type: 'line',
+        data: salesData,
+        options: {
+            responsive: true,
+            plugins: {
+                title: {
+                    display: true,
+                    text: 'Monthly Reservations Trend'
+                }
+            },
+            tooltips: {
+                callbacks: {
+                    label: function(context) {
+                        return 'Reservations' + context.parsed.y.toFixed(2);
+                    }
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        stepSize: 1
+                    },
+                    title: {
+                        display: true,
+                        text: 'Number of People'
+                    }
+                },
+                x: {
+                    title: {
+                        display: true,
+                        text: 'Month'
+                    }
+                }
+            }
+        }
+    });
+</script>
+ 
+{% endblock %}

@@ -1,0 +1,13 @@
+{%extends "main/header.html"%}
+{%block content%}
+<div class="col-md-3 col-lg-2 d-md-block bg-light sidebar">
+    {% include 'Restaurant_handling/restaurant_dashboard.html' %}
+  </div>
+<h1>Analytics</h1>
+<a href="{%url 'graphs:monthly_sales' business.business_id%}">Monthly Sales</a> <br>
+<a href="{%url 'graphs:monthly_reservations' business.business_id%}"> Montly Reservations</a> <br>
+<a href="{%url 'graphs:dish_popularity' business.business_id%}"> Monthly dish popularity</a> <br>
+
+
+
+{%endblock%}

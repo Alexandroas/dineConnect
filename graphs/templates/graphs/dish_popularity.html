@@ -1,0 +1,94 @@
+{% extends "main/header.html" %}
+{% block content %}
+<div class="container mt-4">
+    <h2>Dish Popularity Analysis - {{ current_year }}</h2>
+    <div class="col-md-3 col-lg-2 d-md-block bg-light sidebar">
+        {% include 'Restaurant_handling/restaurant_dashboard.html' %}
+      </div>
+
+    <!-- Summary Cards -->
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Total Orders</h5>
+                    <p class="card-text">{{ total_orders }}</p>
+                </div>
+            </div>
+            <br>
+    </div>
+
+    <!-- Top Dishes Chart -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5>Most Popular Dishes</h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="dishPopularityChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Detailed Table -->
+    <div class="table-responsive mt-4">
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Dish Name</th>
+                    <th>Total Orders</th>
+                    <th>Average Party Size</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for dish in dish_popularity %}
+                <tr>
+                    <td>{{ dish.dish_id__dish_name }}</td>
+                    <td>{{ dish.total_orders|default:0 }}</td>
+                    <td>{{ dish.avg_party_size|default:0|floatformat:1 }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+// Top Dishes Chart
+new Chart(document.getElementById('dishPopularityChart').getContext('2d'), {
+    type: 'bar',
+    data: {
+        labels: [{% for dish in dish_popularity %}'{{ dish.dish_id__dish_name }}'{% if not forloop.last %},{% endif %}{% endfor %}],
+        datasets: [{
+            label: 'Number of Orders',
+            data: [{% for dish in dish_popularity %}{{ dish.total_orders|default:0 }}{% if not forloop.last %},{% endif %}{% endfor %}],
+            backgroundColor: 'rgba(75, 192, 192, 0.6)',
+            borderColor: 'rgba(75, 192, 192, 1)',
+            borderWidth: 1
+        }]
+    },
+    options: {
+        responsive: true,
+        indexAxis: 'y',
+        plugins: {
+            title: {
+                display: true,
+                text: 'Most Popular Dishes'
+            }
+        },
+        scales: {
+            x: {
+                beginAtZero: true,
+                title: {
+                    display: true,
+                    text: 'Number of Orders'
+                }
+            }
+        }
+    }
+});
+</script>
+{% endblock %}
