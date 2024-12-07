@@ -71,6 +71,7 @@
                         <th>Status</th>
                         <th>Special Requests</th>
                         <th>Actions</th>
+                        <th>Quick Actions</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -94,6 +95,24 @@
                                    class="btn btn-sm btn-info">
                                     View Details
                                 </a>
+                            </td>
+                            <td>
+                                {%if reservation.reservation_status == 'Pending'%}
+                                    <a href="{% url 'reservations:confirm_reservation' business.business_id reservation.reservation_id %}"
+                                       class="btn btn-sm btn-success">
+                                        Confirm
+                                    </a>
+                                    <a href="{% url 'reservations:cancel_reservation' business.business_id reservation.reservation_id %}"
+                                       class="btn btn-sm btn-danger">
+                                        Cancel
+                                    </a>
+                                {%endif%}
+                                {%if reservation.reservation_status == 'Confirmed'%}
+                                    <a href="{% url 'reservations:cancel_reservation' business.business_id reservation.reservation_id %}"
+                                       class="btn btn-sm btn-danger">
+                                        Cancel
+                                    </a>
+                                {%endif%}
                             </td>
                         </tr>
                     {% empty %}
