@@ -169,6 +169,13 @@ class BusinessDetailsForm(forms.Form):
             'placeholder': 'Enter max table capacity'
         })
     )
+    contact_number = forms.CharField(
+        max_length=100,
+        widget=forms.TextInput(attrs={
+            'class': 'form-control', 
+            'placeholder': 'Enter contact number'
+        })
+    )
 class BusinessHoursForm(forms.Form):
     # Checkboxes for each day of the week
     monday = forms.BooleanField(required=False, initial=False)

@@ -157,7 +157,7 @@ class BusinessRegistrationWizard(SessionWizardView):
             auth_login(self.request, business_user, 
                       backend='django.contrib.auth.backends.ModelBackend')
 
-            return redirect('restaurant_home')
+            return redirect('Restaurant_handling:restaurant_home')
 
         except Exception as e:
             print("Error during registration:", str(e))
