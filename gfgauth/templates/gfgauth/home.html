@@ -11,12 +11,14 @@
     <div class="search-container p-4 rounded-3 shadow-sm mb-5">
       <div class="row g-3">
         <div class="col-md-6">
-          <div class="input-group">
-            <span class="input-group-text border-end-0">
-              <i class="fas fa-search text-muted"></i>
-            </span>
-            <input type="text" class="form-control border-start-0" placeholder="Search restaurants..." id="searchInput" />
-          </div>
+          <form onsubmit="return false;">
+            <div class="input-group">
+                <span class="input-group-text border-end-0">
+                    <i class="fas fa-search text-muted"></i>
+                </span>
+                <input type="text" class="form-control border-start-0" placeholder="Search restaurants..." id="searchInput" />
+            </div>
+        </form>
         </div>
         <div class="col-md-6">
           <div class="d-flex gap-3">
