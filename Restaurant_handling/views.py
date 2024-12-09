@@ -138,35 +138,41 @@ def restaurant_menu(request):
     })
 
 
-# In your views.py
 def restaurant_detail(request, business_id):
     business = get_object_or_404(Business, business_id=business_id)
     dishes = Dish.objects.filter(business_id=business).order_by('dish_type__dish_type_name')
     reviews = Review.objects.filter(business_id=business)
     form = None
+    existing_review = None
+    has_confirmed_reservation = False  # Default value
    
     if request.user.is_authenticated:
         # Check if user has already reviewed
         existing_review = Review.objects.filter(
-            business_id=business, 
+            business_id=business,
             user_id=request.user
         ).first()
-    has_confirmed_reservation = Reservation.objects.filter(
-        business_id=business,
-        user_id=request.user,
-        reservation_status='Completed'  # Adjust this based on your status field
-    ).exists()
-
         
-        
+        # Check for confirmed reservation only if user is authenticated
+        has_confirmed_reservation = Reservation.objects.filter(
+            business_id=business,
+            user_id=request.user,
+            reservation_status='Completed'
+        ).exists()
+       
     if request.method == 'POST':
+        if not request.user.is_authenticated:
+            messages.error(request, 'You must be logged in to submit a review.')
+            return redirect('Restaurant_handling:restaurant_detail', business_id=business_id)
+            
         if existing_review:
             messages.error(request, 'You have already reviewed this restaurant.')
             return redirect('Restaurant_handling:restaurant_detail', business_id=business_id)
+            
         if not has_confirmed_reservation:
             messages.error(request, 'You must have a completed reservation to review this restaurant.')
             return redirect('Restaurant_handling:restaurant_detail', business_id=business_id)
-            
+           
         form = ReviewForm(request.POST)
         if form.is_valid():
             review = form.save(commit=False)
@@ -176,19 +182,20 @@ def restaurant_detail(request, business_id):
             messages.success(request, 'Review saved successfully!')
             return redirect('Restaurant_handling:restaurant_detail', business_id=business_id)
     else:
-        if not existing_review:  # Only show form if user hasn't reviewed
+        if request.user.is_authenticated and not existing_review:  # Only show form if user hasn't reviewed
             form = ReviewForm()
-
+            
     paginator = Paginator(reviews, 10)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
-    
+   
     context = {
         'business': business,
         'dishes': dishes,
         'reviews': reviews,
         'page_obj': page_obj,
-        'has_reviewed': Review.objects.filter(business_id=business, user_id=request.user).exists() if request.user.is_authenticated else False
+        'has_reviewed': existing_review is not None,  # Simplified this check
+        'has_confirmed_reservation': has_confirmed_reservation
     }
    
     if form is not None:
