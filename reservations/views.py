@@ -13,9 +13,9 @@ from .models import Reservation
 from django.core.paginator import Paginator
 from django.utils import timezone
 from datetime import datetime
-from payments.views import refund_payment
 import stripe # type: ignore
 from django.conf import settings
+from django.db import models
 
 @login_required
 def make_reservation(request, business_id):
@@ -199,6 +199,75 @@ def reservation_details(request, business_id, reservation_id):
    
     return render(request, 'reservations/reservation_details.html', context)
 
+@business_required
+def past_reservations(request, business_id):
+    """
+    View to display past and completed reservations for a business.
+    """
+    try:
+        business = get_object_or_404(Business, business_id=business_id)
+        
+        # Get base queryset of past reservations
+        # Either completed or date is in the past
+        current_date = timezone.now().date()
+        reservations = Reservation.objects.filter(
+            business_id=business
+        ).filter(
+            # Get completed reservations or reservations with past dates
+            models.Q(reservation_status='Completed') |
+            models.Q(reservation_date__lt=current_date)
+        )
+        
+        # Get filter parameters
+        date_filter = request.GET.get('date')
+        status_filter = request.GET.get('status')
+        
+        # Apply date filter if provided
+        if date_filter:
+            try:
+                filter_date = timezone.datetime.strptime(date_filter, '%Y-%m-%d').date()
+                reservations = reservations.filter(reservation_date=filter_date)
+            except ValueError:
+                messages.error(request, "Invalid date format")
+        
+        # Apply status filter if provided
+        if status_filter and status_filter != 'all':
+            reservations = reservations.filter(reservation_status=status_filter)
+        
+        # Order results by most recent first
+        reservations = reservations.order_by('-reservation_date', '-reservation_time')
+        
+        # Calculate statistics
+        total_past = reservations.count()
+        completed_count = reservations.filter(reservation_status='Completed').count()
+        cancelled_count = reservations.filter(reservation_status='Cancelled').count()
+        
+        # Pagination
+        paginator = Paginator(reservations, 20)
+        page_number = request.GET.get('page', 1)
+        page_obj = paginator.get_page(page_number)
+        
+        context = {
+            'business': business,
+            'page_obj': page_obj,
+            'total_past': total_past,
+            'completed_count': completed_count,
+            'cancelled_count': cancelled_count,
+            'date_filter': date_filter,
+            'status_filter': status_filter,
+            'available_statuses': ['Completed', 'Cancelled']
+        }
+        
+        return render(
+            request,
+            'reservations/past_reservations.html',
+            context
+        )
+        
+    except Exception as e:
+        print(f"Error in view: {str(e)}")
+        messages.error(request, f"An error occurred while loading past reservations: {str(e)}")
+        return redirect('Restaurant_handling:restaurant_home')
 
 @business_required
 def cancel_reservation(request, business_id, reservation_id):
