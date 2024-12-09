@@ -66,9 +66,9 @@ class Business(models.Model):
         related_name='businesses'
     )
     business_address = models.TextField(max_length=255)
-    business_tax_code = models.CharField(max_length=100)
+    business_tax_code = models.CharField(max_length=100, unique=True)
     business_max_table_capacity = models.IntegerField(default=4)
-    contact_number = models.CharField(max_length=20)
+    contact_number = models.CharField(max_length=20, unique=True)
     business_description = models.TextField(max_length=255)
     cuisine = models.ManyToManyField(
         Cuisine, 
