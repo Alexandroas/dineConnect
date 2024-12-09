@@ -1,7 +1,6 @@
 from datetime import datetime, timedelta
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, render, redirect
-from allauth.account.forms import SignupForm
 from django.views import View
 from django.contrib.auth import authenticate, login as auth_login, logout
 from django.apps import apps
@@ -33,31 +32,52 @@ def home(request):
     Business = apps.get_model('gfgauth', 'Business')
     Cuisine = apps.get_model('Restaurant_handling', 'Cuisine')
     Testimonial = apps.get_model('main', 'Testimonial')
-   
-    # Get all businesses with prefetched cuisine data
+
+    # Check if this is an AJAX search request
+    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        search_term = request.GET.get('search', '').lower()
+        # Get all businesses for search
+        businesses = Business.objects.prefetch_related('cuisine').all()
+        
+        filtered_businesses = []
+        for business in businesses:
+            searchable_content = f"{business.business_name} {business.get_cuisine_names} {business.business_address}".lower()
+            if search_term in searchable_content:
+                filtered_businesses.append({
+                    'id': business.business_id,
+                    'name': business.business_name,
+                    'cuisine': business.get_cuisine_names(),
+                    'address': business.business_address,
+                    'image_url': business.business_image.url if business.business_image else None,
+                    'owner': business.business_owner.get_full_name(),
+                    'contact': business.contact_number,
+                    'average_rating': business.get_average_rating(),
+                    'review_count': business.review_set.count(),
+                })
+        
+        return JsonResponse({'businesses': filtered_businesses})
+
+    # Normal page load
     businesses = Business.objects.prefetch_related('cuisine').all()
-    
-    # Create paginator with businesses queryset (not the model class)
-    paginator = Paginator(businesses, 6)  # Changed from Business to businesses
     
     # Get other data
     is_business = request.user.groups.filter(name='Business').exists()
     cuisines = Cuisine.objects.all()
     testimonials = Testimonial.objects.filter(is_visible=True).select_related('user')
-   
-    # Get current page
+    
+    # Pagination
+    paginator = Paginator(businesses, 6)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
     
-    # Combine all context into a single dictionary
     context = {
-        'businesses': page_obj,  # Use page_obj instead of businesses
+        'businesses': page_obj,
         'cuisines': cuisines,
         'testimonials': testimonials,
         'is_business': is_business
     }
-   
-    return render(request, 'gfgauth/home.html', context)  # Remove the second context dictionary
+    
+    return render(request, 'gfgauth/home.html', context)
 
 def logout_view(request):
     logout(request)
@@ -187,15 +207,29 @@ def login(request):
 
 class SignupView(View):
     def get(self, request):
-        return render(request, 'gfgauth/signup.html', {'form': CustomUserCreationForm()})
+        form = CustomUserCreationForm()
+        return render(request, 'gfgauth/signup.html', {'form': form})
+    
     def post(self, request):
-        form = SignupForm(request.POST, request.FILES)
+        form = CustomUserCreationForm(request.POST, request.FILES)
         if form.is_valid():
-            user = form.save(request)
-            send_welcome_email(user)
-            return redirect('home')
-        else:
-            print(form.errors)
+            user = form.save()
+            # Get raw password before it's hashed
+            raw_password = form.cleaned_data.get('password1')
+            
+            # Authenticate and login with specific backend
+            user = authenticate(
+                request,
+                username=user.username,
+                password=raw_password,
+                backend='django.contrib.auth.backends.ModelBackend'
+            )
+            
+            if user is not None:
+                auth_login(request, user, backend='django.contrib.auth.backends.ModelBackend')
+                send_welcome_email(user)
+                return redirect('home')
+            
         return render(request, 'gfgauth/signup.html', {'form': form})
 
 def custom_login(request):
