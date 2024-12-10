@@ -13,7 +13,7 @@
         </div>
 
         <!-- Modal for Cancel Confirmation -->
-        {% if reservation.reservation_status != 'Cancelled' or reservation.reservation_status == 'Completed'%}
+        {% if reservation.reservation_status == 'Confirmed' or reservation.reservation_status == 'Pending'%}
           <button class="open-cancel-button" onclick="openForm()">Cancel Reservation</button>
           <div class="modal-overlay">
             <div class="form-popup" id="myForm">
