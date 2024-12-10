@@ -1,4 +1,5 @@
 from django.shortcuts import render
+from gfgauth.decorators import regular_user_or_guest
 from main.utils import send_reservation_email, send_cancellation_email, send_initial_res_confirmation_email, send_reservation_email_business, send_completion_email
 from notifications.utils import create_notification
 from Restaurant_handling.decorators import business_required, login_required
@@ -18,6 +19,7 @@ from django.conf import settings
 from django.db import models
 
 @login_required
+@regular_user_or_guest
 def make_reservation(request, business_id):
     business = get_object_or_404(Business, business_id=business_id)
     dishes = Dish.objects.filter(business_id=business).order_by('dish_type__dish_type_name')
@@ -40,6 +42,7 @@ def make_reservation(request, business_id):
                 if reservation.reservation_date < timezone.now().date():
                     messages.error(request, 'Reservation time cannot be in the past.')
                     return redirect('reservations:restaurant_reservation', business_id=business_id)
+                    
                 if reservation.reservation_party_size > business.business_max_table_capacity:
                     messages.error(request, f"Party size cannot exceed the restaurant max party size of: {business.business_max_table_capacity}.")
                     return redirect('reservations:restaurant_reservation', business_id=business_id)
@@ -47,6 +50,11 @@ def make_reservation(request, business_id):
                 # Get the day of the week for the reservation
                 reservation_day = reservation.reservation_date.strftime('%A')
                 business_hours_for_day = business_hours.get(reservation_day)
+                
+                # Check if business hours exist for this day
+                if not business_hours_for_day:
+                    messages.error(request, f'Sorry, business hours are not set for {reservation_day}s.')
+                    return redirect('reservations:restaurant_reservation', business_id=business_id)
                 
                 if business_hours_for_day == 'Closed':
                     messages.error(request, f'Sorry, we are closed on {reservation_day}s.')
@@ -62,8 +70,8 @@ def make_reservation(request, business_id):
                     if reservation.reservation_time < opening_time or reservation.reservation_time > closing_time:
                         messages.error(request, f'Reservation time must be between {opening_time_str} and {closing_time_str}.')
                         return redirect('reservations:restaurant_reservation', business_id=business_id)
-                except ValueError as e:
-                    messages.error(request, 'Invalid business hours format.')
+                except (ValueError, AttributeError) as e:
+                    messages.error(request, f'Invalid business hours format for {reservation_day}.')
                     return redirect('reservations:restaurant_reservation', business_id=business_id)
                 
                 # If all checks pass, save the reservation
