@@ -36,6 +36,8 @@ def add_dish(request):
                 # Set the business_id field
                 dish.business_id = business  # or dish.BusinessID depending on your model
                 dish.save()
+                if form.cleaned_data.get('allergens'):
+                    dish.allergens.add(*form.cleaned_data['allergens'])
                 messages.success(request, 'Dish saved successfully!')
                 print(f"Dish saved successfully with business_id: {business.business_id}")
                 return redirect('Restaurant_handling:add_dish')
@@ -65,6 +67,9 @@ def edit_dish(request, dish_id=None):
                 # Convert is_available string to boolean if using ChoiceField
                 dish.is_available = form.cleaned_data['is_available'] == 'True'
                 dish.save()
+                dish.allergens.clear()
+                if form.cleaned_data.get('allergens'):
+                    dish.allergens.add(*form.cleaned_data['allergens'])
                 messages.success(request, 'Dish updated successfully!')
                 return redirect('Restaurant_handling:restaurant_menu')
             except Business.DoesNotExist:
@@ -79,7 +84,8 @@ def edit_dish(request, dish_id=None):
     return render(request, 'Restaurant_handling/edit_dish.html', {
         'form': form,
         'dish': dish,
-        'business': business
+        'business': business,
+        'current_allergens': dish.allergens.all()
     })
 
 @business_required
