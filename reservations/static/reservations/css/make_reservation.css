@@ -172,6 +172,23 @@ h2, h3 {
     color: #0d47a1;
     border-left: 4px solid #2196f3;
 }
+.card {
+    transition: all 0.3s ease;
+}
+
+.card:not(.bg-light):hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+
+.badge {
+    font-size: 0.8rem;
+    padding: 0.35em 0.65em;
+}
+
+.form-check-input:disabled ~ .form-check-label {
+    cursor: not-allowed;
+}
 
 /* Responsive Grid */
 @media (max-width: 768px) {
