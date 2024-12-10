@@ -28,10 +28,14 @@ class Dish(models.Model):
     dish_description = models.TextField(max_length=100)
     dish_image = models.ImageField(upload_to='dishes/', blank=True, null=True)
     is_available = models.BooleanField(default=True)
+    allergens = models.ManyToManyField(DieteryPreference, blank=True, related_name='dishes')
     
 
     def __str__(self):
         return self.dish_name
+    
+    def get_allergens_display(self):
+        return ", ".join([str(p) for p in self.allergens.all()])
         
 class Review(models.Model):
     review_id = models.AutoField(primary_key=True)
