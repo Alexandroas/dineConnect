@@ -19,7 +19,7 @@
                     <div class="card bg-primary text-white">
                         <div class="card-body">
                             <h5 class="card-title">Total Revenue</h5>
-                            <p class="card-text h2">${{ total_revenue|floatformat:2 }}</p>
+                            <p class="text-white h2">${{ total_revenue|floatformat:2 }}</p>
                         </div>
                     </div>
                 </div>
@@ -27,7 +27,7 @@
                     <div class="card bg-success text-white">
                         <div class="card-body">
                             <h5 class="card-title">Successful Payments</h5>
-                            <p class="card-text h2">{{ successful_payments }}</p>
+                            <p class="text-white h2">{{ successful_payments }}</p>
                         </div>
                     </div>
                 </div>
@@ -76,6 +76,37 @@
                         </table>
                     </div>
                 </div>
+            </div>
+            <div class="card-footer">
+                {% if page_obj.has_other_pages %}
+                <nav aria-label="Payment navigation">
+                    <ul class="pagination justify-content-center mb-0">
+                        {% if page_obj.has_previous %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page=1">&laquo; First</a>
+                            </li>
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ page_obj.previous_page_number }}">Previous</a>
+                            </li>
+                        {% endif %}
+            
+                        <li class="page-item active">
+                            <span class="page-link">
+                                Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+                            </span>
+                        </li>
+            
+                        {% if page_obj.has_next %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ page_obj.next_page_number }}">Next</a>
+                            </li>
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}">Last &raquo;</a>
+                            </li>
+                        {% endif %}
+                    </ul>
+                </nav>
+                {% endif %}
             </div>
         </div>
     </div>
