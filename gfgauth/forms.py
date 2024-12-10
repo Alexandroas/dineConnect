@@ -163,7 +163,7 @@ class BusinessDetailsForm(forms.Form):
             'placeholder': 'Enter tax code'
         })
     )
-    buisness_max_table_capacity = forms.IntegerField(
+    business_max_table_capacity = forms.IntegerField(
         widget=forms.NumberInput(attrs={
             'class': 'form-control', 
             'placeholder': 'Enter max table capacity'
