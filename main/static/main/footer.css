@@ -4,7 +4,7 @@
   padding: 3rem 0 0;
   position: relative;
   margin-top: 4rem;
-  border-top: 3px solid #34495e;
+  border-top: 3px solid #5f82a6;
 }
 
 .footer-section {
@@ -12,11 +12,11 @@
   color: #ffffff !important;
 }
 a.footer-logo{
-  color: #34495e !important;
+  color: #5f82a6 !important;
 }
 
 h3.footer-heading::after {
-  background: #34495e !important;
+  background: #5f82a6 !important;
 }
 
 .footer-heading {
@@ -36,9 +36,11 @@ h3.footer-heading::after {
   bottom: 0;
   width: 30px;
   height: 2px;
-  background: #34495e;
+  background: #5f82a6;
 }
-
+.footer-heading a{
+  color: #5f82a6 !important;
+}
 .contact-info {
   list-style: none;
   padding: 0;
@@ -73,6 +75,7 @@ h3.footer-heading::after {
 
 .social-links a {
   color:#ffffff !important;
+  background-color: #3c556e !important;
   background: rgba(52, 73, 94, 0.05);
   width: 40px;
   height: 40px;
@@ -86,7 +89,7 @@ h3.footer-heading::after {
 }
 
 .social-links a:hover {
-  background: #34495e;
+  background: #80abd6 !important;
   color: #ffffff;
   transform: translateY(-3px);
   box-shadow: 0 5px 15px rgba(52, 73, 94, 0.2);
