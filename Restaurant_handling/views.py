@@ -1,8 +1,9 @@
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.shortcuts import render, redirect, get_object_or_404
+from gfgauth.decorators import regular_user_or_guest
 from gfgauth.forms import BusinessUpdateForm, UserUpdateForm
-from gfgauth.models import Business, CustomUser, businessHours
+from gfgauth.models import Business, CustomUser, businessHours, get_business_hours
 from .decorators import business_required
 from .forms import DishForm, DishUpdateForm, ReviewForm
 from .models import Dish, Review
@@ -65,7 +66,7 @@ def edit_dish(request, dish_id=None):
                 dish.is_available = form.cleaned_data['is_available'] == 'True'
                 dish.save()
                 messages.success(request, 'Dish updated successfully!')
-                return redirect('restaurant_menu')
+                return redirect('Restaurant_handling:restaurant_menu')
             except Business.DoesNotExist:
                 print("No business found for user:", request.user)
                 messages.error(request, "Error: No business associated with this account")
@@ -137,7 +138,7 @@ def restaurant_menu(request):
         'business': business  # Add business to the context
     })
 
-
+@regular_user_or_guest
 def restaurant_detail(request, business_id):
     business = get_object_or_404(Business, business_id=business_id)
     dishes = Dish.objects.filter(business_id=business).order_by('dish_type__dish_type_name')
@@ -145,6 +146,8 @@ def restaurant_detail(request, business_id):
     form = None
     existing_review = None
     has_confirmed_reservation = False  # Default value
+    
+    business_hours = get_business_hours(business)
    
     if request.user.is_authenticated:
         # Check if user has already reviewed
@@ -195,7 +198,8 @@ def restaurant_detail(request, business_id):
         'reviews': reviews,
         'page_obj': page_obj,
         'has_reviewed': existing_review is not None,  # Simplified this check
-        'has_confirmed_reservation': has_confirmed_reservation
+        'has_confirmed_reservation': has_confirmed_reservation,
+        'business_hours': business_hours
     }
    
     if form is not None:
@@ -295,6 +299,7 @@ def customer_details(request, user_id):
     return render(request, 'Restaurant_handling/customer_details.html', context)
 
 @login_required
+@regular_user_or_guest
 def review_restaurant(request, business_id, reservation_id):
     reservation_id = get_object_or_404(Reservation, reservation_id=reservation_id)
     user = get_object_or_404(CustomUser, id=reservation_id.user_id)
