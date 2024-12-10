@@ -12,6 +12,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.contrib.auth.forms import SetPasswordForm
 from django.contrib.auth import get_user_model
+from gfgauth.decorators import regular_user_or_guest
 from reservations.models import Reservation
 from formtools.wizard.views import SessionWizardView # type: ignore
 from django.core.files.storage import FileSystemStorage
@@ -28,6 +29,8 @@ from .forms import (
     UserUpdateForm,
     UserLoginForm)
 
+
+@regular_user_or_guest
 def home(request):
     Business = apps.get_model('gfgauth', 'Business')
     Cuisine = apps.get_model('Restaurant_handling', 'Cuisine')
@@ -390,7 +393,8 @@ def cancel_reservation(request, reservation_id):
     
     return redirect('view_reservation', reservation_id=reservation_id)
 
-@login_required
+@login_required 
+@regular_user_or_guest
 def toggle_favorite(request, business_id):
     try:
         business = Business.objects.get(business_id=business_id)
@@ -413,6 +417,7 @@ def toggle_favorite(request, business_id):
             'message': 'Business not found'
         }, status=404)
 @login_required
+@regular_user_or_guest
 def favorite_restaurants(request):
     favorites = request.user.favourite_restaurants.all()
     return render(request, 'favorite_restaurants.html', {
