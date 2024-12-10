@@ -80,9 +80,6 @@ class Business(models.Model):
         blank=True, 
         null=True
     )
-    
-    opening_time = models.TimeField()
-    closing_time = models.TimeField()
 
     class Meta:
         verbose_name = 'business'
