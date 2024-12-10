@@ -15,7 +15,7 @@
                     Back to Reservations
                 </a>
                 {% if reservation.reservation_status == 'Pending' or reservation.reservation_status == 'Confirmed'%}
-                    <button class="open-button" onclick="openForm()"> Cancel Reservation</button>
+                    <button class="open-cancel-button" onclick="openForm()"> Cancel Reservation</button>
                     <div class="modal-overlay">
                     <div class="form-popup" id="myForm">
                         <form action="{% url 'reservations:cancel_reservation' business.business_id reservation.reservation_id %}" method="post" class="form-container">
@@ -30,7 +30,7 @@
                     </div>
                 {%endif%}
                 {%if reservation.reservation_status == 'Pending'%}
-                    <button class="open-button" onclick="openFormConf()"> Confirm Reservation</button>
+                    <button class="open-confirm-button" onclick="openFormConf()"> Confirm Reservation</button>
                     <div class="modal-overlay-conf">
                     <div class="form-popup-conf" id="myForm">
                         <form action="{% url 'reservations:confirm_reservation' business.business_id reservation.reservation_id %}" method="post" class="form-container">
