@@ -326,12 +326,7 @@ def cancel_reservation(request, business_id, reservation_id):
     notification_message = f"The business {reservation.business_id} has cancelled your reservation on {reservation.reservation_date} at time, {reservation.reservation_time}."
     create_notification(reservation.user_id, notification_message)
     
-    context = {
-        'business': reservation.business_id,
-        'reservation': reservation
-    }
-    
-    return render(request, 'reservations/upcoming_reservations.html', context)
+    return redirect('reservations:upcoming_reservations', business_id=business_id)
 @business_required
 def confirm_reservation(request, business_id, reservation_id):
     reservation = get_object_or_404(Reservation, reservation_id=reservation_id, business_id=business_id)
@@ -347,11 +342,7 @@ def confirm_reservation(request, business_id, reservation_id):
     notification_message = f"The business {reservation.business_id} has confirmed your reservation on {reservation.reservation_date} at time, {reservation.reservation_time}."
     create_notification(reservation.user_id, notification_message)
     messages.success(request, 'Reservation confirmed successfully!')
-    context = {
-        'business': reservation.business_id,
-        'reservation': reservation
-    }
-    return render(request, 'reservations/upcoming_reservations.html', context)
+    return redirect('reservations:upcoming_reservations', business_id=business_id)
 @business_required
 def complete_reservation(request, business_id, reservation_id):
     reservation = get_object_or_404(Reservation, 
@@ -361,8 +352,4 @@ def complete_reservation(request, business_id, reservation_id):
     reservation.save()
     send_completion_email(reservation.user_id, reservation)
     messages.success(request, 'Reservation completed successfully!')
-    context = {
-        'business': reservation.business_id,
-        'reservation': reservation
-    }
-    return render(request, 'reservations/upcoming_reservations.html', context)
+    return redirect('reservations:upcoming_reservations', business_id=business_id)
