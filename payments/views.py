@@ -13,6 +13,9 @@ from django.http import JsonResponse
 from .models import Payment
 from django.urls import reverse
 from dineConnect_project import settings
+from django.db import models
+from django.db.models import Sum, Count
+from django.core.paginator import Paginator
 # Create your views here.
 def payment_view(request, reservation_id):
     # Get the reservation and verify it belongs to the current user
@@ -135,7 +138,7 @@ def process_payment(request, reservation_id):
             stripe_payment_intent_id=intent.id,
             user=request.user,
             business=reservation.business_id,
-            status ='succeded' if intent.status == 'succeeded' else 'pending'
+            status='succeeded' if intent.status == 'succeeded' else 'pending' 
         )
         
         if intent.status == 'succeeded':
@@ -174,24 +177,32 @@ def payment_history(request):
 @business_required
 def business_payment_history(request, business_id):
     business = get_object_or_404(Business, business_id=business_id)
-    
+   
     # Get all payments for this business
     payments = Payment.objects.filter(
         business=business
     ).select_related(
-        'user',  # For accessing user details efficiently
-        'reservation'  # For accessing reservation details efficiently
-    ).order_by('-created_at')  # Most recent first
+        'user',
+        'reservation'
+    ).order_by('-created_at')
+   
+    # Calculate statistics using aggregation
+    payment_stats = payments.aggregate(
+        total_revenue=Sum('amount', filter=models.Q(status='succeeded')),
+        successful_payments=Count('id', filter=models.Q(status='succeeded'))
+    )
     
-    # Calculate statistics
-    total_revenue = sum(payment.amount for payment in payments if payment.status == 'succeeded')
-    successful_payments = payments.filter(status='succeeded').count()
-    
+    # Pagination
+    page_number = request.GET.get('page', 1)
+    paginator = Paginator(payments, 10)  # Show 10 payments per page
+    page_obj = paginator.get_page(page_number)
+   
     context = {
-        'payments': payments,
+        'payments': page_obj,  # Use page_obj instead of payments
         'business': business,
-        'total_revenue': total_revenue,
-        'successful_payments': successful_payments,
+        'total_revenue': payment_stats['total_revenue'] or 0,
+        'successful_payments': payment_stats['successful_payments'],
+        'page_obj': page_obj,  # Add page_obj to context
     }
-    
+   
     return render(request, 'payments/business_payment_history.html', context)
