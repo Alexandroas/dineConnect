@@ -4,7 +4,7 @@
 {%load custom_tags%}
 {% block content %}
 <link rel="stylesheet" type="text/css" href="{% static 'reservations\css\make_reservation.css' %}">
-<form method="POST">
+<form method="POST" class="form-res">
     {% csrf_token %}
     {{ form|crispy }}
     <div class="container mt-5">
