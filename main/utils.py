@@ -127,7 +127,7 @@ def send_cancellation_email_business(user, reservation):
     print(f"Sending email for reservation {reservation.reservation_id}")
     print(f"Number of dishes: {reservation.dish_id.count()}")
     print(f"Dishes: {list(reservation.dish_id.all())}")
-    html_message = render_to_string('main/cancellation_email_business.html', context)
+    html_message = render_to_string('main/email/cancellation_email_business.html', context)
     business_email = reservation.business_id.business_owner.email
     try:
         send_mail(
