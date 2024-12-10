@@ -56,19 +56,26 @@ def montly_reservations(request, business_id):
     current_year = datetime.now().year
     montly_reservations = Reservation.objects.filter(
         business_id=business_id,
-        reservation_date__year=current_year  # Only get current year's data
+        reservation_date__year=current_year,
+        # Only count confirmed or completed reservations
+        reservation_status__in=['Confirmed', 'Completed']
     ).annotate(
         month=ExtractMonth('reservation_date')
     ).values('month').annotate(
         total=Sum('reservation_party_size')
     ).order_by('month')
-    months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
+
+    months = ['January', 'February', 'March', 'April', 'May', 'June', 
+             'July', 'August', 'September', 'October', 'November', 'December']
     business_reservations_data = [{'month': month, 'total': 0} for month in months]
+    
     for reservation in montly_reservations:
         month_index = reservation['month'] - 1
         business_reservations_data[month_index]['total'] = float(reservation['total'])
+    
     total_reservations = sum(item['total'] for item in business_reservations_data)
     average_monthly_reservations = total_reservations / 12 if total_reservations > 0 else 0
+    
     context = {
         'business_reservations_data': business_reservations_data,
         'total_reservations': total_reservations,
