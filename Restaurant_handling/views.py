@@ -55,8 +55,9 @@ def add_dish(request):
 def edit_dish(request, dish_id=None):
     dish = get_object_or_404(Dish, dish_id=dish_id)
     business = Business.objects.get(business_owner=request.user)
+    
     if request.method == 'POST':
-        form = DishUpdateForm(request.POST, request.FILES, instance=dish)  # Changed to DishUpdateForm
+        form = DishUpdateForm(request.POST, request.FILES, instance=dish)
         if form.is_valid():
             try:
                 dish = form.save(commit=False)
@@ -64,23 +65,23 @@ def edit_dish(request, dish_id=None):
                 business = Business.objects.get(business_owner=request.user)
                 # Set the business_id field
                 dish.business_id = business
-                # Convert is_available string to boolean if using ChoiceField
-                dish.is_available = form.cleaned_data['is_available'] == 'True'
+                # The is_available field will be handled automatically by form.clean_is_available()
                 dish.save()
+                
                 dish.allergens.clear()
                 if form.cleaned_data.get('allergens'):
                     dish.allergens.add(*form.cleaned_data['allergens'])
+                    
                 messages.success(request, 'Dish updated successfully!')
                 return redirect('Restaurant_handling:restaurant_menu')
             except Business.DoesNotExist:
-                print("No business found for user:", request.user)
                 messages.error(request, "Error: No business associated with this account")
             except Exception as e:
-                print("Error saving dish:", str(e))
                 messages.error(request, f"Error saving dish: {str(e)}")
     else:
-        form = DishUpdateForm(instance=dish)  # Changed to DishUpdateForm
-        
+        # Set initial value for is_available based on the current dish state
+        form = DishUpdateForm(instance=dish, initial={'is_available': dish.is_available})
+    
     return render(request, 'Restaurant_handling/edit_dish.html', {
         'form': form,
         'dish': dish,
