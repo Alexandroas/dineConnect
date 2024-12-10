@@ -1,10 +1,18 @@
 from django import forms
-from .models import Dish, Review
+from .models import DieteryPreference, Dish, Review
 
 class DishForm(forms.ModelForm):
+    allergens = forms.ModelMultipleChoiceField(
+        queryset=DieteryPreference.objects.all(),
+        widget = forms.CheckboxSelectMultiple(attrs={
+            'class': 'form-control'
+        }),
+        required=False,
+        label='Allergens/Dietery restrictions'
+    )
     class Meta:
         model = Dish
-        fields = ['dish_name', 'dish_cost', 'dish_description', 'dish_image', 'dish_type', 'cuisine_id']
+        fields = ['dish_name', 'dish_cost', 'dish_description', 'dish_image', 'dish_type', 'cuisine_id', 'allergens']
         exlude = ['buisness_id']
         
 class DishUpdateForm(forms.ModelForm):
@@ -19,17 +27,26 @@ class DishUpdateForm(forms.ModelForm):
         initial=True,
         label='Availability Status'
     )
+    allergens = forms.ModelMultipleChoiceField(
+        queryset=DieteryPreference.objects.all(),
+        widget = forms.CheckboxSelectMultiple(attrs={
+            'class': 'form-control'
+        }),
+        required=False,
+        label='Allergens/Dietery restrictions'
+    )
 
     class Meta:
         model = Dish
         fields = ['dish_name', 'dish_cost', 'is_available', 'dish_description', 
-                 'dish_image', 'dish_type', 'cuisine_id']
+                 'dish_image', 'dish_type', 'cuisine_id', 'allergens']
         exclude = ['business_id']
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         if self.instance and self.instance.pk:
             self.fields['is_available'].initial = self.instance.is_available
+            self.fields['allergens'].initial = self.instance.allergens.all()
         
     def clean_is_available(self):
         return self.cleaned_data['is_available'] == 'True'
