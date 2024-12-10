@@ -1,6 +1,7 @@
 {% extends 'main/header.html' %}
 {% load crispy_forms_tags %}
 {%load static%}
+{%load custom_tags%}
 {% block content %}
 <link rel="stylesheet" type="text/css" href="{% static 'reservations\css\make_reservation.css' %}">
 <form method="POST">
@@ -16,43 +17,45 @@
                 {% regroup dishes by dish_type as dish_list %}
                
                 {% for type in dish_list %}
-                    <div class="mb-4">
-                        <h4 class="text-primary mb-3">{{ type.grouper.dish_type_name }}</h4>
-                        <div class="row">
-                            {% for dish in type.list %}
-                                <div class="col-md-6 mb-3">
-                                    <div class="card {% if not dish.is_available %}bg-light{% endif %}">
-                                        <div class="card-body">
-                                            <div class="form-check">
-                                                <input type="checkbox"
-                                                       class="form-check-input"
-                                                       name="selected_dishes"
-                                                       value="{{ dish.dish_id }}"
-                                                       id="dish_{{ dish.dish_id }}"
-                                                       {% if not dish.is_available %}disabled{% endif %}>
-                                                <label class="form-check-label {% if not dish.is_available %}text-muted{% endif %}" 
-                                                       for="dish_{{ dish.dish_id }}">
-                                                    <div class="d-flex justify-content-between align-items-start">
-                                                        <h5 class="card-title mb-1">{{ dish.dish_name }}</h5>
-                                                        {% if not dish.is_available %}
-                                                            <span class="badge bg-secondary">Not Available</span>
-                                                        {% endif %}
-                                                    </div>
-                                                    <p class="card-text text-muted mb-1">
-                                                        {{ dish.dish_description }}
-                                                    </p>
-                                                    <p class="card-text">
-                                                        <strong>${{ dish.dish_cost }}</strong>
-                                                    </p>
-                                                </label>
-                                            </div>
+                <div class="mb-4">
+                    <h4 class="text-primary mb-3">{{ type.grouper.dish_type_name }}</h4>
+                    <div class="row">
+                        {% for dish in type.list %}
+                            <div class="col-md-6 mb-3">
+                                <div class="card {% if not dish.is_available or dish|has_user_allergens:request.user %}bg-light{% endif %}">
+                                    <div class="card-body">
+                                        <div class="form-check">
+                                            <input type="checkbox"
+                                                   class="form-check-input"
+                                                   name="selected_dishes"
+                                                   value="{{ dish.dish_id }}"
+                                                   id="dish_{{ dish.dish_id }}"
+                                                   {% if not dish.is_available or dish|has_user_allergens:request.user %}disabled{% endif %}>
+                                            <label class="form-check-label {% if not dish.is_available %}text-muted{% elif dish|has_user_allergens:request.user %}text-danger{% endif %}"
+                                                   for="dish_{{ dish.dish_id }}">
+                                                <div class="d-flex justify-content-between align-items-start">
+                                                    <h5 class="card-title mb-1">{{ dish.dish_name }}</h5>
+                                                    {% if not dish.is_available %}
+                                                        <span class="badge bg-secondary">Not Available</span>
+                                                    {% elif dish|has_user_allergens:request.user %}
+                                                        <span class="badge bg-danger">Contains Allergens</span>
+                                                    {% endif %}
+                                                </div>
+                                                <p class="card-text text-muted mb-1">
+                                                    {{ dish.dish_description }}
+                                                </p>
+                                                <p class="card-text">
+                                                    <strong>${{ dish.dish_cost }}</strong>
+                                                </p>
+                                            </label>
                                         </div>
                                     </div>
                                 </div>
-                            {% endfor %}
-                        </div>
+                            </div>
+                        {% endfor %}
                     </div>
-                {% endfor %}
+                </div>
+            {% endfor %}
             {% else %}
                 <div class="alert alert-info">
                     No dishes available for pre-order at this time.
