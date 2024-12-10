@@ -336,7 +336,7 @@ def profile(request, username):
             user_form.save()
             # Save many-to-many data
             form.save_m2m()
-            messages.success(request, f'{user_form.username}, Your profile has been updated!')
+            messages.success(request, f"Your profile has been updated successfully, {user_form.username}!")
             return redirect("profile", user_form.username)
         else:
             for field, errors in form.errors.items():
@@ -354,7 +354,7 @@ def profile(request, username):
         "upcoming_reservations": upcoming_reservations,
         "dietery_preference": dietery_preference,
         "past_reservations": past_reservations,
-        "user_profile": user,  # Add this to distinguish between logged-in user and profile user
+        "user_profile": user,  #distinguish between logged-in user and profile user
         "favorite_restaurants": favorite_restaurants,
     }
     
@@ -387,13 +387,10 @@ def cancel_reservation(request, reservation_id):
             messages.error(request, "This reservation is already cancelled.")
             return redirect('view_reservation', reservation_id=reservation_id)
         
-        # Add any business logic for cancellation (e.g., time limits)
         current_time = timezone.now()
         reservation_datetime = timezone.make_aware(
             datetime.combine(reservation.reservation_date, reservation.reservation_time)
         )
-        
-        # Example: Only allow cancellation up to 1 hour before reservation
         if current_time > reservation_datetime - timedelta(hours=1):
             messages.error(request, 
                          "Reservations can only be cancelled at least 1 hour in advance.")
