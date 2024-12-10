@@ -1,0 +1,83 @@
+{% extends 'main/header.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <!-- Include your business dashboard sidebar -->
+        <div class="col-md-3 col-lg-2">
+            {% include 'Restaurant_handling/restaurant_dashboard.html' %}
+        </div>
+
+        <!-- Main content -->
+        <div class="col-md-9 col-lg-10 px-4">
+            <h2 class="my-4">Payment History</h2>
+
+            <!-- Statistics Cards -->
+            <div class="row mb-4">
+                <div class="col-md-6">
+                    <div class="card bg-primary text-white">
+                        <div class="card-body">
+                            <h5 class="card-title">Total Revenue</h5>
+                            <p class="card-text h2">${{ total_revenue|floatformat:2 }}</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="card bg-success text-white">
+                        <div class="card-body">
+                            <h5 class="card-title">Successful Payments</h5>
+                            <p class="card-text h2">{{ successful_payments }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Payments Table -->
+            <div class="card">
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Customer</th>
+                                    <th>Reservation Date</th>
+                                    <th>Amount</th>
+                                    <th>Status</th>
+                                    <th>Details</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for payment in payments %}
+                                <tr>
+                                    <td>{{ payment.created_at|date:"M d, Y H:i" }}</td>
+                                    <td>{{ payment.user.get_full_name }}</td>
+                                    <td>{{ payment.reservation.reservation_date }}</td>
+                                    <td>${{ payment.amount|floatformat:2 }}</td>
+                                    <td>
+                                        <span class="badge {% if payment.status == 'succeeded' %}bg-success{% elif payment.status == 'pending' %}bg-warning{% else %}bg-danger{% endif %}">
+                                            {{ payment.status|title }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <a href="{% url 'reservations:reservation_details' business.business_id payment.reservation.reservation_id %}" 
+                                           class="btn btn-sm btn-info">
+                                            View Reservation
+                                        </a>
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="6" class="text-center">No payment history available.</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
