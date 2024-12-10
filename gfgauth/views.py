@@ -16,7 +16,7 @@ from gfgauth.decorators import regular_user_or_guest
 from reservations.models import Reservation
 from formtools.wizard.views import SessionWizardView # type: ignore
 from django.core.files.storage import FileSystemStorage
-from .models import Business, CustomUser
+from .models import Business, CustomUser, businessHours
 import os
 from .forms import CustomUserCreationForm
 from main.utils import send_welcome_email, send_cancellation_email_business, send_cancellation_email
@@ -161,8 +161,7 @@ class BusinessRegistrationWizard(SessionWizardView):
                 business_description=form_data['business_description'],
                 business_tax_code=form_data['business_tax_code'],
                 contact_number=form_data['contact_number'],
-                opening_time=form_data['opening_time'],
-                closing_time=form_data['closing_time']
+                business_max_table_capacity=form_data['business_max_table_capacity'],
             )
 
             # Handle business image
@@ -175,6 +174,22 @@ class BusinessRegistrationWizard(SessionWizardView):
                 business.cuisine.set(form_data['cuisine'])
 
             print("Business created successfully:", business)
+            # Handle business hours
+            days_mapping = {
+                'monday': 0, 'tuesday': 1, 'wednesday': 2, 'thursday': 3,
+                'friday': 4, 'saturday': 5, 'sunday': 6
+            }
+
+            for day_name, day_number in days_mapping.items():
+                if form_data.get(day_name):
+                    businessHours.objects.create(
+                        business=business,
+                        day_of_week=day_number,
+                        opening_time=form_data['opening_time'] if not form_data.get('is_closed') else None,
+                        closing_time=form_data['closing_time'] if not form_data.get('is_closed') else None,
+                        is_closed=form_data.get('is_closed', False),
+                        shift_name=form_data.get('shift_name', 'Regular Hours')
+                    )
 
             # Log the user in
             auth_login(self.request, business_user, 
