@@ -1,5 +1,7 @@
 from django.shortcuts import get_object_or_404, redirect, render
 from django.contrib import messages
+from Restaurant_handling.decorators import business_required
+from gfgauth.decorators import regular_user_or_guest
 from main.utils import send_reservation_email
 from notifications.utils import create_notification
 import stripe  # type: ignore
@@ -164,7 +166,32 @@ def process_payment(request, reservation_id):
             'success': False,
             'error': str(e)
         })
-        
+@regular_user_or_guest
 def payment_history(request):
     payments = Payment.objects.filter(user=request.user)
     return render(request, 'payments/payment_history.html', {'payments': payments})
+
+@business_required
+def business_payment_history(request, business_id):
+    business = get_object_or_404(Business, business_id=business_id)
+    
+    # Get all payments for this business
+    payments = Payment.objects.filter(
+        business=business
+    ).select_related(
+        'user',  # For accessing user details efficiently
+        'reservation'  # For accessing reservation details efficiently
+    ).order_by('-created_at')  # Most recent first
+    
+    # Calculate statistics
+    total_revenue = sum(payment.amount for payment in payments if payment.status == 'succeeded')
+    successful_payments = payments.filter(status='succeeded').count()
+    
+    context = {
+        'payments': payments,
+        'business': business,
+        'total_revenue': total_revenue,
+        'successful_payments': successful_payments,
+    }
+    
+    return render(request, 'payments/business_payment_history.html', context)
