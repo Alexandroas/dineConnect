@@ -4,7 +4,7 @@ class DieteryPreference(models.Model):
     dietery_id = models.AutoField(primary_key=True)
     dietery_name = models.CharField(max_length=100)
     def __str__(self):
-        return self.dietery_name
+        return self.dietery_name.strip()
 
 class Cuisine(models.Model):
     cuisine_id = models.AutoField(primary_key=True)
