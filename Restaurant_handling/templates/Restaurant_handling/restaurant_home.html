@@ -91,24 +91,35 @@
       </div>
 
       <!-- Today's Slots -->
-      <div class="card">
-        <div class="card-header bg-dark">
-          <h3 class="card-title h5 mb-0">Today's Available Slots</h3>
-        </div>
-        <div class="card-body">
-          {% if today_slots %}
-            <div class="row g-2">
-              {% for slot in today_slots %}
-                <div class="col-auto">
-                  <span class="badge bg-light text-dark border">{{ slot|time:"H:i" }}</span>
-                </div>
-              {% endfor %}
+      <!-- Recent Reviews Section -->
+<div class="card shadow-sm mb-4">
+  <div class="card-header bg-white d-flex justify-content-between align-items-center">
+    <h3 class="card-title h5 mb-0">Recent Reviews</h3>
+    <a href="{% url 'Restaurant_handling:manage_customers' %}" class="btn btn-sm btn-outline-primary">View All</a>
+  </div>
+  <div class="card-body p-0">
+    {% if recent_reviews %}
+      <div class="list-group list-group-flush">
+        {% for review in recent_reviews %}
+          <div class="list-group-item">
+            <div class="d-flex justify-content-between align-items-start">
+              <div>
+                <h6 class="mb-1">{{ review.user_id.get_full_name }}</h6>
+                <p class="mb-1">{{ review.review_text }}</p>
+                <small class="text-muted">{{ review.review_rating }} stars</small>
+              </div>
+              <span class="text-muted small">{{ review.review_date|timesince }} ago</span>
             </div>
-          {% else %}
-            <p class="text-muted mb-0">No available slots today</p>
-          {% endif %}
-        </div>
+          </div>
+        {% endfor %}
       </div>
+    {% else %}
+      <div class="p-4 text-center text-muted">
+        <p class="mb-0">No reviews yet</p>
+      </div>
+    {% endif %}
+  </div>
+</div>
     </div>
   </div>
 </div>
