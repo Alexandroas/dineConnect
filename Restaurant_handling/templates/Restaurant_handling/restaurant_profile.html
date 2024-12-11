@@ -16,22 +16,21 @@
                 <h2 class="account-heading">
                     {{ business.business_owner.username }}
                 </h2>
-                <p class="text-secondary">{{ business.business_owner.email }}</p>
+                <p class="text-white">{{ business.business_owner.email }}</p>
             </div>
         </div>
 
         <!-- Business Information Display -->
         <div class="media mt-3">
             <div class="media-body">
-                <h3>Business Details</h3>
-                <p class="text-secondary">Business Name: {{ business.business_name }}</p>
-                <p class="text-secondary">Description: {{ business.business_description }}</p>
-                <p class="text-secondary">Address: {{ business.business_address }}</p>
-                <p class="text-secondary">Tax Code: {{ business.business_tax_code }}</p>
-                <p class="text-secondary">Contact: {{ business.contact_number }}</p>
-                <p class="text-secondary">Hours: {{ business.opening_time }} - {{ business.closing_time }}</p>
-                <p class="text-secondary">Cuisine: {% for cuisine in business.cuisine.all %}{{ cuisine.name }}{% if not forloop.last %}, {% endif %}{% endfor %}</p>
-                <p class="text-secondary">Max table size: {{ business.buisness_max_table_capacity }}</p>
+                <h3 class=> Business Details</h3>
+                <p class="text-white">Business Name: {{ business.business_name }}</p>
+                <p class="text-white">Description: {{ business.business_description }}</p>
+                <p class="text-white">Address: {{ business.business_address }}</p>
+                <p class="text-white">Tax Code: {{ business.business_tax_code }}</p>
+                <p class="text-white">Contact: {{ business.contact_number }}</p>
+                <p class="text-white">Cuisine: {{business.get_cuisine_names}}</p>
+                <p class="text-white">Max table size: {{business.business_max_table_capacity}}</p>
                 {% if business.business_image %}
                     <img src="{{ business.business_image.url }}" alt="Business Image" class="img-thumbnail" style="max-width: 200px;">
                 {% endif %}
@@ -61,7 +60,7 @@
 
         <div class="form-group">
             <button class="btn btn-outline-info" type="submit">Update Profile</button>
-            <a class="btn btn-outline-info text-teal href="{% url 'password_change' %}" class="btn btn-outline-secondary">Change Password</a>
+            <a href="{% url 'password_change' %}" class="btn btn-outline-info">Change Password</a>
         </div>
     </form>
 </div>
