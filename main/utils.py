@@ -1,4 +1,3 @@
-# utils.py
 from django.core.mail import send_mail
 from django.template.loader import render_to_string
 from django.conf import settings
@@ -42,9 +41,9 @@ def send_initial_res_confirmation_email(user, reservation):
         'dishes' : reservation.dish_id.all(),
         'debug': True
     }
-    print(f"Sending email for reservation {reservation.reservation_id}")
-    print(f"Number of dishes: {reservation.dish_id.count()}")
-    print(f"Dishes: {list(reservation.dish_id.all())}")
+    #print(f"Sending email for reservation {reservation.reservation_id}")
+    #print(f"Number of dishes: {reservation.dish_id.count()}")
+    #print(f"Dishes: {list(reservation.dish_id.all())}")
     html_message = render_to_string('main/email/initial_email_reservation.html', context)
     
     try:
@@ -69,9 +68,9 @@ def send_reservation_email(user, reservation):
         'dishes' : reservation.dish_id.all(),
         'debug': True
     }
-    print(f"Sending email for reservation {reservation.reservation_id}")
-    print(f"Number of dishes: {reservation.dish_id.count()}")
-    print(f"Dishes: {list(reservation.dish_id.all())}")
+    #print(f"Sending email for reservation {reservation.reservation_id}")
+    #print(f"Number of dishes: {reservation.dish_id.count()}")
+    #print(f"Dishes: {list(reservation.dish_id.all())}")
     html_message = render_to_string('main/email/email_reservation.html', context)
     
     try:
@@ -96,9 +95,9 @@ def send_reservation_email_business(user, reservation):
         'dishes' : reservation.dish_id.all(),
         'debug': True
     }
-    print(f"Sending email for reservation {reservation.reservation_id}")
-    print(f"Number of dishes: {reservation.dish_id.count()}")
-    print(f"Dishes: {list(reservation.dish_id.all())}")
+    #print(f"Sending email for reservation {reservation.reservation_id}")
+    #print(f"Number of dishes: {reservation.dish_id.count()}")
+    #print(f"Dishes: {list(reservation.dish_id.all())}")
     html_message = render_to_string('main/email/email_reservation_business.html', context)
     business_email = reservation.business_id.business_owner.email
     try:
@@ -124,9 +123,9 @@ def send_cancellation_email_business(user, reservation):
         'dishes' : reservation.dish_id.all(),
         'debug': True
     }
-    print(f"Sending email for reservation {reservation.reservation_id}")
-    print(f"Number of dishes: {reservation.dish_id.count()}")
-    print(f"Dishes: {list(reservation.dish_id.all())}")
+    #print(f"Sending email for reservation {reservation.reservation_id}")
+    #print(f"Number of dishes: {reservation.dish_id.count()}")
+    #print(f"Dishes: {list(reservation.dish_id.all())}")
     html_message = render_to_string('main/email/cancellation_email_business.html', context)
     business_email = reservation.business_id.business_owner.email
     try:
@@ -151,9 +150,9 @@ def send_completion_email(user, reservation):
         'dishes' : reservation.dish_id.all(),
         'debug': True
     }
-    print(f"Sending email for reservation {reservation.reservation_id}")
-    print(f"Number of dishes: {reservation.dish_id.count()}")
-    print(f"Dishes: {list(reservation.dish_id.all())}")
+    #print(f"Sending email for reservation {reservation.reservation_id}")
+    #print(f"Number of dishes: {reservation.dish_id.count()}")
+    #print(f"Dishes: {list(reservation.dish_id.all())}")
     html_message = render_to_string('main/email/completed_reservation_email.html', context)
     
     try:
@@ -178,9 +177,9 @@ def send_cancellation_email(user, reservation):
         'dishes' : reservation.dish_id.all(),
         'debug': True
     }
-    print(f"Sending email for reservation {reservation.reservation_id}")
-    print(f"Number of dishes: {reservation.dish_id.count()}")
-    print(f"Dishes: {list(reservation.dish_id.all())}")
+    #print(f"Sending email for reservation {reservation.reservation_id}")
+    #print(f"Number of dishes: {reservation.dish_id.count()}")
+    #print(f"Dishes: {list(reservation.dish_id.all())}")
     html_message = render_to_string('main/email/cancellation_email.html', context)
     
     try:
