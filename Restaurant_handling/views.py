@@ -226,11 +226,15 @@ def restaurant_home(request):
         is_open = True
     else:
         is_open = False
+    recent_reviews = Review.objects.filter(business_id=business)\
+        .select_related('user_id')\
+        .order_by('-review_id')[:5]
     context = {
         'business': business,
         'hours_by_day': hours_by_day,
         'stats': stats,
-        'is_open': is_open
+        'is_open': is_open,
+        'recent_reviews': recent_reviews
     }
     return render(request, 'Restaurant_handling/restaurant_home.html', context)
 
