@@ -1,1 +1,1 @@
-web: gunicorn dineconnect_project.wsgi
+web: gunicorn dineConnect_project.wsgi
