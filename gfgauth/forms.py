@@ -6,7 +6,26 @@ from .models import Business, CustomUser, businessHours
 from django.apps import apps
 from django.db import models
 from django.core.exceptions import ValidationError
+from django.contrib.auth.forms import PasswordResetForm as BasePasswordResetForm
 
+class CustomPasswordResetForm(BasePasswordResetForm):
+    email = forms.EmailField(
+        label="Email",
+        max_length=254,
+        widget=forms.EmailInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Enter your email address',
+            'autocomplete': 'email'
+        })
+    )
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Apply Bootstrap classes
+        self.fields['email'].widget.attrs.update({
+            'class': 'form-control',
+            'placeholder': 'Enter your email address'
+        })
 # forms.py
 class UserUpdateForm(forms.ModelForm):
     email = forms.EmailField(required=True)

@@ -1,38 +1,18 @@
-// sorting.js
 function sortBusinesses(sortBy) {
-    console.log("Initiated sorting");
-    const container = document.querySelector('.row.row-cols-1.row-cols-md-2.row-cols-lg-3');
-    const businesses = Array.from(container.getElementsByClassName('col'));
-
-    businesses.sort((a, b) => {
-        switch(sortBy) {
-            case 'name':
-                console.log("Sorting by name:" + sortBy);
-                const nameA = a.querySelector('.card-title').innerText.toLowerCase();
-                console.log("Name A:" + nameA);
-                const nameB = b.querySelector('.card-title').innerText.toLowerCase();
-                console.log("Name B:" + nameB);
-                return nameA.localeCompare(nameB);
-            
-            case 'name-desc':
-                const nameDescA = a.querySelector('.card-title').innerText.toLowerCase();
-                const nameDescB = b.querySelector('.card-title').innerText.toLowerCase();
-                return nameDescB.localeCompare(nameDescA);
-            
-            case 'rating':
-                const ratingA = getRating(a);
-                const ratingB = getRating(b);
-                return ratingA - ratingB; // Sort high to low
-                
-            default:
-                return 0;
-        }
-    });
-
-    // Clear and re-append sorted items
-    businesses.forEach(business => {
-        container.appendChild(business);
-    });
+    // Get current URL
+    let url = new URL(window.location.href);
+    
+    // Update or add sort parameter
+    url.searchParams.set('sort', sortBy);
+    
+    // Preserve the page parameter if it exists
+    const currentPage = url.searchParams.get('page');
+    if (currentPage) {
+        url.searchParams.set('page', '1'); // Reset to first page when sorting
+    }
+    
+    // Replace current URL with sorted version
+    window.location.href = url.toString();
 }
 
 // Helper function to get rating
@@ -46,6 +26,13 @@ function getRating(businessElement) {
 document.addEventListener('DOMContentLoaded', function() {
     const sortSelect = document.getElementById('sortSelect');
     if (sortSelect) {
+        // Set initial value based on URL parameter
+        const urlParams = new URLSearchParams(window.location.search);
+        const currentSort = urlParams.get('sort');
+        if (currentSort) {
+            sortSelect.value = currentSort;
+        }
+        
         sortSelect.addEventListener('change', function() {
             sortBusinesses(this.value);
         });

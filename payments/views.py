@@ -24,24 +24,26 @@ def payment_view(request, reservation_id):
         reservation_id=reservation_id,
         user_id=request.user
     )
-    
+   
     # Calculate total amount from selected dishes
     total_amount = sum(dish.dish_cost for dish in reservation.dish_id.all())
-    
+   
     # Ensure there's no existing successful payment for this reservation
     existing_payment = Payment.objects.filter(
         reservation=reservation,
         status='succeeded'
     ).first()
-    
+   
     if existing_payment:
         messages.warning(request, "This reservation has already been paid for.")
-        return redirect('reservation_detail', reservation_id=reservation_id)
+        return redirect('reservations:reservation_details', 
+                       business_id=reservation.business_id.business_id,
+                       reservation_id=reservation_id)
 
     if request.method == 'POST':
         try:
             stripe.api_key = settings.STRIPE_SECRET_KEY
-            
+           
             # Create Stripe payment intent
             intent = stripe.PaymentIntent.create(
                 amount=int(total_amount * 100),  # Convert to cents
@@ -53,24 +55,27 @@ def payment_view(request, reservation_id):
                 },
                 description=f"Reservation #{reservation.reservation_id} at {reservation.business_id.business_name}"
             )
-
             return render(request, 'payments/payment.html', {
                 'reservation': reservation,
                 'total_amount': total_amount,
                 'client_secret': intent.client_secret,
                 'stripe_publishable_key': settings.STRIPE_PUBLISHABLE_KEY,
             })
-            
+           
         except stripe.error.StripeError as e:
             # Handle Stripe-specific errors
             messages.error(request, f"Payment error: {str(e)}")
-            return redirect('reservation_detail', reservation_id=reservation_id)
-            
+            return redirect('reservations:reservation_details', 
+                          business_id=reservation.business_id.business_id,
+                          reservation_id=reservation_id)
+           
         except Exception as e:
             # Handle other unexpected errors
             messages.error(request, "An unexpected error occurred. Please try again.")
-            return redirect('reservation_detail', reservation_id=reservation_id)
-    
+            return redirect('reservations:reservation_details', 
+                          business_id=reservation.business_id.business_id,
+                          reservation_id=reservation_id)
+   
     # GET request - show payment form
     context = {
         'reservation': reservation,
@@ -78,7 +83,7 @@ def payment_view(request, reservation_id):
         'stripe_publishable_key': settings.STRIPE_PUBLISHABLE_KEY,
         'business_name': reservation.business_id.business_name
     }
-    
+   
     return render(request, 'payments/payment.html', context)
 
 def payment_success(request, reservation_id):
@@ -138,7 +143,7 @@ def process_payment(request, reservation_id):
             stripe_payment_intent_id=intent.id,
             user=request.user,
             business=reservation.business_id,
-            status='succeeded' if intent.status == 'succeeded' else 'pending' 
+            status='Succeeded' if intent.status == 'Succeeded' else 'Pending' 
         )
         
         if intent.status == 'succeeded':

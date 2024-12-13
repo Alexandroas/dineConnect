@@ -33,7 +33,8 @@ class Reservation(models.Model):
     @property
     def is_upcoming(self):
         if self.get_datetime:
-            return self.get_datetime > timezone.now()
+            aware_datetime = timezone.make_aware(self.get_datetime)
+            return aware_datetime > timezone.now()
         return False
 
     @classmethod

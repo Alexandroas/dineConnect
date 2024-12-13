@@ -16,7 +16,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             // Only setup notifications if URL is available
             this.notificationUrl = document.body.dataset.notificationUrl;
-            if (this.notificationUrl) {
+            if (this.notificationUrl && this.isAuthenticated) {
                 this.setupNotificationContainer();
                 this.setupEventSource();
                 this.loadNotifications();
@@ -24,6 +24,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
             console.log('Notification handler initialized');
         },
+        isAuthenticated() {
+            return document.body.dataset.isAuthenticated === 'true';
+        },
+
         setupNotificationContainer() {
             if (!document.getElementById('notification-container')) {
                 const container = document.createElement('div');
@@ -149,9 +153,8 @@ document.addEventListener('DOMContentLoaded', () => {
         },
 
         setupEventSource() {
-            // Only setup EventSource if we have a URL
-            if (!this.notificationUrl) {
-                console.log('No notification URL available, skipping EventSource setup');
+            if (!this.notificationUrl || !this.isAuthenticated()) {
+                console.log('Notifications disabled: User not authenticated or URL not available');
                 return;
             }
 
@@ -174,13 +177,19 @@ document.addEventListener('DOMContentLoaded', () => {
                 };
 
                 this.eventSource.onerror = (error) => {
-                    console.log('EventSource error - will retry connection');
+                    console.log('EventSource error occurred');
                     if (this.eventSource) {
                         this.eventSource.close();
                         this.eventSource = null;
                     }
-                    // Retry connection after 5 seconds
-                    setTimeout(() => this.setupEventSource(), 5000);
+
+                    // Check authentication before retrying
+                    if (this.isAuthenticated()) {
+                        console.log('Will retry connection in 5 seconds...');
+                        setTimeout(() => this.setupEventSource(), 5000);
+                    } else {
+                        console.log('Not retrying: User not authenticated');
+                    }
                 };
 
             } catch (error) {

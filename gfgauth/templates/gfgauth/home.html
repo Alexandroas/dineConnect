@@ -122,23 +122,25 @@
       <ul class="pagination justify-content-center">
         {% if businesses.has_previous %}
           <li class="page-item">
-            <a class="page-link" href="?page=1">&laquo; First</a>
+              <a class="page-link" href="?page=1{% if current_sort %}&sort={{ current_sort }}{% endif %}">&laquo; First</a>
           </li>
           <li class="page-item">
-            <a class="page-link" href="?page={{ businesses.previous_page_number }}">Previous</a>
+              <a class="page-link" href="?page={{ businesses.previous_page_number }}{% if current_sort %}&sort={{ current_sort }}{% endif %}">Previous</a>
           </li>
-        {% endif %}
-        <li class="page-item active">
+      {% endif %}
+
+      <li class="page-item active">
           <span class="page-link">Page {{ businesses.number }} of {{ businesses.paginator.num_pages }}</span>
-        </li>
-        {% if businesses.has_next %}
+      </li>
+
+      {% if businesses.has_next %}
           <li class="page-item">
-            <a class="page-link" href="?page={{ businesses.next_page_number }}">Next</a>
+              <a class="page-link" href="?page={{ businesses.next_page_number }}{% if current_sort %}&sort={{ current_sort }}{% endif %}">Next</a>
           </li>
           <li class="page-item">
-            <a class="page-link" href="?page={{ businesses.paginator.num_pages }}">Last &raquo;</a>
+              <a class="page-link" href="?page={{ businesses.paginator.num_pages }}{% if current_sort %}&sort={{ current_sort }}{% endif %}">Last &raquo;</a>
           </li>
-        {% endif %}
+    {% endif %}
       </ul>
     </nav>
     

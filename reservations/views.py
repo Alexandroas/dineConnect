@@ -292,9 +292,9 @@ def cancel_reservation(request, business_id, reservation_id):
     # Get the associated payment
     try:
         payment = Payment.objects.get(
-            reservation=reservation,
-            status='succeded'
-        )
+        reservation=reservation,
+        status__in=['Pending', 'Succeeded']
+    )
         print(f"DEBUG: Found payment {payment.id} with status {payment.status}")
         
         stripe.api_key = settings.STRIPE_SECRET_KEY
@@ -302,7 +302,7 @@ def cancel_reservation(request, business_id, reservation_id):
             payment_intent=payment.stripe_payment_intent_id
         )
         
-        payment.status = 'refunded'
+        payment.status = 'Refunded'
         payment.save()
         
         messages.success(request, 'Reservation canceled and payment refunded successfully!')

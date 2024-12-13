@@ -17,45 +17,111 @@
 }
 
 /* Star Rating */
-    /* Updated star rating styles */
-    .star-rating {
-        display: flex;
-        flex-direction: row-reverse; /* Reverse the order of stars */
-        gap: 8px;
-        justify-content: center;
-        margin-bottom: 20px;
-    }
+.star-rating {
+  display: flex;
+  flex-direction: row;
+  gap: 8px;
+  justify-content: center;
+  margin-bottom: 20px;
+  position: relative; /* Added for animation positioning */
+}
 
-    .star-label {
-        cursor: pointer;
-        transition: transform 0.2s ease;
-    }
+.star-label {
+  cursor: pointer;
+  transition: all 0.3s ease;
+  position: relative; /* Added for animation positioning */
+}
 
-    .star-label:hover {
-        transform: scale(1.1);
-    }
+.star-label:hover {
+  transform: scale(1.1);
+}
 
-    .hidden {
-        display: none;
-    }
+.hidden {
+  display: none;
+}
 
-    .star-icon {
-        width: 32px;
-        height: 32px;
-        fill: #cbd5e0;
-        transition: fill 0.3s ease;
-    }
+.star-icon {
+  width: 32px;
+  height: 32px;
+  fill: #cbd5e0;
+  transition: all 0.3s ease;
+}
 
-    /* This makes stars fill from right to left on hover */
-    .star-label:hover .star-icon,
-    .star-label:hover ~ .star-label .star-icon {
-        fill: #fbbf24;
-    }
+/* Animation keyframes */
+@keyframes moveAndFade {
+  0% {
+    transform: translateX(0) scale(1);
+    opacity: 1;
+  }
+  100% {
+    transform: translateX(calc(-100% - 8px)) scale(0);
+    opacity: 0;
+  }
+}
 
-    /* This makes stars fill from right to left when selected */
-    input[name="review_rating"]:checked ~ .star-label .star-icon {
-        fill: #f59e0b;
-    }
+@keyframes growAndGlow {
+  0% {
+    transform: scale(1);
+    fill: #cbd5e0;
+  }
+  100% {
+    transform: scale(1.5);
+    fill: #f59e0b;
+  }
+}
+
+/* Combined state styles */
+.star-rating.combined .star-label:not(:first-of-type) {
+  animation: moveAndFade 0.3s forwards;
+}
+
+.star-rating.combined .star-label:first-of-type .star-icon {
+  animation: growAndGlow 0.3s forwards;
+}
+
+/* Hover effects */
+.star-rating:not(.combined) .star-label:hover .star-icon {
+  fill: #f59e0b;
+}
+
+.star-rating:not(.combined) .star-label:hover ~ .star-label .star-icon {
+  fill: #cbd5e0;
+}
+
+.star-rating:not(.combined) .star-label:hover .star-icon,
+.star-rating:not(.combined) .star-label:has(~ .star-label:hover) .star-icon {
+  fill: #f59e0b;
+}
+
+/* Active/Selected state */
+.star-rating .star-label input[type="radio"]:checked ~ .star-icon {
+  fill: #f59e0b;
+}
+
+/* Reset states */
+.star-rating:not(.combined) .star-label {
+  transform: translateX(0) scale(1);
+  opacity: 1;
+}
+
+.star-rating:not(.combined) .star-label .star-icon {
+  transform: scale(1);
+  fill: #cbd5e0;
+}
+
+/* Star Hover Effects */
+.star-label:hover ~ .star-label .star-icon {
+  fill: #cbd5e0;
+}
+
+.star-label .star-icon {
+  fill: #cbd5e0;
+}
+
+.star-label:hover .star-icon,
+.star-label:has(~ .star-label:hover) .star-icon {
+  fill: #fbbf24;
+}
 
 /* Review Textarea */
 .review-textarea {
@@ -117,17 +183,9 @@
 }
 
 /* Success Message Animation */
-@keyframes slideIn {
-  from {
-      transform: translateY(100%);
-      opacity: 0;
-  }
-  to {
-      transform: translateY(0);
-      opacity: 1;
-  }
-}
 
+
+/* Review Card Styles */
 .review-card {
   min-height: 150px;
   background: #f8f9fa;
@@ -141,6 +199,7 @@
   line-height: 1.5;
 }
 
+/* Carousel Controls */
 .carousel-control-prev,
 .carousel-control-next {
   width: 10%;
@@ -156,7 +215,7 @@
   font-size: 0.8rem;
 }
 
-/* Custom scrollbar */
+/* Custom Scrollbar */
 .review-text::-webkit-scrollbar {
   width: 4px;
 }

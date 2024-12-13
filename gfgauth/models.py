@@ -245,47 +245,46 @@ class businessHours(models.Model):
             blank=True,
             help_text="Optional name for this shift (e.g., 'Lunch', 'Dinner')"
         )
-
-class Meta:
-    verbose_name = 'business hours'
-    verbose_name_plural = 'business hours'
-    ordering = ['day_of_week', 'opening_time']
-    # Ensure we don't have overlapping hours for the same business/day
-    constraints = [
-        models.UniqueConstraint(
-            fields=['business', 'day_of_week', 'shift_name'],
-            name='unique_business_hours_shift'
-        )
-    ]
-
-    def clean(self):
-        """Validate that closing time is after opening time"""
-        if self.opening_time and self.closing_time:
-            if self.closing_time <= self.opening_time:
-                raise ValidationError(
-                    _('Closing time must be after opening time')
+        class Meta:
+            verbose_name = 'business hours'
+            verbose_name_plural = 'business hours'
+            ordering = ['day_of_week', 'opening_time']
+            # Ensure we don't have overlapping hours for the same business/day
+            constraints = [
+                models.UniqueConstraint(
+                    fields=['business', 'day_of_week', 'shift_name'],
+                    name='unique_business_hours_shift'
                 )
-            
-            # Check for overlapping hours on the same day
-            overlapping = businessHours.objects.filter(
-                business=self.business,
-                day_of_week=self.day_of_week,
-                is_closed=False
-            ).exclude(pk=self.pk).filter(
-                models.Q(opening_time__lte=self.closing_time,
-                        closing_time__gte=self.opening_time)
-            )
-            
-            if overlapping.exists():
-                raise ValidationError(
-                    _('Hours overlap with existing business hours for this day')
-                )
+            ]
 
-    def __str__(self):
-        day_name = self.get_day_of_week_display()
-        if self.is_closed:
-            return f"{day_name}: Closed"
-        return f"{day_name}: {self.opening_time.strftime('%H:%M')} - {self.closing_time.strftime('%H:%M')}"
+        def clean(self):
+            """Validate that closing time is after opening time"""
+            if self.opening_time and self.closing_time:
+                if self.closing_time <= self.opening_time:
+                    raise ValidationError(
+                        _('Closing time must be after opening time')
+                    )
+                
+                # Check for overlapping hours on the same day
+                overlapping = businessHours.objects.filter(
+                    business=self.business,
+                    day_of_week=self.day_of_week,
+                    is_closed=False
+                ).exclude(pk=self.pk).filter(
+                    models.Q(opening_time__lte=self.closing_time,
+                            closing_time__gte=self.opening_time)
+                )
+                
+                if overlapping.exists():
+                    raise ValidationError(
+                        _('Hours overlap with existing business hours for this day')
+                    )
+
+        def __str__(self):
+            day_name = self.get_day_of_week_display()
+            if self.is_closed:
+                return f"{day_name}: Closed"
+            return f"{day_name}: {self.opening_time.strftime('%H:%M')} - {self.closing_time.strftime('%H:%M')}"
 def get_business_hours(self):
     """
     Return business hours as a dictionary

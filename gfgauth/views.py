@@ -35,6 +35,9 @@ def home(request):
     Business = apps.get_model('gfgauth', 'Business')
     Cuisine = apps.get_model('Restaurant_handling', 'Cuisine')
     Testimonial = apps.get_model('main', 'Testimonial')
+    
+    # Get sort parameter
+    sort_by = request.GET.get('sort', '')
 
     # Check if this is an AJAX search request
     if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
@@ -60,8 +63,19 @@ def home(request):
         
         return JsonResponse({'businesses': filtered_businesses})
 
-    # Normal page load
-    businesses = Business.objects.prefetch_related('cuisine').all()
+    # Base queryset with annotations for sorting
+    businesses = Business.objects.prefetch_related('cuisine', 'review_set').annotate(
+        avg_rating=models.Avg('review__review_rating'),
+        review_count=models.Count('review')
+    )
+
+    # Apply sorting
+    if sort_by == 'rating':
+        businesses = businesses.order_by('-avg_rating', '-review_count')
+    elif sort_by == 'name':
+        businesses = businesses.order_by('business_name')
+    elif sort_by == 'name-desc':
+        businesses = businesses.order_by('-business_name')
     
     # Get other data
     is_business = request.user.groups.filter(name='Business').exists()
@@ -77,7 +91,8 @@ def home(request):
         'businesses': page_obj,
         'cuisines': cuisines,
         'testimonials': testimonials,
-        'is_business': is_business
+        'is_business': is_business,
+        'current_sort': sort_by  # Add current sort to context
     }
     
     return render(request, 'gfgauth/home.html', context)

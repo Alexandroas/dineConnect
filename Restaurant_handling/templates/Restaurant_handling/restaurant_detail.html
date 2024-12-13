@@ -225,4 +225,58 @@
       </div>
     {% endif %}
   </div>
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const starRating = document.querySelector('.star-rating');
+      const stars = document.querySelectorAll('.star-label');
+      let isAnimating = false;
+      let currentClickedStar = null;
+  
+      const resetStars = () => {
+          stars.forEach(s => {
+              s.style.transform = '';
+              s.style.opacity = '';
+              s.querySelector('.star-icon').style.transform = '';
+              s.querySelector('.star-icon').style.fill = '';
+          });
+          starRating.classList.remove('combined');
+          isAnimating = false;
+          currentClickedStar = null;
+      };
+  
+      stars.forEach(star => {
+          star.addEventListener('click', (e) => {
+              const clickedStar = e.currentTarget;
+  
+              // If clicking the same star, reset everything
+              if (currentClickedStar === clickedStar) {
+                  resetStars();
+                  return;
+              }
+  
+              // Reset previous animation if any
+              resetStars();
+  
+              const allStars = Array.from(stars);
+              const clickedIndex = allStars.indexOf(clickedStar);
+              
+              // Move all stars after the clicked one
+              allStars.slice(clickedIndex + 1).forEach((s, index) => {
+                  s.style.transform = `translateX(-${(index + 1) * 40}px)`;
+                  s.style.opacity = '0';
+              });
+              
+              // Grow the clicked star
+              clickedStar.querySelector('.star-icon').style.transform = 'scale(1.5)';
+              clickedStar.querySelector('.star-icon').style.fill = '#f59e0b';
+              
+              starRating.classList.add('combined');
+              isAnimating = true;
+              currentClickedStar = clickedStar;
+          });
+      });
+  });
+  </script>
+
+
 {% endblock %}

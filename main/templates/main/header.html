@@ -25,7 +25,8 @@
     <!-- jQuery -->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 </head>
-<body data-notification-url="{% url 'notifications:notification_stream' %}">
+<body data-notification-url="{% url 'notifications:notification_stream' %}" 
+      data-user-authenticated="{% if user.is_authenticated %}true{% else %}false{% endif %}">
     {% csrf_token %}
 
     {% include 'main/includes/navbar.html' %}
