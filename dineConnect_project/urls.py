@@ -28,8 +28,8 @@ urlpatterns = [
     path('accounts/password/reset/',
     auth_views.PasswordResetView.as_view(
         template_name='gfgauth/password_reset_form.html',  # Make sure this matches your file structure
-        email_template_name='registration/password_reset_email.html',
-        subject_template_name='registration/password_reset_subject.txt',
+        email_template_name='gfgauth/password_reset_email.html',
+        subject_template_name='gfgauth/password_reset_subject.txt',
         success_url='/accounts/password/reset/done/',
         form_class=CustomPasswordResetForm,
     ),
@@ -41,12 +41,12 @@ urlpatterns = [
         name='password_reset_done'),
     path('accounts/password/reset/<uidb64>/<token>/', 
         auth_views.PasswordResetConfirmView.as_view(
-            template_name='registration/password_reset_confirm.html'
+            template_name='gfgauth/password_reset_confirm.html'
         ), 
         name='password_reset_confirm'),
     path('accounts/password/reset/complete/', 
         auth_views.PasswordResetCompleteView.as_view(
-            template_name='registration/password_reset_complete.html'
+            template_name='gfgauth/password_reset_complete.html'
         ), 
         name='password_reset_complete'),
     path('accounts/', include('allauth.urls')),
