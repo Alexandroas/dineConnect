@@ -118,7 +118,13 @@ class BusinessRegistrationWizard(SessionWizardView):
 
     
     def post(self, *args, **kwargs):
-        """Override post to handle the back button without validation"""
+        """
+        goto_step = self.request.POST.get('wizard_goto_step', None)
+        if goto_step and goto_step in self.get_form_list():
+            return self.render_goto_step(goto_step)
+        If it is, the method renders the form for the specified step without performing validation.
+        Otherwise, it proceeds with the default post method behavior.
+        """
         wizard_goto_step = self.request.POST.get('wizard_goto_step', None)
         if wizard_goto_step and wizard_goto_step in self.get_form_list():
             return self.render_goto_step(wizard_goto_step)
@@ -135,6 +141,14 @@ class BusinessRegistrationWizard(SessionWizardView):
         return self.render(form)
 
     def get_context_data(self, form, **kwargs):
+        """
+        Add additional context data for the template rendering.
+
+        This method adds an 'is_last_step' flag to the context to indicate
+        whether the current step is the last step in the wizard. This can be
+        useful for the template to display specific content or actions only
+        on the last step of the wizard.
+        """
         context = super().get_context_data(form=form, **kwargs)
         if self.steps.current == self.steps.last:
             context.update({'is_last_step': True})
@@ -142,6 +156,15 @@ class BusinessRegistrationWizard(SessionWizardView):
     
     def done(self, form_list, **kwargs):
         # Combine all form data
+        """
+        Finalize the business registration process.
+
+        This method combines all the cleaned data from the forms, creates a new
+        CustomUser and Business instance, assigns the user to the 'Business' group,
+        handles the business image and cuisine, creates business hours, logs the user in,
+        and redirects to the restaurant home page. If an error occurs during the process,
+        it deletes the created user and raises the exception.
+        """
         form_data = {}
         for form in form_list:
             form_data.update(form.cleaned_data)
@@ -220,7 +243,13 @@ class BusinessRegistrationWizard(SessionWizardView):
             raise
 
     def process_step(self, form):
-        """Process each step, validating data as needed"""
+        """
+        Process each step, validating data as needed.
+
+        This method performs additional validation for the 'basic' step to ensure
+        that the email and username provided are unique. If the email or username
+        already exists in the database, an error is added to the form.
+        """
         cleaned_data = self.get_all_cleaned_data()
         
         # Validate email and username uniqueness in the first step
@@ -235,6 +264,7 @@ class BusinessRegistrationWizard(SessionWizardView):
                 form.add_error('username', 'This username is already taken.')
 
         return super().process_step(form)
+    
 def login(request):
     return render(request, 'gfgauth/login.html')
 
@@ -391,6 +421,7 @@ def view_reservation(request, reservation_id):
         'reservation': reservation,
         'total_amount': total_amount
     })
+    
 @login_required
 def cancel_reservation(request, reservation_id):
     if request.method == 'POST':
@@ -443,6 +474,7 @@ def toggle_favorite(request, business_id):
             'status': 'error',
             'message': 'Business not found'
         }, status=404)
+        
 @login_required
 @regular_user_or_guest
 def favorite_restaurants(request):

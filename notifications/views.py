@@ -12,6 +12,19 @@ from django.contrib import messages
 
 @csrf_exempt
 def notification_stream(request):
+    """
+    View function to provide a server-sent events (SSE) stream of notifications for authenticated users.
+    This view function streams notifications to the client in real-time using SSE. It checks for new notifications
+    for the authenticated user every 5 seconds and sends them to the client if they haven't been sent before.
+    Args:
+        request (HttpRequest): The HTTP request object.
+    Returns:
+        StreamingHttpResponse: A streaming HTTP response with the notifications in SSE format.
+    Notes:
+        - The user must be authenticated to access this stream. If not, a 401 Unauthorized response is returned.
+        - The notifications are filtered based on the recipient, creation time, and read status.
+        - The response headers are set to prevent caching and disable buffering.
+    """
     if not request.user.is_authenticated:
         return StreamingHttpResponse("Unauthorized", status=401)
 

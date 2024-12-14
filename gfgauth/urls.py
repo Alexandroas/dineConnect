@@ -12,7 +12,6 @@ urlpatterns = [
     path('register/business/', 
          views.BusinessRegistrationWizard.as_view(views.FORMS), 
          name='register_business'), 
-    # urls.py
     path('toggle-favorite/<int:business_id>/', views.toggle_favorite, name='toggle_favorite'),
     path('favorites/', views.favorite_restaurants, name='favorite_restaurants'),
     path('view_reservation/<int:reservation_id>', views.view_reservation, name='view_reservation'),

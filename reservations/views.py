@@ -21,6 +21,27 @@ from django.db import models
 @login_required
 @regular_user_or_guest
 def make_reservation(request, business_id):
+    """
+    Handles the creation of a reservation for a given business.
+    Args:
+        request (HttpRequest): The HTTP request object containing POST data for the reservation.
+        business_id (int): The ID of the business for which the reservation is being made.
+    Returns:
+        HttpResponse: Renders the reservation form page or redirects to appropriate pages based on the reservation status.
+    The function performs the following steps:
+    1. Retrieves the business object and its associated dishes and business hours.
+    2. Checks if the business is open.
+    3. If the request method is POST, it processes the reservation form:
+        - Validates the form data.
+        - Checks if the reservation date is in the past.
+        - Checks if the party size exceeds the business's maximum table capacity.
+        - Checks if the reservation time is within the business hours for the selected day.
+        - Saves the reservation and handles selected dishes.
+        - If dishes are selected, redirects to the payment page.
+        - If no dishes are selected, sends confirmation emails and creates a notification.
+    4. If the request method is not POST, it initializes an empty reservation form.
+    5. Renders the reservation form page with the context data.
+    """
     business = get_object_or_404(Business, business_id=business_id)
     dishes = Dish.objects.filter(business_id=business).order_by('dish_type__dish_type_name')
     business_hours = get_business_hours(business)
@@ -118,7 +139,22 @@ def make_reservation(request, business_id):
 @business_required
 def upcoming_reservations(request, business_id):
     """
-    View to display upcoming reservations for a business.
+    This view handles the following functionalities:
+        - Retrieves the business object based on the provided business_id.
+        - Fetches upcoming reservations for the business.
+        - Applies optional filters for date and status.
+        - Orders the reservations by date and time.
+        - Calculates the total number of upcoming reservations and the count for today's reservations.
+        - Implements pagination for the reservations list.
+        - Renders the 'upcoming_reservations.html' template with the context data.
+        Parameters:
+            request (HttpRequest): The HTTP request object.
+            business_id (int): The ID of the business for which to display reservations.
+        Returns:
+            HttpResponse: The rendered HTML page displaying the upcoming reservations.
+        Raises:
+            Http404: If the business object is not found.
+            Exception: For any other errors that occur during the view execution.
     """
     try:
         business = get_object_or_404(Business, business_id=business_id)
@@ -210,7 +246,20 @@ def reservation_details(request, business_id, reservation_id):
 @business_required
 def past_reservations(request, business_id):
     """
-    View to display past and completed reservations for a business.
+    Args:
+        request (HttpRequest): The HTTP request object.
+        business_id (int): The ID of the business for which to display past reservations.
+    Returns:
+        HttpResponse: The rendered HTML page displaying past reservations.
+    This view performs the following steps:
+    1. Retrieves the business object using the provided business_id.
+    2. Fetches past reservations for the business, either completed or with dates in the past.
+    3. Applies optional filters for reservation date and status based on query parameters.
+    4. Orders the reservations by most recent date and time.
+    5. Calculates statistics for total past reservations, completed reservations, and cancelled reservations.
+    6. Paginates the results to display 20 reservations per page.
+    7. Renders the 'reservations/past_reservations.html' template with the context data.
+    If an error occurs during processing, an error message is displayed and the user is redirected to the restaurant home page.
     """
     try:
         business = get_object_or_404(Business, business_id=business_id)
@@ -279,6 +328,25 @@ def past_reservations(request, business_id):
 
 @business_required
 def cancel_reservation(request, business_id, reservation_id):
+    """
+    Cancel a reservation for a business.
+    This view handles the cancellation of a reservation for a specific business. It performs the following steps:
+    1. Retrieves the reservation object based on the provided reservation_id and business_id.
+    2. Checks for any associated payments with the reservation.
+    3. If a payment with status 'Pending' or 'Succeeded' is found, it processes a refund using Stripe.
+    4. Updates the payment status to 'Refunded' if the refund is successful.
+    5. If no successful payment is found, it logs the statuses of other payments.
+    6. Updates the reservation status to 'Cancelled'.
+    7. Sends a cancellation email to the user.
+    8. Creates a notification for the user about the cancellation.
+    9. Redirects to the upcoming reservations page for the business.
+    Args:
+        request (HttpRequest): The HTTP request object.
+        business_id (int): The ID of the business.
+        reservation_id (int): The ID of the reservation to be canceled.
+    Returns:
+        HttpResponseRedirect: Redirects to the upcoming reservations page for the business.
+"""
     reservation = get_object_or_404(Reservation,
                                   reservation_id=reservation_id,
                                   business_id=business_id)
@@ -327,6 +395,8 @@ def cancel_reservation(request, business_id, reservation_id):
     create_notification(reservation.user_id, notification_message)
     
     return redirect('reservations:upcoming_reservations', business_id=business_id)
+
+
 @business_required
 def confirm_reservation(request, business_id, reservation_id):
     reservation = get_object_or_404(Reservation, reservation_id=reservation_id, business_id=business_id)
@@ -343,6 +413,7 @@ def confirm_reservation(request, business_id, reservation_id):
     create_notification(reservation.user_id, notification_message)
     messages.success(request, 'Reservation confirmed successfully!')
     return redirect('reservations:upcoming_reservations', business_id=business_id)
+
 @business_required
 def complete_reservation(request, business_id, reservation_id):
     reservation = get_object_or_404(Reservation, 

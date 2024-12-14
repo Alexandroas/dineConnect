@@ -25,6 +25,32 @@ def restaurant_dashboard(request):
 
 @business_required
 def add_dish(request):
+    """
+    View to handle the addition of a new dish by a business owner.
+
+    This view requires the user to be authenticated as a business owner.
+
+    Args:
+        request (HttpRequest): The HTTP request object.
+
+    Returns:
+        HttpResponse: Renders the 'add_dish' template with the dish form and business context.
+        If the form is successfully submitted and valid, redirects to the 'add_dish' view.
+
+    Raises:
+        Business.DoesNotExist: If no business is associated with the current user.
+        Exception: For any other errors that occur during the dish saving process.
+
+    Flow:
+        1. Retrieves the business associated with the current user.
+        2. If the request method is POST, processes the submitted form.
+        3. Validates the form and attempts to save the dish.
+        4. Sets the business_id for the dish and saves it.
+        5. Adds any allergens to the dish if provided.
+        6. Displays success or error messages based on the outcome.
+        7. If the request method is not POST, initializes an empty form.
+        8. Renders the 'add_dish' template with the form and business context.
+    """
     business = Business.objects.get(business_owner=request.user)
     if request.method == 'POST':
         form = DishForm(request.POST, request.FILES)
@@ -53,6 +79,24 @@ def add_dish(request):
 
 @business_required
 def edit_dish(request, dish_id=None):
+    """
+    View to handle the editing of a dish.
+    This view allows a business owner to edit the details of a dish. It retrieves the dish
+    based on the provided dish_id and ensures that the dish belongs to the business associated
+    with the current user. The view supports both GET and POST requests.
+    GET:
+    - Renders the edit dish form with the current details of the dish.
+    POST:
+    - Processes the submitted form data to update the dish.
+    - Validates the form and saves the updated dish details.
+    - Updates the allergens associated with the dish.
+    - Displays success or error messages based on the outcome.
+    Args:
+        request (HttpRequest): The HTTP request object.
+        dish_id (int, optional): The ID of the dish to be edited. Defaults to None.
+    Returns:
+        HttpResponse: The rendered edit dish page or a redirect to the restaurant menu page.
+    """
     dish = get_object_or_404(Dish, dish_id=dish_id)
     business = Business.objects.get(business_owner=request.user)
     
@@ -98,6 +142,20 @@ def delete_dish(request, dish_id=None):
 
 @business_required
 def restaurant_profile(request):
+    """
+    Handles the restaurant profile view for the logged-in business owner.
+    This view allows the business owner to view and update their profile information.
+    It handles both GET and POST requests. On a GET request, it displays the current
+    profile information. On a POST request, it processes the submitted forms to update
+    the profile information.
+    Args:
+        request (HttpRequest): The HTTP request object.
+    Returns:
+        HttpResponse: The rendered restaurant profile page or a redirect to the home page
+                      if no business profile is found.
+    Raises:
+        Business.DoesNotExist: If no business profile is found for the logged-in user.
+    """
     try:
         business = Business.objects.get(business_owner=request.user)
         
@@ -147,6 +205,26 @@ def restaurant_menu(request):
 
 @regular_user_or_guest
 def restaurant_detail(request, business_id):
+    """
+    View function to display the details of a specific restaurant, including its dishes, reviews, and business hours.
+    Handles review submission if the user is authenticated and has a confirmed reservation.
+    Args:
+        request (HttpRequest): The HTTP request object.
+        business_id (int): The ID of the business to display.
+    Returns:
+        HttpResponse: The rendered restaurant detail page with context data.
+    Context:
+        business (Business): The business object for the given business_id.
+        dishes (QuerySet): A queryset of dishes associated with the business, ordered by dish type name.
+        reviews (QuerySet): A queryset of reviews associated with the business.
+        page_obj (Page): A paginator page object containing the reviews for the current page.
+        has_reviewed (bool): Indicates if the authenticated user has already reviewed the business.
+        has_confirmed_reservation (bool): Indicates if the authenticated user has a confirmed reservation.
+        business_hours (dict): A dictionary containing the business hours of the restaurant.
+        form (ReviewForm, optional): The review form if the user is authenticated and hasn't reviewed the business.
+    Raises:
+        Http404: If the business with the given business_id does not exist.
+    """
     business = get_object_or_404(Business, business_id=business_id)
     dishes = Dish.objects.filter(business_id=business).order_by('dish_type__dish_type_name')
     reviews = Review.objects.filter(business_id=business)
@@ -215,6 +293,22 @@ def restaurant_detail(request, business_id):
 
 @business_required
 def restaurant_home(request):
+    """
+    View function for the restaurant home page.
+    Args:
+        request (HttpRequest): The HTTP request object.
+    Returns:
+        HttpResponse: The rendered restaurant home page.
+    Retrieves the business associated with the current user, gathers reservation statistics,
+    business hours by day, and recent reviews. Determines if the business is currently open.
+    Passes this data to the 'Restaurant_handling/restaurant_home.html' template for rendering.
+    Context:
+        business (Business): The business object associated with the current user.
+        hours_by_day (dict): A dictionary mapping day names to business hours.
+        stats (dict): Reservation statistics for the business.
+        is_open (bool): Whether the business is currently open.
+        recent_reviews (QuerySet): A queryset of the most recent reviews for the business.
+    """
     business = get_object_or_404(Business, business_owner=request.user)
     stats = business.get_reservation_stats()
     hours_by_day = {}
@@ -252,6 +346,30 @@ def manage_customers(request):
 
 @business_required
 def customer_details(request, user_id):
+    """
+    View function to display customer details and statistics for a specific user at a specific business.
+    Args:
+        request (HttpRequest): The HTTP request object.
+        user_id (int): The ID of the user whose details are to be displayed.
+    Returns:
+        HttpResponse: The rendered HTML page displaying the customer's details and statistics.
+    The function performs the following tasks:
+    1. Retrieves the user object based on the provided user_id.
+    2. Retrieves the business associated with the current logged-in user.
+    3. Fetches all reservations for the specified user at the current business, ordered by reservation date and time.
+    4. Calculates various statistics related to the user's reservations, including:
+        - Total number of visits.
+        - Number of confirmed, pending, and cancelled reservations.
+        - Top 5 favorite dishes based on order count.
+        - Total amount spent on completed payments.
+        - Average party size for reservations.
+        - Most common reservation time and day.
+        - Date and time of the last confirmed visit.
+        - Whether the business is a favorite of the user.
+        - Count of reservations with special requests.
+    5. Prepares the context dictionary with the user, reservations, statistics, and business information.
+    6. Renders the 'Restaurant_handling/customer_details.html' template with the context data.
+    """
     user = get_object_or_404(CustomUser, id=user_id)
     business = request.user.business
     
@@ -312,6 +430,23 @@ def customer_details(request, user_id):
 @login_required
 @regular_user_or_guest
 def review_restaurant(request, business_id, reservation_id):
+    """
+    Handles the review submission for a restaurant by a user.
+
+    This view function ensures that the user submitting the review is the same user who made the reservation.
+    If the user is not authorized, an error message is displayed and the user is redirected to the restaurant detail page.
+    If the user is authorized and the request method is POST, the review form is validated and saved.
+    If the form is valid, the review is saved and a success message is displayed.
+    If the request method is GET, an empty review form is rendered.
+
+    Args:
+        request (HttpRequest): The HTTP request object.
+        business_id (int): The ID of the business being reviewed.
+        reservation_id (int): The ID of the reservation associated with the review.
+
+    Returns:
+        HttpResponse: The response object containing the rendered template or a redirect.
+"""
     reservation_id = get_object_or_404(Reservation, reservation_id=reservation_id)
     user = get_object_or_404(CustomUser, id=reservation_id.user_id)
     business = get_object_or_404(Business, business_id=business_id)
@@ -334,6 +469,23 @@ def review_restaurant(request, business_id, reservation_id):
     
 @business_required
 def settings(request):
-    business = Business.objects.get(business_owner=request.user)
-    
-    return render(request, 'Restaurant_handling/settings.html')
+    """
+    Handles the settings view for the logged-in business owner.
+    This view allows the business owner to view and update their business settings.
+    It handles both GET and POST requests. On a GET request, it displays the current
+    settings information. On a POST request, it processes the submitted forms to update
+    the settings information.
+    Args:
+        request (HttpRequest): The HTTP request object.
+    Returns:
+        HttpResponse: The rendered settings page or a redirect to the home page
+                      if no business profile is found.
+    Raises:
+        Business.DoesNotExist: If no business profile is found for the logged-in user.
+    """
+    try:
+        business = Business.objects.get(business_owner=request.user)
+        return render(request, 'Restaurant_handling/settings.html', {'business': business})
+    except Business.DoesNotExist:
+        messages.error(request, "No business profile found.")
+        return redirect('home')

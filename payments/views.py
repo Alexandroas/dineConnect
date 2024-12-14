@@ -18,6 +18,20 @@ from django.db.models import Sum, Count
 from django.core.paginator import Paginator
 # Create your views here.
 def payment_view(request, reservation_id):
+    """
+    Handles the payment process for a reservation.
+    This view performs the following steps:
+    1. Retrieves the reservation and verifies it belongs to the current user.
+    2. Calculates the total amount from the selected dishes in the reservation.
+    3. Checks if there is an existing successful payment for the reservation.
+    4. If a POST request is made, it creates a Stripe payment intent and renders the payment page.
+    5. If a GET request is made, it renders the payment form.
+    Args:
+        request (HttpRequest): The HTTP request object.
+        reservation_id (int): The ID of the reservation to be paid for.
+    Returns:
+        HttpResponse: The response object containing the rendered payment page or a redirect.
+    """
     # Get the reservation and verify it belongs to the current user
     reservation = get_object_or_404(
         Reservation,
@@ -111,6 +125,26 @@ def payment_cancel(request, reservation_id):
 
 @require_POST
 def process_payment(request, reservation_id):
+    """
+    Processes a payment for a given reservation.
+    Args:
+        request (HttpRequest): The HTTP request object containing payment details.
+        reservation_id (int): The ID of the reservation for which the payment is being processed.
+    Returns:
+        JsonResponse: A JSON response indicating the success or failure of the payment process.
+    Raises:
+        stripe.error.CardError: If there is an error with the card during the payment process.
+        Exception: For any other exceptions that occur during the payment process.
+    The function performs the following steps:
+    1. Parses the payment details from the request body.
+    2. Retrieves the reservation object based on the reservation_id and user_id.
+    3. Calculates the total amount for the reservation.
+    4. Creates a Stripe payment intent with the calculated amount and payment method.
+    5. Creates a Payment object to record the payment details.
+    6. Updates the reservation status to 'Confirmed' if the payment is successful.
+    7. Sends a confirmation email to the user if the payment is successful.
+    8. Returns a JSON response indicating the success or failure of the payment process.
+    """
     try:
         data = json.loads(request.body)
         payment_method_id = data.get('payment_method_id')
@@ -181,6 +215,20 @@ def payment_history(request):
 
 @business_required
 def business_payment_history(request, business_id):
+    """
+    View to display the payment history for a specific business.
+    Args:
+        request (HttpRequest): The HTTP request object.
+        business_id (int): The ID of the business whose payment history is to be displayed.
+    Returns:
+        HttpResponse: The rendered HTML page displaying the payment history and statistics.
+    The view performs the following actions:
+    1. Retrieves the business object using the provided business_id.
+    2. Fetches all payments related to the business, including related user and reservation data.
+    3. Aggregates payment statistics such as total revenue and count of successful payments.
+    4. Implements pagination to display a limited number of payments per page.
+    5. Renders the 'payments/business_payment_history.html' template with the context data.
+    """
     business = get_object_or_404(Business, business_id=business_id)
    
     # Get all payments for this business
